@@ -9,3 +9,4 @@ CXX_STD=CXX11
 CPPFILES = $(wildcard *.cpp src/*.cpp)
 SOURCES = $(CPPFILES)
 OBJECTS = $(CPPFILES:.cpp=.o)
+
