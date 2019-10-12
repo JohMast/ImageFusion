@@ -6,9 +6,9 @@
 
 using namespace Rcpp;
 
-// execute_estarfm_job
-void execute_estarfm_job(CharacterVector input_filenames, CharacterVector input_resolutions, IntegerVector input_dates, IntegerVector pred_dates, CharacterVector pred_filenames, IntegerVector pred_area);
-RcppExport SEXP _ImageFusion_execute_estarfm_job(SEXP input_filenamesSEXP, SEXP input_resolutionsSEXP, SEXP input_datesSEXP, SEXP pred_datesSEXP, SEXP pred_filenamesSEXP, SEXP pred_areaSEXP) {
+// execute_estarfm_job_cpp
+void execute_estarfm_job_cpp(CharacterVector input_filenames, CharacterVector input_resolutions, IntegerVector input_dates, IntegerVector pred_dates, CharacterVector pred_filenames, IntegerVector pred_area);
+RcppExport SEXP _ImageFusion_execute_estarfm_job_cpp(SEXP input_filenamesSEXP, SEXP input_resolutionsSEXP, SEXP input_datesSEXP, SEXP pred_datesSEXP, SEXP pred_filenamesSEXP, SEXP pred_areaSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< CharacterVector >::type input_filenames(input_filenamesSEXP);
@@ -17,7 +17,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< IntegerVector >::type pred_dates(pred_datesSEXP);
     Rcpp::traits::input_parameter< CharacterVector >::type pred_filenames(pred_filenamesSEXP);
     Rcpp::traits::input_parameter< IntegerVector >::type pred_area(pred_areaSEXP);
-    execute_estarfm_job(input_filenames, input_resolutions, input_dates, pred_dates, pred_filenames, pred_area);
+    execute_estarfm_job_cpp(input_filenames, input_resolutions, input_dates, pred_dates, pred_filenames, pred_area);
     return R_NilValue;
 END_RCPP
 }
@@ -33,7 +33,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_ImageFusion_execute_estarfm_job", (DL_FUNC) &_ImageFusion_execute_estarfm_job, 6},
+    {"_ImageFusion_execute_estarfm_job_cpp", (DL_FUNC) &_ImageFusion_execute_estarfm_job_cpp, 6},
     {"_ImageFusion_rcpp_hello_world", (DL_FUNC) &_ImageFusion_rcpp_hello_world, 0},
     {NULL, NULL, 0}
 };

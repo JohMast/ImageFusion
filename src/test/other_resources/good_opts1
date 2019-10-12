@@ -1,0 +1,10 @@
+# no endline at file ending
+-n1 --image=(--file=../test_resources/images/test_info_image.tif # ignore the following n= 42 \" ' " \'
+             -d 0 -t "hey")             # test n = 44
+
+  -n 2
+  -s 593\ x\ x24 # preserved whitespace with escaping
+
+--rectangle=(-x=4 -y 6 # test \' "
+             -w 1 -h 2)
+   -n5

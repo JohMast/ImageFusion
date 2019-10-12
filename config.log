@@ -44,7 +44,7 @@ PATH: /snap/bin
 
 configure:1702: R_HOME: /usr/lib/R
 configure:1715: CC: gcc -std=gnu99
-configure:1717: CXX: g++
+configure:1717: CXX: g++ -std=gnu++11
 configure:1752: C++11 support available
 configure:1760: rgdal: 1.4-3
 configure:1763: checking for /usr/bin/svnversion
