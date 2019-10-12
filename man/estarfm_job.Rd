@@ -4,12 +4,19 @@
 \alias{estarfm_job}
 \title{Title}
 \usage{
-estarfm_job()
+estarfm_job(input_filenames, input_resolutions, input_dates, pred_dates,
+  pred_filenames, pred_area)
+}
+\value{
+Nothinh
 }
 \description{
 Title
 }
 \examples{
+
+
+
 
 
 }

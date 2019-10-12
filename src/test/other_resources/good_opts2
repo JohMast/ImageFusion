@@ -1,0 +1,6 @@
+# all kind of whitespace at file ending
+
+--rectangle='-x=4 -y 6 # test \' "
+   -w 1 -h 2'
+   -n5   	
+	 	  
