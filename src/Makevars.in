@@ -1,0 +1,11 @@
+#Add the gdal opencv headers and the imagefusion headers from the /include directory
+PKG_CPPFLAGS=@PKG_CPPFLAGS@  `$(R_HOME)/bin/Rscript -e 'ROpenCVLite::opencvConfig("cflags")'`  -I../src/include 
+#Also include boost_filesystem manually 
+PKG_LIBS=@PKG_LIBS@ -L/usr/include -lboost_filesystem `$(R_HOME)/bin/Rscript -e 'ROpenCVLite::opencvConfig("libs")'`
+PKG_CXXFLAGS = -Iinclude 
+CXX_STD=CXX11
+
+#Add all cpp files from the subfolder src
+CPPFILES = $(wildcard *.cpp src/*.cpp)
+SOURCES = $(CPPFILES)
+OBJECTS = $(CPPFILES:.cpp=.o)
