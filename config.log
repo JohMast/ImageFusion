@@ -55,7 +55,9 @@ configure:1835: found /usr/bin/gdal-config
 configure:1848: result: /usr/bin/gdal-config
 configure:1885: checking gdal-config usability
 configure:1896: result: yes
-configure:1916: GDAL: 2.2.3
+configure:1916: GDAL: 2.4.2
+configure:1924: checking C++11 support for GDAL >= 2.3.0
+configure:1927: result: yes
 configure:1936: checking GDAL version >= 1.11.4
 configure:1939: result: yes
 configure:1953: checking GDAL version <= 2.5.0
@@ -64,7 +66,7 @@ configure:2001: checking gdal: linking with --libs only
 configure:2009: result: yes
 configure:2041: checking GDAL: gdal-config data directory readable
 configure:2044: result: yes
-configure:2068: checking GDAL: /usr/share/gdal/2.2/pcs.csv readable
+configure:2068: checking GDAL: /usr/share/gdal/pcs.csv readable
 configure:2071: result: yes
 configure:2086: pkg-config proj exists, will use it
 configure:2101: PROJ version: 4.9.3
@@ -125,7 +127,7 @@ ECHO_C=''
 ECHO_N='-n'
 ECHO_T=''
 GDAL_CONFIG='/usr/bin/gdal-config'
-GDAL_DATADIR='/usr/share/gdal/2.2'
+GDAL_DATADIR='/usr/share/gdal'
 LIBOBJS=''
 LIBS=' -lproj '
 LTLIBOBJS=''

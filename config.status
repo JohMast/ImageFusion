@@ -583,7 +583,7 @@ echo 'BEGIN {' >"$ac_tmp/subs1.awk" &&
 cat >>"$ac_tmp/subs1.awk" <<\_ACAWK &&
 S["LTLIBOBJS"]=""
 S["LIBOBJS"]=""
-S["GDAL_DATADIR"]="/usr/share/gdal/2.2"
+S["GDAL_DATADIR"]="/usr/share/gdal"
 S["PKG_LIBS"]=" -L/usr/lib -lgdal -lproj"
 S["PKG_CPPFLAGS"]=" -I/usr/include/gdal"
 S["GDAL_CONFIG"]="/usr/bin/gdal-config"
