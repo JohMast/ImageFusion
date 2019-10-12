@@ -8,12 +8,7 @@
 #' @examples
 #' 
 #' 
-#' 
-#' 
-#' 
-#' 
-#' 
-#' 
+
 estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,pred_filenames,pred_area
                         ) {
   #Check all inputs for plausibility

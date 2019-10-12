@@ -8,10 +8,6 @@ using namespace Rcpp;
 
 using  std::vector;
 
-
-
-
-
 // [[Rcpp::export]]
 void execute_estarfm_job(CharacterVector input_filenames, //character vector length n_i
                          CharacterVector input_resolutions, //character vector length n_i
