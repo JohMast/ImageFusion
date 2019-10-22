@@ -8,31 +8,37 @@ estarfm_job(input_filenames, input_resolutions, input_dates, pred_dates,
   pred_filenames, pred_area, hightag, lowtag)
 }
 \arguments{
-\item{input_filenames}{Gute Dateinamen}
+\item{input_filenames}{A string vector containing the filenames of the input images}
 
-\item{input_resolutions}{}
+\item{input_resolutions}{A string vector containing the resolution-tags \code{hightag} and \code{lowtag} of the input images}
 
-\item{input_dates}{}
+\item{input_dates}{An integer vector containing the dates of the input images.}
 
-\item{pred_dates}{}
+\item{pred_dates}{A string vector containing the dates for which images should be predicted.}
 
-\item{pred_filenames}{}
+\item{pred_filenames}{A string vector containing the filenames for the predicted images. Must match pred_dates in length and order.}
 
-\item{pred_area}{}
+\item{pred_area}{(Optional) An integer vector containing the bounding box coordinates for the area to predict (x_min, y_min, x_max, y_max). By default will use the entire area of the first input image.}
 
-\item{hightag}{}
+\item{hightag}{(Optional) A string which is used in \code{input_resolutions} to describe the high-resolution images. Default is "high".}
 
-\item{lowtag}{}
+\item{lowtag}{(Optional) A string which is used in \code{input_resolutions} to describe the low-resolution images.  Default is "low".}
 }
 \value{
-Something nice
+Nothing. Output files are written to disk.
 }
 \description{
-Title
+A wrapper function for \code{execute_estarfm_job_cpp}. It ensures that all of the arguments passed are of the correct type and creates sensible defaults.
+}
+\details{
+Executes the estarfm algorithm to create a number of synthetic high-resolution images from two pairs of matching high- and low-resolution images.  Assumes that the input images already have matching size.
 }
 \examples{
 Sorry, maybe later
 
 
   
+}
+\author{
+Johannes Mast
 }

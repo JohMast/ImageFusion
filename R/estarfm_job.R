@@ -2,19 +2,22 @@
 
 library(assertthat)
 #' Title
+#' @description A wrapper function for \code{execute_estarfm_job_cpp}. It ensures that all of the arguments passed are of the correct type and creates sensible defaults. 
 #'
-#' @param input_filenames Gute Dateinamen
-#' @param input_resolutions 
-#' @param input_dates 
-#' @param pred_dates 
-#' @param pred_filenames 
-#' @param pred_area 
-#' @param hightag 
-#' @param lowtag 
+#' @param input_filenames A string vector containing the filenames of the input images
+#' @param input_resolutions A string vector containing the resolution-tags \code{hightag} and \code{lowtag} of the input images
+#' @param input_dates An integer vector containing the dates of the input images.
+#' @param pred_dates A string vector containing the dates for which images should be predicted.
+#' @param pred_filenames A string vector containing the filenames for the predicted images. Must match pred_dates in length and order.
+#' @param pred_area (Optional) An integer vector containing the bounding box coordinates for the area to predict (x_min, y_min, x_max, y_max). By default will use the entire area of the first input image.
+#' @param hightag (Optional) A string which is used in \code{input_resolutions} to describe the high-resolution images. Default is "high".
+#' @param lowtag (Optional) A string which is used in \code{input_resolutions} to describe the low-resolution images.  Default is "low".
 #'
-#' @return Something nice
+#' @return Nothing. Output files are written to disk.
 #' @export
 #'
+#' @author Johannes Mast
+#' @details Executes the estarfm algorithm to create a number of synthetic high-resolution images from two pairs of matching high- and low-resolution images.  Assumes that the input images already have matching size.
 #' @examples Sorry, maybe later
 #'
 #' 
