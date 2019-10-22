@@ -7,8 +7,8 @@
 using namespace Rcpp;
 
 // execute_estarfm_job_cpp
-void execute_estarfm_job_cpp(CharacterVector input_filenames, CharacterVector input_resolutions, IntegerVector input_dates, IntegerVector pred_dates, CharacterVector pred_filenames, IntegerVector pred_area);
-RcppExport SEXP _ImageFusion_execute_estarfm_job_cpp(SEXP input_filenamesSEXP, SEXP input_resolutionsSEXP, SEXP input_datesSEXP, SEXP pred_datesSEXP, SEXP pred_filenamesSEXP, SEXP pred_areaSEXP) {
+void execute_estarfm_job_cpp(CharacterVector input_filenames, CharacterVector input_resolutions, IntegerVector input_dates, IntegerVector pred_dates, CharacterVector pred_filenames, IntegerVector pred_area, const std::string& hightag, const std::string& lowtag);
+RcppExport SEXP _ImageFusion_execute_estarfm_job_cpp(SEXP input_filenamesSEXP, SEXP input_resolutionsSEXP, SEXP input_datesSEXP, SEXP pred_datesSEXP, SEXP pred_filenamesSEXP, SEXP pred_areaSEXP, SEXP hightagSEXP, SEXP lowtagSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< CharacterVector >::type input_filenames(input_filenamesSEXP);
@@ -17,7 +17,9 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< IntegerVector >::type pred_dates(pred_datesSEXP);
     Rcpp::traits::input_parameter< CharacterVector >::type pred_filenames(pred_filenamesSEXP);
     Rcpp::traits::input_parameter< IntegerVector >::type pred_area(pred_areaSEXP);
-    execute_estarfm_job_cpp(input_filenames, input_resolutions, input_dates, pred_dates, pred_filenames, pred_area);
+    Rcpp::traits::input_parameter< const std::string& >::type hightag(hightagSEXP);
+    Rcpp::traits::input_parameter< const std::string& >::type lowtag(lowtagSEXP);
+    execute_estarfm_job_cpp(input_filenames, input_resolutions, input_dates, pred_dates, pred_filenames, pred_area, hightag, lowtag);
     return R_NilValue;
 END_RCPP
 }
@@ -33,7 +35,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_ImageFusion_execute_estarfm_job_cpp", (DL_FUNC) &_ImageFusion_execute_estarfm_job_cpp, 6},
+    {"_ImageFusion_execute_estarfm_job_cpp", (DL_FUNC) &_ImageFusion_execute_estarfm_job_cpp, 8},
     {"_ImageFusion_rcpp_hello_world", (DL_FUNC) &_ImageFusion_rcpp_hello_world, 0},
     {NULL, NULL, 0}
 };

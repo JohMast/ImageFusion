@@ -9,14 +9,16 @@ using namespace Rcpp;
 using  std::vector;
 
 
-
+//' @export
 // [[Rcpp::export]]
 void execute_estarfm_job_cpp(CharacterVector input_filenames, //character vector length n_i
                          CharacterVector input_resolutions, //character vector length n_i
                          IntegerVector input_dates, //character vector length n_i
                          IntegerVector pred_dates, //vector of length n_o
                          CharacterVector pred_filenames,   //vector of length n_o
-                         IntegerVector pred_area //vector of x1 y1 x2 y2) 
+                         IntegerVector pred_area, //vector of x1 y1 x2 y2) 
+                         const std::string& hightag,  //string identifying the high res images
+                         const std::string& lowtag  //string identifying the low res images
                            )
   {
 
@@ -44,8 +46,8 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames, //character vector
   
   //Set the desired Options
   EstarfmOptions o;
-  o.setHighResTag("high");
-  o.setLowResTag("low");
+  o.setHighResTag(hightag);
+  o.setLowResTag(lowtag);
   o.setDate1(1);
   o.setDate3(3);
   o.setPredictionArea(Rectangle{pred_area[0],pred_area[1],pred_area[2],pred_area[3]});

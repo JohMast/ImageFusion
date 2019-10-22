@@ -5,21 +5,34 @@
 \title{Title}
 \usage{
 estarfm_job(input_filenames, input_resolutions, input_dates, pred_dates,
-  pred_filenames, pred_area)
+  pred_filenames, pred_area, hightag, lowtag)
+}
+\arguments{
+\item{input_filenames}{Gute Dateinamen}
+
+\item{input_resolutions}{}
+
+\item{input_dates}{}
+
+\item{pred_dates}{}
+
+\item{pred_filenames}{}
+
+\item{pred_area}{}
+
+\item{hightag}{}
+
+\item{lowtag}{}
 }
 \value{
-Nothinh
+Something nice
 }
 \description{
 Title
 }
 \examples{
+Sorry, maybe later
 
 
-
-
-
-
-
-
+  
 }
