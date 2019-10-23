@@ -18,7 +18,7 @@ estarfm_job(input_filenames, input_resolutions, input_dates, pred_dates,
 
 \item{pred_filenames}{A string vector containing the filenames for the predicted images. Must match pred_dates in length and order.}
 
-\item{pred_area}{(Optional) An integer vector containing the bounding box coordinates for the area to predict (x_min, y_min, x_max, y_max). By default will use the entire area of the first input image.}
+\item{pred_area}{(Optional) An integer vector containing image coordinates for a bounding box which specifies the prediction area. The prediction will only be done in this area. (x_min, y_min, width, height). By default will use the entire area of the first input image.}
 
 \item{hightag}{(Optional) A string which is used in \code{input_resolutions} to describe the high-resolution images. Default is "high".}
 

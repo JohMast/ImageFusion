@@ -29,10 +29,11 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames, //character vector
   //are performed within the R wrapper function)
   std::cout<<"Inputs:" << input_filenames << std::endl;
   std::cout<<"Outputs:" << pred_filenames << std::endl;
+  Rectangle pred_rectangle = Rectangle{pred_area[0],pred_area[1],pred_area[2],pred_area[3]};
   //Step 2: Prepare the fusion
   //Get the Geoinformation from the first of the images
   GeoInfo gi{as<std::string>(input_filenames[1])};
-  
+
   //Loop over all the input filenames and load them into a MultiResImages object
   //for every filename, set the corresponding resolution tag
   //and date
@@ -50,7 +51,7 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames, //character vector
   o.setLowResTag(lowtag);
   o.setDate1(1);
   o.setDate3(3);
-  o.setPredictionArea(Rectangle{pred_area[0],pred_area[1],pred_area[2],pred_area[3]});
+  o.setPredictionArea(pred_rectangle);
 
   //Step 3: Fusion
   //Create the Fusor
@@ -67,8 +68,17 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames, //character vector
     esf.predict(pred_dates[i]);
     //Write to destination
     esf.outputImage().write(pred_filename);
+    
     //Add the Geoinformation to the written file
-    gi.addTo(pred_filename);
+    if (gi.hasGeotransform()) {
+      gi.geotrans.translateImage(pred_rectangle.x, pred_rectangle.y);
+      if (pred_rectangle.width != 0)
+        gi.size.width = pred_rectangle.width;
+      if (pred_rectangle.height != 0)
+        gi.size.height = pred_rectangle.height;
+      gi.addTo(pred_filename);
+    }
+    
   }
 }
 

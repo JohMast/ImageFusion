@@ -1,6 +1,6 @@
 
 
-library(assertthat)
+
 #' Title
 #' @description A wrapper function for \code{execute_estarfm_job_cpp}. It ensures that all of the arguments passed are of the correct type and creates sensible defaults. 
 #'
@@ -9,7 +9,7 @@ library(assertthat)
 #' @param input_dates An integer vector containing the dates of the input images.
 #' @param pred_dates A string vector containing the dates for which images should be predicted.
 #' @param pred_filenames A string vector containing the filenames for the predicted images. Must match pred_dates in length and order.
-#' @param pred_area (Optional) An integer vector containing the bounding box coordinates for the area to predict (x_min, y_min, x_max, y_max). By default will use the entire area of the first input image.
+#' @param pred_area (Optional) An integer vector containing image coordinates for a bounding box which specifies the prediction area. The prediction will only be done in this area. (x_min, y_min, width, height). By default will use the entire area of the first input image.
 #' @param hightag (Optional) A string which is used in \code{input_resolutions} to describe the high-resolution images. Default is "high".
 #' @param lowtag (Optional) A string which is used in \code{input_resolutions} to describe the low-resolution images.  Default is "low".
 #'
@@ -24,6 +24,7 @@ library(assertthat)
 #'   
 estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,pred_filenames,pred_area,hightag,lowtag
                         ) {
+  library(assertthat)
   
   #### A: Check all the required Inputs ####
   #These are variables which are always provided by the user
@@ -43,32 +44,56 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
   ### pred_area ###
   # check pred area.
   # if not provided by user, set pred area to max image size of first image
-  # Open Question: Is the cropping window required in image- or geo-coordinates? Here we assume geo.
+  # TO DO: MAKE SURE THAT THE SPECIFIED IMAGE COORDINATES FIT INTO THE BOUNDING BOX
+  # TO DO: ADD AN OPTION TO USE GEOCOORDINATES
+  #Use the first image as a template #TO DO: MAY MAKE MORE SENSE TO USE THE FIRST LOW-ONLY IMAGE AS TEMPLATE
+  template <- raster::raster(input_filenames_c[1])
+  #If a bbox was provided, check it for plausibility and pass it on 
   if(!missing(pred_area)){
-    assert_that(length(pred_area)==4,
-                class(pred_area)=="numeric")
+    assert_that(
+      length(pred_area)==4,
+      class(pred_area)=="numeric",
+      pred_area[1]+pred_area[3]<=template@ncols,
+      pred_area[2]+pred_area[4]<=template@nrows
+    )
     pred_area_c <- pred_area
+    
   }else{
     print("No Prediction Area specified. Predicting entire extent of:")
     print(input_filenames_c[1])
-    template <- raster::raster(input_filenames_c[1])
-    pred_area_c <- template@extent[c(1,3,2,4)]
+    pred_area_c <- c(0,0,template@ncols,template@nrows)
+    #pred_area_c <- template@extent[c(1,3,2,4)]  #Geocoordinates
   }
 
   ### hightag and lowtag###
   if(!missing(hightag)){
-    assert_that(class(pred_area)=="character")
+    assert_that(class(hightag)=="character")
     hightag_c <- hightag
   }else{
     hightag_c <- "high"
   }
   if(!missing(lowtag)){
-    assert_that(class(pred_area)=="character")
+    assert_that(class(lowtag)=="character")
     lowtag_c <- lowtag
   }else{
     lowtag_c <- "low"
   }
 
+  print("Input Filenames: ")
+  print(input_filenames_c)
+  print("Input Resolutions: ")
+  print(input_resolutions_c)
+  print("Input Dates: ")
+  print(input_dates_c)
+  print("Prediction Filenames: ")
+  print(pred_filenames_c)
+  print("Prediction Dates: ")
+  print(pred_dates_c)
+  print("Prediction Area: ")
+  print(pred_area_c)
+
+  
+    
   #Call the cpp fusion function with the checked inputs
   ImageFusion::execute_estarfm_job_cpp(input_filenames = input_filenames_c,
                                    input_resolutions = input_resolutions_c,
