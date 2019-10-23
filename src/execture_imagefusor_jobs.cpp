@@ -27,8 +27,7 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames, //character vector
   //(This function assumes that the inputs are all in correct length and type,
   //any checks, assertions, conversions, and error handling
   //are performed within the R wrapper function)
-  std::cout<<"Inputs:" << input_filenames << std::endl;
-  std::cout<<"Outputs:" << pred_filenames << std::endl;
+
   Rectangle pred_rectangle = Rectangle{pred_area[0],pred_area[1],pred_area[2],pred_area[3]};
   //Step 2: Prepare the fusion
   //Get the Geoinformation from the first of the images
@@ -52,6 +51,13 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames, //character vector
   o.setDate1(1);
   o.setDate3(3);
   o.setPredictionArea(pred_rectangle);
+  
+  
+  
+  
+  
+  
+  
 
   //Step 3: Fusion
   //Create the Fusor

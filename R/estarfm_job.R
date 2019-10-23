@@ -26,17 +26,8 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
                         ) {
   library(assertthat)
   
-  #### A: Check all the required Inputs ####
-  #These are variables which are always provided by the user
-  #Here, we simply make sure they are of the correct types and matching length
-  
-  input_filenames_c <- input_filenames
-  input_resolutions_c <- input_resolutions
-  input_dates_c <- input_dates
-  pred_dates_c <- pred_dates
-  pred_filenames_c <- pred_filenames
-  
-  #### B: Check all the Optional Inputs ####
+
+  #### A: Check all the Optional Inputs ####
   #These are variables which are optional 
   # or can easily infered from the required inputs
   
@@ -78,7 +69,43 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
   }else{
     lowtag_c <- "low"
   }
-
+  #___________________________________________________________________________#
+  
+  #### B: Check all the required Inputs ####
+  #These are variables which are always provided by the user
+  #Here, we simply make sure they are of the correct types and matching length
+  
+  #Some Basic Assertions about the length of the inputs
+  assert_that(
+    length(input_filenames)>=5,
+    length(input_resolutions)==length(input_filenames),
+    length(input_dates)==length(input_filenames),
+    length(unique(input_resolutions))==2,   
+    length(pred_dates)==length(pred_dates)
+  )
+  
+  #Get the High and Low Dates and Pair Dates just for checking
+  high_dates <- input_dates[input_resolutions==hightag_c]
+  low_dates <- input_dates[input_resolutions==lowtag_c]
+  pair_dates <- which(table(c(unique(high_dates),unique(low_dates)))>=2)
+  
+  assert_that(
+    length(pair_dates)>=2,             #At least two pairs?
+    any(!pred_dates>max(pair_dates)),  #Pred Dates within the Interval?
+    any(!pred_dates<min(pair_dates))   #Pred Dates within the Interval?
+  )
+  
+  
+  input_filenames_c <- input_filenames
+  input_resolutions_c <- input_resolutions
+  input_dates_c <- input_dates
+  pred_dates_c <- pred_dates
+  pred_filenames_c <- pred_filenames
+  #___________________________________________________________________________#
+  
+  
+  #### C: Call the CPP function ####
+  #And print the used parameters 
   print("Input Filenames: ")
   print(input_filenames_c)
   print("Input Resolutions: ")
@@ -91,9 +118,6 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
   print(pred_dates_c)
   print("Prediction Area: ")
   print(pred_area_c)
-
-  
-    
   #Call the cpp fusion function with the checked inputs
   ImageFusion::execute_estarfm_job_cpp(input_filenames = input_filenames_c,
                                    input_resolutions = input_resolutions_c,
@@ -104,6 +128,6 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
                                    hightag=hightag_c,
                                    lowtag=lowtag_c
                                   )
-  
+  #___________________________________________________________________________#
   
 }
