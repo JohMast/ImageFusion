@@ -3,7 +3,7 @@
 #include "Estarfm.h"
 #include "fitfc.h"
 #include "spstfm.h"
-
+#include "utils_common.h"
 using namespace Rcpp;
 
 using  std::vector;
@@ -17,6 +17,7 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames, //character vector
                          IntegerVector pred_dates, //vector of length n_o
                          CharacterVector pred_filenames,   //vector of length n_o
                          IntegerVector pred_area, //vector of x1 y1 x2 y2) 
+                         int winsize,   //windowsize
                          const std::string& hightag,  //string identifying the high res images
                          const std::string& lowtag  //string identifying the low res images
                            )
@@ -51,6 +52,7 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames, //character vector
   o.setDate1(1);
   o.setDate3(3);
   o.setPredictionArea(pred_rectangle);
+  o.setWinSize(winsize);
   
   
   

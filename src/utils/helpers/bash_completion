@@ -1,0 +1,368 @@
+# bash completion for imagefusion utilities
+
+# global variables used by _recursequotation, description see above _findopenquotepos
+charpos=0
+openquotepos=()
+openquotecmds=()
+
+# internal function used by _findopenquotepos
+function _recursequotation {
+    local str="$1"
+    local end=$(( ${#str} ))
+
+    local skip=0
+    local quote=0
+    local start char
+    while (( $charpos < $end )) ; do
+        if (( skip )) ; then
+            skip=0
+            continue
+        fi
+
+        char=${str:$charpos:1}
+        charpos=$(( charpos + 1 ))
+        if [[ $char == \\ ]] ; then
+            skip=1
+            continue
+        elif [[ $char == \' || $char == \" || $char == '(' || $char == ')' ]] ; then
+            if [[ $quote == 0 ]] ; then
+                if [[ $char != ')' ]] ; then
+                    start=$(( $charpos - 1 ))
+                    quote=$char
+                fi
+            elif [[ $quote == '(' && $char == ')' ]] || [[ $quote != '(' && $char == $quote ]] ; then
+                return
+            elif [[ $char != ')' ]] ; then
+                charpos=$(( charpos - 1 ))
+                _recursequotation "$str"
+            fi
+        fi
+    done
+    if [[ -n $start ]] ; then
+        openquotepos=("${openquotepos[@]}" "$start")
+    fi
+}
+
+# Calling this will fill the global variables openquotepos and openquotecmds.
+# It will use the current line until the cursor as input string.
+# openquotepos  is an array, which contains all quote position that don't have a closing partner.
+#               As quotes '...', "..." and (...) are considered. Quotes can be nested. The last open quote
+#               position is the first element and the first open quote position is the last element.
+#               Example: for the string
+#                        --img='-l (0) -f "te
+#                        01234567890123456789
+#                        it contained (17 6).
+# openquotecmds is an array with the words before the open quotes. Potential quotes and equal signs are
+#               trimmed. The order corresponds to openquotepos.
+#               Example: for the string above it contained ( '-f' '--img' ).
+function _findopenquotepos {
+    charpos=0
+    openquotepos=()
+
+    # get line until cursor
+    local str="${COMP_LINE:0:COMP_POINT}"
+    local end=$(( ${#str} ))
+    while (( $charpos < $end )) ; do
+        _recursequotation "$str"
+        charpos=$(( charpos + 1 ))
+    done
+
+    openquotecmds=()
+    local numquotes=${#openquotepos[@]}
+    local lastquotepos=0
+    local cmd i curquotepos
+    for (( i=$numquotes-1; i>=0; i-- )) ; do
+        curquotepos=${openquotepos[i]}
+        if (( $curquotepos == $lastquotepos )) ; then
+            continue
+        fi
+
+        strpart=${str:$lastquotepos:$curquotepos-$lastquotepos}
+        cmd=$(awk '{print $NF}' <<< $strpart | grep -o "[^\"'\=]*")
+        openquotecmds=("${cmd}" "${openquotecmds[@]}")
+        lastquotepos=$curquotepos
+    done
+}
+
+
+# Auto-complete <img> argument. Do not call directly, call rather _autocomplete_plainimage or _autocomplete_multiresimage.
+# It requires that _findopenquotepos has run before calling
+# It uses the following local variables of the parent calling function:
+#  - imgopts:            String of options that accept an <img> argument. If it is empty, this function does nothing.
+#
+#  - nestedimgopts:      nested options to complete.
+#                        For a plain image argument this is     "--file --crop --layers"
+#                        For a multi-res image argument this is "--file --crop --layers --date --tag"
+#
+#  - levels:             quotation level.
+#
+#  - cur:                current word to complete
+#
+#  - prev:               previous word
+#
+#  - linefromlastquote:  part from the input line, beginning with the most right open quote
+#
+#  - linefromfirstquote: part from the input line, beginning with the most left open quote
+function _autocomplete_image {
+    local nestedcropopts="-x -w -y -h --width --height"
+
+    # check for image option and only accept on top-level
+    if [[ " $imgopts " =~ " ${openquotecmds} " && $levels == 1 ]] ; then
+        # autocomplete a file name after a file option
+        if [[ ${cur} == --file=* || ${cur} == '--file' || ${cur} == '-f' || ${prev} == '--file' || ${prev} == '-f' ]] ; then
+            # crop option from filename, may result in an empty filename
+            local filenamestart=${cur##--file=}
+            filenamestart=${filenamestart##--file}
+            filenamestart=${filenamestart##-f}
+
+            # get files
+            mapfile -t files < <( compgen -o filenames -A file -- "${filenamestart}" )
+
+            # escape spaces in files
+            local IFS=$'\n'
+            files=($(printf "%q\n" "${files[@]}"))
+
+            # add prefix to not let completion replace it
+            prefix=${linefromfirstquote%*$filenamestart}
+            for entry in "${files[@]}" ; do
+                COMPREPLY+=( "$prefix$entry" )
+            done
+            return 0
+
+        # autocomplete '-*' with img specific options '--file', '--crop', '--layers'
+        elif [[ ${cur} == -* ]] ; then
+            local prefix=${linefromfirstquote%*$cur}
+            mapfile -t COMPREPLY < <( compgen -P "$prefix" -W "${nestedimgopts}" -- "${cur}" )
+            return 0
+
+        # autocomplete the whole quote with a file name
+        else
+            mapfile -t COMPREPLY < <( compgen -o filenames -A file -- ${linefromlastquote/^[\"\' ]*} )
+            return 0
+        fi
+
+    # check for quoted crop option and make sure previous option was an image option
+    elif [[ ${openquotecmds} == -c || ${openquotecmds} == --crop ]] \
+        && [[ $levels == 2 ]] \
+        && [[ " $imgopts " =~ " ${openquotecmds[-1]} " ]] ; then
+        if [[ ${cur} == -* ]] ; then
+            local prefix=${linefromfirstquote%*$cur}
+            mapfile -t COMPREPLY < <( compgen -P "$prefix" -W "${nestedcropopts}" -- "${cur}" )
+            return 0
+        fi
+
+    # check for quoted file option and make sure previous option was an image option
+    elif [[ ${openquotecmds} == -f || ${openquotecmds} == --file ]] \
+        && [[ $levels == 2 ]] \
+        && [[ " $imgopts " =~ " ${openquotecmds[-1]} " ]] ; then
+        # crop option from filename, may result in an empty filename
+        local filenamestart=${cur##--file=}
+        filenamestart=${filenamestart##--file}
+        filenamestart=${filenamestart##-f}
+
+        # get files with prefix to not let completion replace the prefix
+        prefix=${linefromfirstquote%*$filenamestart}
+        mapfile -t COMPREPLY < <( compgen -P "$prefix" -o filenames -A file -- ${filenamestart} )
+        return 0
+    fi
+    return 1
+}
+
+# Auto-complete plain <img> argument. For further description about which variables are used, look above _autocomplete_image.
+# However, this will use the local parent variable plainimgopts instead of imgopts.
+function _autocomplete_plainimage {
+    local imgopts="$plainimgopts"
+    local nestedimgopts="--file --crop --layers"
+    _autocomplete_image
+}
+
+# Auto-complete multi-res <img> argument. For further description about which variables are used, look above _autocomplete_image.
+# However, this will use the local parent variable multiresimgopts instead of imgopts.
+function _autocomplete_multiresimage {
+    local imgopts="$multiresimgopts"
+    local nestedimgopts="--file --crop --layers --date --tag"
+    _autocomplete_image "multires"
+}
+
+
+# Auto-complete <rect> argument
+# It requires that _findopenquotepos has run before calling
+# It uses the following local variables of the parent calling function:
+#
+#  - rectopts:           String of options that accept a <rect> argument. If it is empty, this function does nothing.
+#
+#  - levels:             Quotation level.
+#
+#  - cur:                Current word to complete
+#
+#  - linefromfirstquote: Part from the input line, beginning with the most left open quote
+function _autocomplete_rect {
+    local nestedopts="-x -w -y -h --width --height"
+
+    # check for rectangle option and only accept on top-level
+    if [[ " $rectopts " =~ " ${openquotecmds} " && $levels == 1 && ${cur} == -* ]] ; then
+        # autocomplete '-*' with rectangle specific options '-x', '-w', '-y', '-h', '--width', '--height'
+        local prefix=${linefromfirstquote%*$cur}
+        mapfile -t COMPREPLY < <( compgen -P "$prefix" -W "${nestedopts}" -- "${cur}" )
+        return 0
+    fi
+    return 1
+}
+
+
+# This does the auto-completion for image fusion utilities
+# It uses the following local variables of the parent calling function:
+#
+#  - opts:            String of options that will be used on top level for completion
+#
+#  - plainimgopts:    String of options that accept a plain <img> argument.
+#                     For these a quotation is required and the sub-options
+#                     '--file', '--crop' and '--layers' are handled
+#
+#  - multiresimgopts: String of options that accept a multi-res <img> argument.
+#                     For these a quotation is required and the sub-options
+#                     '--file', '--crop', '--layers', '--date' and '--tag' are handled.
+#
+#  - rectopts:        String of options that accept a <rect> argument.
+function _autocomplete_imagefusion {
+    COMPREPLY=()
+
+    # current and previous words in case of no open quote
+    local cur="${COMP_WORDS[COMP_CWORD]}"
+    local prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+    # parse quotation and fill arrays openquotepos and openquotecmds
+    _findopenquotepos
+
+    # check for quoted option
+    if (( $openquotepos )) ; then
+        # get line until cursor
+        local line=${COMP_LINE:0:COMP_POINT}
+
+        # assume _findopenquotepos has run
+        local linefromlastquote=${line:$openquotepos:COMP_POINT}
+        local linefromfirstquote=${line:${openquotepos[-1]}:COMP_POINT}
+        local levels=${#openquotepos[@]}
+        cur=$(awk '{print $NF}' <<< $linefromlastquote | grep -o "[^\"'(]*$" )
+        prev=$(awk '{print $(NF-1)}' <<< $linefromlastquote | grep -o "[^\"'(]*$" )
+
+#         echo
+#         echo "prev:              |$prev|"
+#         echo "cur:               |$cur|"
+#         echo "linefromlastquote: |$linefromlastquote|"
+
+        # uses variable: plainimgopts
+        _autocomplete_plainimage
+        success=$?
+        if [[ $success == 0 ]]; then
+            return 0
+        fi
+
+        # uses variable: multiresimgopts
+        _autocomplete_multiresimage
+        success=$?
+        if [[ $success == 0 ]]; then
+            return 0
+        fi
+
+        # uses variable: rectopts
+        _autocomplete_rect
+        success=$?
+        if [[ $success == 0 ]]; then
+            return 0
+        fi
+
+        # if no option matches, try a filename
+        mapfile -t COMPREPLY < <( compgen -o filenames -A file -- ${cur/^[\"\' ]*} )
+        return 0
+
+    # autocomplete top-level options
+    elif [[ ${cur} == -* ]] ; then
+        COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+        return 0
+
+    # autocomplete unquoted file name
+    else
+        # get files
+        mapfile -t COMPREPLY < <( compgen -o filenames -A file -- ${cur/=} )
+
+        # escape spaces in files
+        local IFS=$'\n'
+        COMPREPLY=($(printf "%q\n" "${COMPREPLY[@]}"))
+        return 0
+    fi
+}
+
+
+
+# Utility scripts. Add your own, if you like.
+# Define a local variable
+#  - 'opts'            for top-level options,
+#  - 'plainimgopts'    for options that accept a plain <img> argument, which has the suboptions:    '--file', '--crop', '--layers',
+#  - 'multiresimgopts' for options that accept a multires <img> argument, which has the suboptions: '--file', '--crop', '--layers', '--date', '--tag',
+#  - 'rectopts'        for options that accept a <rect> argument, which has the suboptions:         '-x', '-w', '-y', '-h', '--width', '--height'
+_imgcompare() {
+    local opts="--disable-grids --disable-legends --disable-use-nodata --enable-grids --enable-legends --enable-use-nodata --help --hist-bins --hist-diff-range --hist-log --hist-range --hist-size --img --mask-invalid-ranges --mask-valid-ranges --option-file --out-diff --out-diff-bin --out-diff-scaled --out-hist-both --out-hist-diff --out-hist-first --out-hist-second --out-mask --out-scatter --scatter-size"
+    local plainimgopts="--img -i --mask-img -m"
+
+    _autocomplete_imagefusion
+}
+complete -o nospace -F _imgcompare imgcompare;
+
+
+_imggeocrop() {
+    local opts="--disable-saturate --disable-use-nodata --enable-saturate --enable-use-nodata --geo-extents --help --help-formats --img --mask-invalid-ranges --mask-valid-ranges --option-file --out-format --out-like --out-postfix --out-prefix --out-type --set-nodata-val"
+    local plainimgopts="--img -i --geo-extents-from"
+
+    _autocomplete_imagefusion
+}
+complete -o nospace -F _imggeocrop imggeocrop;
+
+
+_imginterp() {
+    local opts="--disable-output-pixelstate --disable-use-nodata --enable-output-pixelstate --enable-use-nodata --help --help-formats --img --interp-ranges --limit-days --mask-invalid-ranges --mask-valid-ranges --no-interp-ranges --option-file --out-pixelstate-postfix --out-pixelstate-prefix --out-postfix --out-prefix --stats"
+    local multiresimgopts="--img -i --mask -m -q --ql-fmask --ql-img --ql-landsat --ql-modis"
+
+    _autocomplete_imagefusion
+}
+complete -o nospace -F _imginterp imginterp;
+
+
+_spstfm() {
+    local opts="--dict-size --dict-reuse --disable-output-masks --disable-random-sampling --disable-use-nodata --enable-output-masks --enable-random-sampling --enable-use-nodata --help --help-formats --img --load-dict --mask-img --mask-high-res-invalid-ranges --mask-high-res-valid-ranges --mask-invalid-ranges --mask-low-res-invalid-ranges --mask-low-res-valid-ranges --mask-valid-ranges --max-train-iterations --min-train-iterations --number-samples --option-file --out-format --out-mask-postfix --out-mask-prefix --out-postfix --out-prefix --patch-overlap --patch-size --pred-area --save-dict"
+    local plainimgopts="--mask-img -m"
+    local multiresimgopts="--img -i"
+
+    _autocomplete_imagefusion
+}
+complete -o nospace -F _spstfm spstfm;
+
+
+_estarfm() {
+    local opts="--disable-local-tol --disable-output-masks --disable-smt-reg-qlty --disable-use-nodata --enable-local-tol --enable-output-masks --enable-smt-reg-qlty --enable-use-nodata --help --help-formats --img --mask-img --mask-high-res-invalid-ranges --mask-high-res-valid-ranges --mask-invalid-ranges --mask-low-res-invalid-ranges --mask-low-res-valid-ranges --mask-valid-ranges --number-slices --option-file --out-format --out-mask-postfix --out-mask-prefix --out-postfix --out-prefix --pred-area --win-size"
+    local plainimgopts="--mask-img -m"
+    local multiresimgopts="--img -i"
+
+    _autocomplete_imagefusion
+}
+complete -o nospace -F _estarfm estarfm;
+
+
+_starfm() {
+    local opts="--auto-temporal-weighting --disable-copy-on-zero-diff --disable-double-pair-mode --disable-output-masks --disable-strict-filtering --disable-temporal-weighting --disable-use-nodata --enable-copy-on-zero-diff --enable-double-pair-mode --enable-output-masks --enable-strict-filtering --enable-temporal-weighting --enable-use-nodata --help --help-formats --img --log-scale --mask-img --mask-high-res-invalid-ranges --mask-high-res-valid-ranges --mask-invalid-ranges --mask-low-res-invalid-ranges --mask-low-res-valid-ranges --mask-valid-ranges --number-classes --option-file --out-format --out-mask-postfix --out-mask-prefix --out-postfix --out-prefix --pred-area --spectral-uncertainty --temporal-uncertainty --win-size"
+    local plainimgopts="--mask-img -m"
+    local multiresimgopts="--img -i"
+
+    _autocomplete_imagefusion
+}
+complete -o nospace -F _starfm starfm;
+
+
+_fitfc() {
+    local opts="--disable-output-masks --disable-use-nodata --enable-output-masks --enable-use-nodata --help --help-formats --img --mask-img --mask-high-res-invalid-ranges --mask-high-res-valid-ranges --mask-invalid-ranges --mask-low-res-invalid-ranges --mask-low-res-valid-ranges --mask-valid-ranges --number-neighbors --option-file --out-format --out-mask-postfix --out-mask-prefix --out-postfix --out-prefix --pred-area --scale --win-size"
+    local plainimgopts="--mask-img -m"
+    local multiresimgopts="--img -i"
+
+    _autocomplete_imagefusion
+}
+complete -o nospace -F _fitfc fitfc;

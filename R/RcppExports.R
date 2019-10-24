@@ -2,8 +2,8 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 #' @export
-execute_estarfm_job_cpp <- function(input_filenames, input_resolutions, input_dates, pred_dates, pred_filenames, pred_area, hightag, lowtag) {
-    invisible(.Call(`_ImageFusion_execute_estarfm_job_cpp`, input_filenames, input_resolutions, input_dates, pred_dates, pred_filenames, pred_area, hightag, lowtag))
+execute_estarfm_job_cpp <- function(input_filenames, input_resolutions, input_dates, pred_dates, pred_filenames, pred_area, winsize, hightag, lowtag) {
+    invisible(.Call(`_ImageFusion_execute_estarfm_job_cpp`, input_filenames, input_resolutions, input_dates, pred_dates, pred_filenames, pred_area, winsize, hightag, lowtag))
 }
 
 rcpp_hello_world <- function() {

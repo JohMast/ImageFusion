@@ -2,10 +2,10 @@
 % Please edit documentation in R/estarfm_job.R
 \name{estarfm_job}
 \alias{estarfm_job}
-\title{Title}
+\title{estarfm_job}
 \usage{
 estarfm_job(input_filenames, input_resolutions, input_dates, pred_dates,
-  pred_filenames, pred_area, hightag, lowtag)
+  pred_filenames, pred_area, winsize, hightag, lowtag)
 }
 \arguments{
 \item{input_filenames}{A string vector containing the filenames of the input images}
@@ -16,9 +16,11 @@ estarfm_job(input_filenames, input_resolutions, input_dates, pred_dates,
 
 \item{pred_dates}{A string vector containing the dates for which images should be predicted.}
 
-\item{pred_filenames}{A string vector containing the filenames for the predicted images. Must match pred_dates in length and order.}
+\item{pred_filenames}{A string vector containing the filenames for the predicted images. Must match \code{pred_dates} in length and order.}
 
 \item{pred_area}{(Optional) An integer vector containing image coordinates for a bounding box which specifies the prediction area. The prediction will only be done in this area. (x_min, y_min, width, height). By default will use the entire area of the first input image.}
+
+\item{winsize}{(Optional) Window size of the rectangle around the current pixel. Default is 51.}
 
 \item{hightag}{(Optional) A string which is used in \code{input_resolutions} to describe the high-resolution images. Default is "high".}
 
@@ -31,13 +33,13 @@ Nothing. Output files are written to disk.
 A wrapper function for \code{execute_estarfm_job_cpp}. It ensures that all of the arguments passed are of the correct type and creates sensible defaults.
 }
 \details{
-Executes the estarfm algorithm to create a number of synthetic high-resolution images from two pairs of matching high- and low-resolution images.  Assumes that the input images already have matching size.
+Executes the estarfm algorithm to create a number of synthetic high-resolution images from two pairs of matching high- and low-resolution images.  Assumes that the input images already have matching size. See the original paper for details (Note: There is a difference to the algorithm as described in the paper though. The regression for $ R $ is now done with all candidates of one window. This complies to the reference implementation, but not to the paper, since there the regression is done only for the candidates that belong to one single coarse pixel. However, the coarse grid is not known at prediction and not necessarily trivial to find out (e. g. in case of higher order interpolation).)
 }
 \examples{
 Sorry, maybe later
-
-
-  
+}
+\references{
+Zhu, X., Chen, J., Gao, F., Chen, X., & Masek, J. G. (2010). An enhanced spatial and temporal adaptive reflectance fusion model for complex heterogeneous regions. Remote Sensing of Environment, 114(11), 2610-2623.
 }
 \author{
 Johannes Mast
