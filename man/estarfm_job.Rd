@@ -5,7 +5,7 @@
 \title{estarfm_job}
 \usage{
 estarfm_job(input_filenames, input_resolutions, input_dates, pred_dates,
-  pred_filenames, pred_area, winsize, hightag, lowtag)
+  pred_filenames, pred_area, winsize, number_classes, hightag, lowtag)
 }
 \arguments{
 \item{input_filenames}{A string vector containing the filenames of the input images}
@@ -18,9 +18,11 @@ estarfm_job(input_filenames, input_resolutions, input_dates, pred_dates,
 
 \item{pred_filenames}{A string vector containing the filenames for the predicted images. Must match \code{pred_dates} in length and order.}
 
-\item{pred_area}{(Optional) An integer vector containing image coordinates for a bounding box which specifies the prediction area. The prediction will only be done in this area. (x_min, y_min, width, height). By default will use the entire area of the first input image.}
+\item{pred_area}{(Optional) An integer vector containing parameters in image coordinates for a bounding box which specifies the prediction area. The prediction will only be done in this area. (x_min, y_min, width, height). By default will use the entire area of the first input image.}
 
 \item{winsize}{(Optional) Window size of the rectangle around the current pixel. Default is 51.}
+
+\item{number_classes}{(Optional) The number of classes used for similarity. Note all channels of a pixel are considered for similarity. So this value holds for each channel, e. g. with 3 channels there are n^3 classes. Default: c-th root of 64, where c is the number of channels.}
 
 \item{hightag}{(Optional) A string which is used in \code{input_resolutions} to describe the high-resolution images. Default is "high".}
 

@@ -18,6 +18,7 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames, //character vector
                          CharacterVector pred_filenames,   //vector of length n_o
                          IntegerVector pred_area, //vector of x1 y1 x2 y2) 
                          int winsize,   //windowsize
+                         int number_classes,
                          const std::string& hightag,  //string identifying the high res images
                          const std::string& lowtag  //string identifying the low res images
                            )
@@ -53,6 +54,7 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames, //character vector
   o.setDate3(3);
   o.setPredictionArea(pred_rectangle);
   o.setWinSize(winsize);
+  o.setNumberClasses(number_classes);
   
   
   

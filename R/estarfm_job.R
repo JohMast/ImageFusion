@@ -7,10 +7,11 @@
 #' @param input_filenames A string vector containing the filenames of the input images
 #' @param input_resolutions A string vector containing the resolution-tags \code{hightag} and \code{lowtag} of the input images
 #' @param input_dates An integer vector containing the dates of the input images.
-#' @param pred_dates A string vector containing the dates for which images should be predicted.
 #' @param pred_filenames A string vector containing the filenames for the predicted images. Must match \code{pred_dates} in length and order.
-#' @param pred_area (Optional) An integer vector containing image coordinates for a bounding box which specifies the prediction area. The prediction will only be done in this area. (x_min, y_min, width, height). By default will use the entire area of the first input image.
+#' @param pred_dates A string vector containing the dates for which images should be predicted.
+#' @param pred_area (Optional) An integer vector containing parameters in image coordinates for a bounding box which specifies the prediction area. The prediction will only be done in this area. (x_min, y_min, width, height). By default will use the entire area of the first input image.
 #' @param winsize (Optional) Window size of the rectangle around the current pixel. Default is 51.
+#' @param number_classes (Optional) The number of classes used for similarity. Note all channels of a pixel are considered for similarity. So this value holds for each channel, e. g. with 3 channels there are n^3 classes. Default: c-th root of 64, where c is the number of channels.
 #' @param hightag (Optional) A string which is used in \code{input_resolutions} to describe the high-resolution images. Default is "high".
 #' @param lowtag (Optional) A string which is used in \code{input_resolutions} to describe the low-resolution images.  Default is "low".
 #' @references Zhu, X., Chen, J., Gao, F., Chen, X., & Masek, J. G. (2010). An enhanced spatial and temporal adaptive reflectance fusion model for complex heterogeneous regions. Remote Sensing of Environment, 114(11), 2610-2623.
@@ -22,7 +23,7 @@
 #' @examples Sorry, maybe later
 
 
-estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,pred_filenames,pred_area,winsize,hightag,lowtag
+estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,pred_filenames,pred_area,winsize,number_classes,hightag,lowtag
                         ) {
   library(assertthat)
   
@@ -38,7 +39,7 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
   # TO DO: MAKE SURE THAT THE SPECIFIED IMAGE COORDINATES FIT INTO THE BOUNDING BOX
   # TO DO: ADD AN OPTION TO USE GEOCOORDINATES
   #Use the first image as a template #TO DO: MAY MAKE MORE SENSE TO USE THE FIRST LOW-ONLY IMAGE AS TEMPLATE
-  template <- raster::raster(input_filenames[1])
+  template <- raster::stack(input_filenames[1])
   #If a bbox was provided, check it for plausibility and pass it on 
   if(!missing(pred_area)){
     assert_that(
@@ -51,7 +52,7 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
     
   }else{
     print("No Prediction Area specified. Predicting entire extent of:")
-    print(template@file@name)
+    print(template[[1]]@file@name)
     pred_area_c <- c(0,0,template@ncols,template@nrows)
     #pred_area_c <- template@extent[c(1,3,2,4)]  #Geocoordinates
   }
@@ -63,6 +64,13 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
   }else{
     winsize_c <- 51
   }
+  if(!missing(number_classes)){
+    assert_that(class(number_classes)=="numeric")
+    number_classes_c <- number_classes
+  }else{
+    number_classes_c <- 64^(1/length(template@layers))
+  }
+  
   
   ### hightag and lowtag###
   if(!missing(hightag)){
@@ -137,6 +145,8 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
   print(pred_dates_c)
   print("Prediction Area: ")
   print(pred_area_c)
+  print("Number Classes: ")
+  print(number_classes_c)
   #Call the cpp fusion function with the checked inputs
   ImageFusion::execute_estarfm_job_cpp(input_filenames = input_filenames_c,
                                    input_resolutions = input_resolutions_c,
@@ -145,6 +155,7 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
                                    pred_filenames = pred_filenames_c,
                                    pred_area = pred_area_c,
                                    winsize = winsize_c,
+                                   number_classes = number_classes_c,
                                    hightag=hightag_c,
                                    lowtag=lowtag_c
                                   )
