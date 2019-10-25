@@ -11,6 +11,8 @@
 #' @param pred_dates A string vector containing the dates for which images should be predicted.
 #' @param pred_area (Optional) An integer vector containing parameters in image coordinates for a bounding box which specifies the prediction area. The prediction will only be done in this area. (x_min, y_min, width, height). By default will use the entire area of the first input image.
 #' @param winsize (Optional) Window size of the rectangle around the current pixel. Default is 51.
+#' @param use_local_tol (Optional) This enables the usage of local tolerances to find similar pixels instead of using the global tolerance.  When searching similar pixels, a tolerance of \eqn{2*\sigma/m} is used. This options sets whether is calculated only from the local window region around the central pixel or from the whole image. Default is "false".
+#' @param uncertainty_factor (Optional) Sets the uncertainty factor. This is multiplied to the upper limit of the high resolution range. The range can be given by a mask range. Default: 0.002 (i. e. 0.2)
 #' @param number_classes (Optional) The number of classes used for similarity. Note all channels of a pixel are considered for similarity. So this value holds for each channel, e. g. with 3 channels there are n^3 classes. Default: c-th root of 64, where c is the number of channels.
 #' @param hightag (Optional) A string which is used in \code{input_resolutions} to describe the high-resolution images. Default is "high".
 #' @param lowtag (Optional) A string which is used in \code{input_resolutions} to describe the low-resolution images.  Default is "low".
@@ -23,7 +25,7 @@
 #' @examples Sorry, maybe later
 
 
-estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,pred_filenames,pred_area,winsize,number_classes,hightag,lowtag
+estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,pred_filenames,pred_area,winsize,uncertainty_factor,number_classes,hightag,lowtag
                         ) {
   library(assertthat)
   
@@ -64,6 +66,24 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
   }else{
     winsize_c <- 51
   }
+  ### use_local_tol ###
+  if(!missing(use_local_tol)){
+    assert_that(class(use_local_tol)=="logical")
+    use_local_tol_c <- use_local_tol
+  }else{
+    use_local_tol_c <- FALSE
+  }
+  
+  ### uncertainty_factor ###
+  if(!missing(uncertainty_factor)){
+    assert_that(class(uncertainty_factor)=="numeric")
+    uncertainty_factor_c <- uncertainty_factor
+  }else{
+    uncertainty_factor_c <- 0.002
+  }
+  
+  
+  ### number_classes ###
   if(!missing(number_classes)){
     assert_that(class(number_classes)=="numeric")
     number_classes_c <- number_classes
@@ -155,6 +175,8 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
                                    pred_filenames = pred_filenames_c,
                                    pred_area = pred_area_c,
                                    winsize = winsize_c,
+                                   use_local_tol = use_local_tol_c,
+                                   uncertainty_factor = uncertainty_factor_c,
                                    number_classes = number_classes_c,
                                    hightag=hightag_c,
                                    lowtag=lowtag_c
