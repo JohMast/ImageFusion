@@ -11,6 +11,8 @@
 #' @param pred_dates A string vector containing the dates for which images should be predicted.
 #' @param pred_area (Optional) An integer vector containing parameters in image coordinates for a bounding box which specifies the prediction area. The prediction will only be done in this area. (x_min, y_min, width, height). By default will use the entire area of the first input image.
 #' @param winsize (Optional) Window size of the rectangle around the current pixel. Default is 51.
+#' @param date1
+#' @param date3
 #' @param data_range_min (Optional) When predicting pixel values ESTARFM can exceed the values that appear in the image. To prevent from writing invalid values (out of a known data range) you can set bounds. By default, the value range will be limited by the natural data range (e. g. -32767 for INT2S).
 #' @param data_range_max (Optional) When predicting pixel values ESTARFM can exceed the values that appear in the image. To prevent from writing invalid values (out of a known data range) you can set bounds. By default, the value range will be limited by the natural data range (e. g.  32767 for INT2S).
 #' @param use_local_tol (Optional) This enables the usage of local tolerances to find similar pixels instead of using the global tolerance.  When searching similar pixels, a tolerance of \eqn{2\sigma/m} is used. This options sets whether is calculated only from the local window region around the central pixel or from the whole image. Default is "false".
@@ -27,7 +29,7 @@
 #' @examples Sorry, maybe later
 
 
-estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,pred_filenames,pred_area,winsize,data_range_min, data_range_max, uncertainty_factor,number_classes,hightag,lowtag
+estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,pred_filenames,pred_area,winsize,date1,date3,data_range_min, data_range_max, uncertainty_factor,number_classes,hightag,lowtag
                         ) {
   library(assertthat)
   
@@ -93,6 +95,8 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
     number_classes_c <- 64^(1/length(template@layers))
   }
   
+  
+  
   ### data_range_min ###
   if(!missing(data_range_min)){
     assert_that(class(data_range_min)=="numeric")
@@ -136,6 +140,30 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
   }else{
     lowtag_c <- "low"
   }
+  
+  ### date1 and date3 ###
+  
+  #Get the High and Low Dates and Pair Dates for finding the first and last pair
+  high_dates <- input_dates[input_resolutions==hightag_c]
+  low_dates <- input_dates[input_resolutions==lowtag_c]
+  pair_dates <- which(table(c(unique(high_dates),unique(low_dates)))>=2)
+  
+  if(!missing(date1)){
+    assert_that(class(date1)=="numeric")
+    date1_c <- date1
+  }else{
+    date1_c <- pair_dates[1]
+  }
+  
+  if(!missing(date3)){
+    assert_that(class(date3)=="numeric")
+    date3_c <- date3
+  }else{
+    date3_c <- pair_dates[length(pair_dates)]
+  }
+  
+  
+  
   #___________________________________________________________________________#
   
   #### B: Check all the required Inputs ####
@@ -164,6 +192,8 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
   high_dates <- input_dates[input_resolutions==hightag_c]
   low_dates <- input_dates[input_resolutions==lowtag_c]
   pair_dates <- which(table(c(unique(high_dates),unique(low_dates)))>=2)
+  
+  
   
   #Some further Assertions
   assert_that(
@@ -209,6 +239,8 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
                                    pred_filenames = pred_filenames_c,
                                    pred_area = pred_area_c,
                                    winsize = winsize_c,
+                                   date1 = date1_c,
+                                   date3 = date3_c,
                                    use_local_tol = use_local_tol_c,
                                    uncertainty_factor = uncertainty_factor_c,
                                    number_classes = number_classes_c,

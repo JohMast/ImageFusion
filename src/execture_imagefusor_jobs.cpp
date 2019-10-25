@@ -18,6 +18,8 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames, //character vector
                          CharacterVector pred_filenames,   //vector of length n_o
                          IntegerVector pred_area, //vector of x1 y1 x2 y2) 
                          int winsize,   //windowsize
+                         int date1,
+                         int date3,
                          bool use_local_tol,
                          double uncertainty_factor,
                          double number_classes,
@@ -54,8 +56,8 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames, //character vector
   EstarfmOptions o;
   o.setHighResTag(hightag);
   o.setLowResTag(lowtag);
-  o.setDate1(1);
-  o.setDate3(3);
+  o.setDate1(Date1);
+  o.setDate3(Date3);
   o.setPredictionArea(pred_rectangle);
   o.setWinSize(winsize);
   o.setNumberClasses(number_classes);
