@@ -11,25 +11,26 @@
 #' @param pred_dates A string vector containing the dates for which images should be predicted.
 #' @param pred_area (Optional) An integer vector containing parameters in image coordinates for a bounding box which specifies the prediction area. The prediction will only be done in this area. (x_min, y_min, width, height). By default will use the entire area of the first input image.
 #' @param winsize (Optional) Window size of the rectangle around the current pixel. Default is 51.
-#' @param date1
-#' @param date3
+#' @param date1 (Optional) Set the date of the first input image pair. By default, will use the pair with the lowest date value.
+#' @param date3 (Optional) Set the date of the second input image pair. By default, will use the pair with the highest date value.
 #' @param data_range_min (Optional) When predicting pixel values ESTARFM can exceed the values that appear in the image. To prevent from writing invalid values (out of a known data range) you can set bounds. By default, the value range will be limited by the natural data range (e. g. -32767 for INT2S).
 #' @param data_range_max (Optional) When predicting pixel values ESTARFM can exceed the values that appear in the image. To prevent from writing invalid values (out of a known data range) you can set bounds. By default, the value range will be limited by the natural data range (e. g.  32767 for INT2S).
 #' @param use_local_tol (Optional) This enables the usage of local tolerances to find similar pixels instead of using the global tolerance.  When searching similar pixels, a tolerance of \eqn{2\sigma/m} is used. This options sets whether is calculated only from the local window region around the central pixel or from the whole image. Default is "false".
-#' @param uncertainty_factor (Optional) Sets the uncertainty factor. This is multiplied to the upper limit of the high resolution range. The range can be given by a mask range. Default: 0.002 (i. e. 0.2)
+#' @param uncertainty_factor (Optional) Sets the uncertainty factor. This is multiplied to the upper limit of the high resolution range. The range can be given by a mask range. Default: 0.002 (0.2 per cent)
 #' @param number_classes (Optional) The number of classes used for similarity. Note all channels of a pixel are considered for similarity. So this value holds for each channel, e. g. with 3 channels there are n^3 classes. Default: c-th root of 64, where c is the number of channels.
 #' @param hightag (Optional) A string which is used in \code{input_resolutions} to describe the high-resolution images. Default is "high".
 #' @param lowtag (Optional) A string which is used in \code{input_resolutions} to describe the low-resolution images.  Default is "low".
+#' @param use_quality_weighted_regression (Optional) This enables the smooth weighting of the regression coefficient by its quality. The regression coefficient is not limited strictly by the quality, but linearly blended to 1 in case of bad quality. Default is "false".
 #' @references Zhu, X., Chen, J., Gao, F., Chen, X., & Masek, J. G. (2010). An enhanced spatial and temporal adaptive reflectance fusion model for complex heterogeneous regions. Remote Sensing of Environment, 114(11), 2610-2623.
 #' @return Nothing. Output files are written to disk.
 #' @export
 #'
 #' @author Johannes Mast
-#' @details Executes the estarfm algorithm to create a number of synthetic high-resolution images from two pairs of matching high- and low-resolution images.  Assumes that the input images already have matching size. See the original paper for details (Note: There is a difference to the algorithm as described in the paper though. The regression for $ R $ is now done with all candidates of one window. This complies to the reference implementation, but not to the paper, since there the regression is done only for the candidates that belong to one single coarse pixel. However, the coarse grid is not known at prediction and not necessarily trivial to find out (e. g. in case of higher order interpolation).)
+#' @details Executes the estarfm algorithm to create a number of synthetic high-resolution images from two pairs of matching high- and low-resolution images.  Assumes that the input images already have matching size. See the original paper for details (Note: There is a difference to the algorithm as described in the paper though. The regression for $ R $ is now done with all candidates of one window. This complies to the reference implementation, but not to the paper, since there the regression is done only for the candidates that belong to one single coarse pixel. However, the coarse grid is not known at prediction and not necessarily trivial to find out (e. g. in case of higher order interpolation).
 #' @examples Sorry, maybe later
 
 
-estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,pred_filenames,pred_area,winsize,date1,date3,data_range_min, data_range_max, uncertainty_factor,number_classes,hightag,lowtag
+estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,pred_filenames,pred_area,winsize,date1,date3,data_range_min, data_range_max, uncertainty_factor,number_classes,hightag,lowtag,use_local_tol,use_quality_weighted_regression
                         ) {
   library(assertthat)
   
@@ -77,6 +78,17 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
   }else{
     use_local_tol_c <- FALSE
   }
+  
+  
+  
+  ### use_quality_weighted_regression ###
+  if(!missing(use_quality_weighted_regression)){
+    assert_that(class(use_quality_weighted_regression)=="logical")
+    use_quality_weighted_regression_c <- use_quality_weighted_regression
+  }else{
+    use_quality_weighted_regression_c <- FALSE
+  }
+  
   
   ### uncertainty_factor ###
   if(!missing(uncertainty_factor)){
@@ -224,12 +236,15 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
   print(pred_filenames_c)
   print("Prediction Dates: ")
   print(pred_dates_c)
+  print("Predicting between Pairs on Dates:")
+  print(paste(date1_c,date3_c))
   print("Prediction Area: ")
   print(pred_area_c)
   print("Number Classes: ")
   print(number_classes_c)
   print("Data_Range: ")
   print(paste(data_range_min_c, data_range_max_c))
+  
   
   #Call the cpp fusion function with the checked inputs
   ImageFusion::execute_estarfm_job_cpp(input_filenames = input_filenames_c,
@@ -242,6 +257,7 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
                                    date1 = date1_c,
                                    date3 = date3_c,
                                    use_local_tol = use_local_tol_c,
+                                   use_quality_weighted_regression = use_quality_weighted_regression_c,
                                    uncertainty_factor = uncertainty_factor_c,
                                    number_classes = number_classes_c,
                                    data_range_min = data_range_min_c,

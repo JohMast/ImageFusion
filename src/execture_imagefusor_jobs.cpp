@@ -16,11 +16,12 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames, //character vector
                          IntegerVector input_dates, //character vector length n_i
                          IntegerVector pred_dates, //vector of length n_o
                          CharacterVector pred_filenames,   //vector of length n_o
-                         IntegerVector pred_area, //vector of x1 y1 x2 y2) 
+                         IntegerVector pred_area, //vector of x1 y1 width height) 
                          int winsize,   //windowsize
                          int date1,
                          int date3,
                          bool use_local_tol,
+                         bool use_quality_weighted_regression,
                          double uncertainty_factor,
                          double number_classes,
                          double data_range_min,
@@ -56,14 +57,15 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames, //character vector
   EstarfmOptions o;
   o.setHighResTag(hightag);
   o.setLowResTag(lowtag);
-  o.setDate1(Date1);
-  o.setDate3(Date3);
+  o.setDate1(date1);
+  o.setDate3(date3);
   o.setPredictionArea(pred_rectangle);
   o.setWinSize(winsize);
   o.setNumberClasses(number_classes);
   o.setUncertaintyFactor(uncertainty_factor);
   o.setUseLocalTol(use_local_tol);
   o.setDataRange(data_range_min,data_range_max);
+  o.setUseQualityWeightedRegression(use_quality_weighted_regression);
   
   
   

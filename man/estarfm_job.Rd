@@ -5,8 +5,9 @@
 \title{estarfm_job}
 \usage{
 estarfm_job(input_filenames, input_resolutions, input_dates, pred_dates,
-  pred_filenames, pred_area, winsize, uncertainty_factor, number_classes,
-  hightag, lowtag)
+  pred_filenames, pred_area, winsize, date1, date3, data_range_min,
+  data_range_max, uncertainty_factor, number_classes, hightag, lowtag,
+  use_local_tol, use_quality_weighted_regression)
 }
 \arguments{
 \item{input_filenames}{A string vector containing the filenames of the input images}
@@ -23,6 +24,14 @@ estarfm_job(input_filenames, input_resolutions, input_dates, pred_dates,
 
 \item{winsize}{(Optional) Window size of the rectangle around the current pixel. Default is 51.}
 
+\item{date1}{(Optional) Set the date of the first input image pair. By default, will use the pair with the lowest date value.}
+
+\item{date3}{(Optional) Set the date of the second input image pair. By default, will use the pair with the highest date value.}
+
+\item{data_range_min}{(Optional) When predicting pixel values ESTARFM can exceed the values that appear in the image. To prevent from writing invalid values (out of a known data range) you can set bounds. By default, the value range will be limited by the natural data range (e. g. -32767 for INT2S).}
+
+\item{data_range_max}{(Optional) When predicting pixel values ESTARFM can exceed the values that appear in the image. To prevent from writing invalid values (out of a known data range) you can set bounds. By default, the value range will be limited by the natural data range (e. g.  32767 for INT2S).}
+
 \item{uncertainty_factor}{(Optional) Sets the uncertainty factor. This is multiplied to the upper limit of the high resolution range. The range can be given by a mask range. Default: 0.002 (i. e. 0.2)}
 
 \item{number_classes}{(Optional) The number of classes used for similarity. Note all channels of a pixel are considered for similarity. So this value holds for each channel, e. g. with 3 channels there are n^3 classes. Default: c-th root of 64, where c is the number of channels.}
@@ -32,6 +41,8 @@ estarfm_job(input_filenames, input_resolutions, input_dates, pred_dates,
 \item{lowtag}{(Optional) A string which is used in \code{input_resolutions} to describe the low-resolution images.  Default is "low".}
 
 \item{use_local_tol}{(Optional) This enables the usage of local tolerances to find similar pixels instead of using the global tolerance.  When searching similar pixels, a tolerance of \eqn{2\sigma/m} is used. This options sets whether is calculated only from the local window region around the central pixel or from the whole image. Default is "false".}
+
+\item{use_quality_weighted_regression}{(Optional) This enables the smooth weighting of the regression coefficient by its quality. The regression coefficient is not limited strictly by the quality, but linearly blended to 1 in case of bad quality. Default is "false".}
 }
 \value{
 Nothing. Output files are written to disk.
@@ -40,7 +51,7 @@ Nothing. Output files are written to disk.
 A wrapper function for \code{execute_estarfm_job_cpp}. It ensures that all of the arguments passed are of the correct type and creates sensible defaults.
 }
 \details{
-Executes the estarfm algorithm to create a number of synthetic high-resolution images from two pairs of matching high- and low-resolution images.  Assumes that the input images already have matching size. See the original paper for details (Note: There is a difference to the algorithm as described in the paper though. The regression for $ R $ is now done with all candidates of one window. This complies to the reference implementation, but not to the paper, since there the regression is done only for the candidates that belong to one single coarse pixel. However, the coarse grid is not known at prediction and not necessarily trivial to find out (e. g. in case of higher order interpolation).)
+Executes the estarfm algorithm to create a number of synthetic high-resolution images from two pairs of matching high- and low-resolution images.  Assumes that the input images already have matching size. See the original paper for details (Note: There is a difference to the algorithm as described in the paper though. The regression for $ R $ is now done with all candidates of one window. This complies to the reference implementation, but not to the paper, since there the regression is done only for the candidates that belong to one single coarse pixel. However, the coarse grid is not known at prediction and not necessarily trivial to find out (e. g. in case of higher order interpolation).
 }
 \examples{
 Sorry, maybe later
