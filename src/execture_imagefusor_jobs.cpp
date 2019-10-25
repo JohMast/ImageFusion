@@ -21,6 +21,8 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames, //character vector
                          bool use_local_tol,
                          double uncertainty_factor,
                          double number_classes,
+                         double data_range_min,
+                         double data_range_max,
                          const std::string& hightag,  //string identifying the high res images
                          const std::string& lowtag  //string identifying the low res images
                            )
@@ -59,8 +61,7 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames, //character vector
   o.setNumberClasses(number_classes);
   o.setUncertaintyFactor(uncertainty_factor);
   o.setUseLocalTol(use_local_tol);
-  
-  
+  o.setDataRange(data_range_min,data_range_max);
   
   
   

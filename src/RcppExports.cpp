@@ -7,8 +7,8 @@
 using namespace Rcpp;
 
 // execute_estarfm_job_cpp
-void execute_estarfm_job_cpp(CharacterVector input_filenames, CharacterVector input_resolutions, IntegerVector input_dates, IntegerVector pred_dates, CharacterVector pred_filenames, IntegerVector pred_area, int winsize, bool use_local_tol, double uncertainty_factor, double number_classes, const std::string& hightag, const std::string& lowtag);
-RcppExport SEXP _ImageFusion_execute_estarfm_job_cpp(SEXP input_filenamesSEXP, SEXP input_resolutionsSEXP, SEXP input_datesSEXP, SEXP pred_datesSEXP, SEXP pred_filenamesSEXP, SEXP pred_areaSEXP, SEXP winsizeSEXP, SEXP use_local_tolSEXP, SEXP uncertainty_factorSEXP, SEXP number_classesSEXP, SEXP hightagSEXP, SEXP lowtagSEXP) {
+void execute_estarfm_job_cpp(CharacterVector input_filenames, CharacterVector input_resolutions, IntegerVector input_dates, IntegerVector pred_dates, CharacterVector pred_filenames, IntegerVector pred_area, int winsize, bool use_local_tol, double uncertainty_factor, double number_classes, double data_range_min, double data_range_max, const std::string& hightag, const std::string& lowtag);
+RcppExport SEXP _ImageFusion_execute_estarfm_job_cpp(SEXP input_filenamesSEXP, SEXP input_resolutionsSEXP, SEXP input_datesSEXP, SEXP pred_datesSEXP, SEXP pred_filenamesSEXP, SEXP pred_areaSEXP, SEXP winsizeSEXP, SEXP use_local_tolSEXP, SEXP uncertainty_factorSEXP, SEXP number_classesSEXP, SEXP data_range_minSEXP, SEXP data_range_maxSEXP, SEXP hightagSEXP, SEXP lowtagSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< CharacterVector >::type input_filenames(input_filenamesSEXP);
@@ -21,9 +21,11 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< bool >::type use_local_tol(use_local_tolSEXP);
     Rcpp::traits::input_parameter< double >::type uncertainty_factor(uncertainty_factorSEXP);
     Rcpp::traits::input_parameter< double >::type number_classes(number_classesSEXP);
+    Rcpp::traits::input_parameter< double >::type data_range_min(data_range_minSEXP);
+    Rcpp::traits::input_parameter< double >::type data_range_max(data_range_maxSEXP);
     Rcpp::traits::input_parameter< const std::string& >::type hightag(hightagSEXP);
     Rcpp::traits::input_parameter< const std::string& >::type lowtag(lowtagSEXP);
-    execute_estarfm_job_cpp(input_filenames, input_resolutions, input_dates, pred_dates, pred_filenames, pred_area, winsize, use_local_tol, uncertainty_factor, number_classes, hightag, lowtag);
+    execute_estarfm_job_cpp(input_filenames, input_resolutions, input_dates, pred_dates, pred_filenames, pred_area, winsize, use_local_tol, uncertainty_factor, number_classes, data_range_min, data_range_max, hightag, lowtag);
     return R_NilValue;
 END_RCPP
 }
@@ -39,7 +41,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_ImageFusion_execute_estarfm_job_cpp", (DL_FUNC) &_ImageFusion_execute_estarfm_job_cpp, 12},
+    {"_ImageFusion_execute_estarfm_job_cpp", (DL_FUNC) &_ImageFusion_execute_estarfm_job_cpp, 14},
     {"_ImageFusion_rcpp_hello_world", (DL_FUNC) &_ImageFusion_rcpp_hello_world, 0},
     {NULL, NULL, 0}
 };

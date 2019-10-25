@@ -11,7 +11,9 @@
 #' @param pred_dates A string vector containing the dates for which images should be predicted.
 #' @param pred_area (Optional) An integer vector containing parameters in image coordinates for a bounding box which specifies the prediction area. The prediction will only be done in this area. (x_min, y_min, width, height). By default will use the entire area of the first input image.
 #' @param winsize (Optional) Window size of the rectangle around the current pixel. Default is 51.
-#' @param use_local_tol (Optional) This enables the usage of local tolerances to find similar pixels instead of using the global tolerance.  When searching similar pixels, a tolerance of \eqn{2*\sigma/m} is used. This options sets whether is calculated only from the local window region around the central pixel or from the whole image. Default is "false".
+#' @param data_range_min (Optional) When predicting pixel values ESTARFM can exceed the values that appear in the image. To prevent from writing invalid values (out of a known data range) you can set bounds. By default, the value range will be limited by the natural data range (e. g. -32767 for INT2S).
+#' @param data_range_max (Optional) When predicting pixel values ESTARFM can exceed the values that appear in the image. To prevent from writing invalid values (out of a known data range) you can set bounds. By default, the value range will be limited by the natural data range (e. g.  32767 for INT2S).
+#' @param use_local_tol (Optional) This enables the usage of local tolerances to find similar pixels instead of using the global tolerance.  When searching similar pixels, a tolerance of \eqn{2\sigma/m} is used. This options sets whether is calculated only from the local window region around the central pixel or from the whole image. Default is "false".
 #' @param uncertainty_factor (Optional) Sets the uncertainty factor. This is multiplied to the upper limit of the high resolution range. The range can be given by a mask range. Default: 0.002 (i. e. 0.2)
 #' @param number_classes (Optional) The number of classes used for similarity. Note all channels of a pixel are considered for similarity. So this value holds for each channel, e. g. with 3 channels there are n^3 classes. Default: c-th root of 64, where c is the number of channels.
 #' @param hightag (Optional) A string which is used in \code{input_resolutions} to describe the high-resolution images. Default is "high".
@@ -25,7 +27,7 @@
 #' @examples Sorry, maybe later
 
 
-estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,pred_filenames,pred_area,winsize,uncertainty_factor,number_classes,hightag,lowtag
+estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,pred_filenames,pred_area,winsize,data_range_min, data_range_max, uncertainty_factor,number_classes,hightag,lowtag
                         ) {
   library(assertthat)
   
@@ -91,6 +93,34 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
     number_classes_c <- 64^(1/length(template@layers))
   }
   
+  ### data_range_min ###
+  if(!missing(data_range_min)){
+    assert_that(class(data_range_min)=="numeric")
+    data_range_min_c <- data_range_min
+  }else{
+    template_dataType <- dataType(template[[1]])
+    if(template_dataType=="INT1U"){data_range_min_c <- 0}
+    if(template_dataType=="INT1S"){data_range_min_c <- -127}
+    if(template_dataType=="INT2U"){data_range_min_c <- 0}
+    if(template_dataType=="INT2S"){data_range_min_c <-  -32767}
+    if(template_dataType=="FLT4S"){data_range_min_c <- -3.4e+38}
+    if(template_dataType=="FLT8S"){data_range_min_c <- -1.7e+308}
+    }
+    
+    
+  ### data_range_min ###
+  if(!missing(data_range_max)){
+    assert_that(class(data_range_max)=="numeric")
+    data_range_max_c <- data_range_max
+  }else{
+    template_dataType <- dataType(template[[1]])
+    if(template_dataType=="INT1U"){data_range_max_c <- 255}
+    if(template_dataType=="INT1S"){data_range_max_c <- 127}
+    if(template_dataType=="INT2U"){data_range_max_c <- 65534}
+    if(template_dataType=="INT2S"){data_range_max_c <- 32767}
+    if(template_dataType=="FLT4S"){data_range_max_c <- 3.4e+38}
+    if(template_dataType=="FLT8S"){data_range_max_c <- 1.7e+308 }
+  } 
   
   ### hightag and lowtag###
   if(!missing(hightag)){
@@ -99,6 +129,7 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
   }else{
     hightag_c <- "high"
   }
+    
   if(!missing(lowtag)){
     assert_that(class(lowtag)=="character")
     lowtag_c <- lowtag
@@ -167,6 +198,9 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
   print(pred_area_c)
   print("Number Classes: ")
   print(number_classes_c)
+  print("Data_Range: ")
+  print(paste(data_range_min_c, data_range_max_c))
+  
   #Call the cpp fusion function with the checked inputs
   ImageFusion::execute_estarfm_job_cpp(input_filenames = input_filenames_c,
                                    input_resolutions = input_resolutions_c,
@@ -178,6 +212,8 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
                                    use_local_tol = use_local_tol_c,
                                    uncertainty_factor = uncertainty_factor_c,
                                    number_classes = number_classes_c,
+                                   data_range_min = data_range_min_c,
+                                   data_range_max = data_range_max_c,
                                    hightag=hightag_c,
                                    lowtag=lowtag_c
                                   )

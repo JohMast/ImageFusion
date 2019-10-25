@@ -31,7 +31,7 @@ estarfm_job(input_filenames, input_resolutions, input_dates, pred_dates,
 
 \item{lowtag}{(Optional) A string which is used in \code{input_resolutions} to describe the low-resolution images.  Default is "low".}
 
-\item{use_local_tol}{(Optional) This enables the usage of local tolerances to find similar pixels instead of using the global tolerance.  When searching similar pixels, a tolerance of \eqn{2*\sigma/m} is used. This options sets whether is calculated only from the local window region around the central pixel or from the whole image. Default is "false".}
+\item{use_local_tol}{(Optional) This enables the usage of local tolerances to find similar pixels instead of using the global tolerance.  When searching similar pixels, a tolerance of \eqn{2\sigma/m} is used. This options sets whether is calculated only from the local window region around the central pixel or from the whole image. Default is "false".}
 }
 \value{
 Nothing. Output files are written to disk.
