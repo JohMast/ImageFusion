@@ -33,6 +33,7 @@
 estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,pred_filenames,pred_area,winsize,date1,date3,data_range_min, data_range_max, uncertainty_factor,number_classes,hightag,lowtag,use_local_tol,use_quality_weighted_regression
                         ) {
   library(assertthat)
+  library(raster)
   
 
   #### A: Check all the Optional Inputs ####
@@ -212,7 +213,7 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
     length(pair_dates)>=2,             #At least two pairs?
     any(!pred_dates>max(pair_dates)),  #Pred Dates within the Interval?
     any(!pred_dates<min(pair_dates)),   #Pred Dates within the Interval?
-    all(test_resolutions %in% c(hightag_c, lowtag_c)) #Resolutions given consistent with hightag and lowtag
+    all(input_resolutions %in% c(hightag_c, lowtag_c)) #Resolutions given consistent with hightag and lowtag
       )
   
   
