@@ -32,6 +32,15 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
+// testoptions
+void testoptions();
+RcppExport SEXP _ImageFusion_testoptions() {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    testoptions();
+    return R_NilValue;
+END_RCPP
+}
 // rcpp_hello_world
 List rcpp_hello_world();
 RcppExport SEXP _ImageFusion_rcpp_hello_world() {
@@ -45,6 +54,7 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_ImageFusion_execute_estarfm_job_cpp", (DL_FUNC) &_ImageFusion_execute_estarfm_job_cpp, 17},
+    {"_ImageFusion_testoptions", (DL_FUNC) &_ImageFusion_testoptions, 0},
     {"_ImageFusion_rcpp_hello_world", (DL_FUNC) &_ImageFusion_rcpp_hello_world, 0},
     {NULL, NULL, 0}
 };

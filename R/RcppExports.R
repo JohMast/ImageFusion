@@ -6,6 +6,11 @@ execute_estarfm_job_cpp <- function(input_filenames, input_resolutions, input_da
     invisible(.Call(`_ImageFusion_execute_estarfm_job_cpp`, input_filenames, input_resolutions, input_dates, pred_dates, pred_filenames, pred_area, winsize, date1, date3, use_local_tol, use_quality_weighted_regression, uncertainty_factor, number_classes, data_range_min, data_range_max, hightag, lowtag))
 }
 
+#' @export
+testoptions <- function() {
+    invisible(.Call(`_ImageFusion_testoptions`))
+}
+
 rcpp_hello_world <- function() {
     .Call(`_ImageFusion_rcpp_hello_world`)
 }

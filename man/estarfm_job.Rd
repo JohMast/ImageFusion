@@ -32,7 +32,7 @@ estarfm_job(input_filenames, input_resolutions, input_dates, pred_dates,
 
 \item{data_range_max}{(Optional) When predicting pixel values ESTARFM can exceed the values that appear in the image. To prevent from writing invalid values (out of a known data range) you can set bounds. By default, the value range will be limited by the natural data range (e. g.  32767 for INT2S).}
 
-\item{uncertainty_factor}{(Optional) Sets the uncertainty factor. This is multiplied to the upper limit of the high resolution range. The range can be given by a mask range. Default: 0.002 (i. e. 0.2)}
+\item{uncertainty_factor}{(Optional) Sets the uncertainty factor. This is multiplied to the upper limit of the high resolution range. The range can be given by a mask range. Default: 0.002 (0.2 per cent)}
 
 \item{number_classes}{(Optional) The number of classes used for similarity. Note all channels of a pixel are considered for similarity. So this value holds for each channel, e. g. with 3 channels there are n^3 classes. Default: c-th root of 64, where c is the number of channels.}
 
