@@ -54,21 +54,3 @@ void testoptions(){
   auto predValidSets = baseValidSets;
 
   }
-
-// 
-// void testranges(){
-//   std::vector test_range = "[0, 10000]";
-//   //auto baseValidSets = helpers::parseAndCombineRanges<Parse>(options["MASKRANGE"]);
-//   //auto baseValidSets = helpers::parseAndCombineRanges<Parse>();
-//   auto baseValidSets = helpers::parseAndCombineRanges<Parse>(test_range);
-//   if (!baseValidSets.high.empty()) {
-//     imagefusion::Interval const& first = *baseValidSets.high.begin();
-//     imagefusion::Interval const& last  = *(--baseValidSets.high.end());
-//     double rangeMin = first.lower();
-//     double rangeMax = last.upper();
-//     std::cout << "Data range: [" << rangeMin << ", " << rangeMax << "]" << std::endl;
-//     //estarfmOpts.setDataRange(rangeMin, rangeMax);
-//   }
-//   
-//   
-//   }

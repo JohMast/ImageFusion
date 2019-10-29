@@ -7,7 +7,8 @@
 estarfm_job(input_filenames, input_resolutions, input_dates, pred_dates,
   pred_filenames, pred_area, winsize, date1, date3, data_range_min,
   data_range_max, uncertainty_factor, number_classes, hightag, lowtag,
-  use_local_tol, use_quality_weighted_regression)
+  MASKIMG_options, MASKRANGE_options, use_local_tol,
+  use_quality_weighted_regression, output_masks)
 }
 \arguments{
 \item{input_filenames}{A string vector containing the filenames of the input images}
@@ -40,9 +41,22 @@ estarfm_job(input_filenames, input_resolutions, input_dates, pred_dates,
 
 \item{lowtag}{(Optional) A string which is used in \code{input_resolutions} to describe the low-resolution images.  Default is "low".}
 
+\item{MASKIMG_options}{(Optional) A string containing}
+
+\item{MASKRANGE_options}{(Optional) Specify one or more intervals for valid values. Locations with invalid values will be masked out. Ranges should be given in the format '[<float>,<float>]', '(<float>,<float>)', '[<float>,<float>' or '<float>,<float>]'. There are a couple of options:' \itemize{
+ \item{"--mask-valid-ranges"}{ Stuff}
+ \item{"--mask-invalid-ranges"}{ Stuff}
+ \item{"--mask-high-res-valid-ranges"}{ Stuff}
+ \item{"--mask-high-res-invalid-ranges"}{ Stuff}
+ \item{"--mask-low-res-valid-ranges"}{ Stuff}
+ \item{"--mask-low-res-invalid-ranges"}{ Stuff}
+}}
+
 \item{use_local_tol}{(Optional) This enables the usage of local tolerances to find similar pixels instead of using the global tolerance.  When searching similar pixels, a tolerance of \eqn{2\sigma/m} is used. This options sets whether is calculated only from the local window region around the central pixel or from the whole image. Default is "false".}
 
 \item{use_quality_weighted_regression}{(Optional) This enables the smooth weighting of the regression coefficient by its quality. The regression coefficient is not limited strictly by the quality, but linearly blended to 1 in case of bad quality. Default is "false".}
+
+\item{output_masks}{(Optional) Write mask images to disk? Default is "true".}
 }
 \value{
 Nothing. Output files are written to disk.

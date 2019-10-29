@@ -240,32 +240,38 @@ int main(int argc, char* argv[]) {
         #endif /* WITH_OMP */
 
         imagefusion::Image pairMask = baseMask;
-        for (int datePair : pairDate_vec) {
+        for (int datePair : pairDate_vec) {         //FIRST WE HANDLE THE P A I R DATES
             // read in pair images
-            if (!mri->has(jat.highTag, datePair)) {
-                auto in = Parse::MRImage(imgArgs.get(jat.highTag, datePair));
-                mri->set(jat.highTag, datePair, std::move(in.i));
+            if (!mri->has(jat.highTag, datePair)) {  //if we do not aleady have highrez images for that date:
+                auto in = Parse::MRImage(imgArgs.get(jat.highTag, datePair));   //load the image for that date and rez rom the imgArgs
+                mri->set(jat.highTag, datePair, std::move(in.i));       //put that image into the mri
             }
-            if (!mri->has(jat.lowTag, datePair)) {
-                auto in = Parse::MRImage(imgArgs.get(jat.lowTag, datePair));
-                mri->set(jat.lowTag, datePair, std::move(in.i));
+            if (!mri->has(jat.lowTag, datePair)) {//if we do not aleady have lowrez images for that date:
+                auto in = Parse::MRImage(imgArgs.get(jat.lowTag, datePair)); //load the image for that date and rez from the imgArgs
+                mri->set(jat.lowTag, datePair, std::move(in.i));    //put that image into the mri
             }
 
             // add mask from nodata value and valid / invalid ranges for pair images base mask
-            auto pairValidSets = baseValidSets;
-            if (useNodataValue) {
-                if (!pairValidSets.hasHigh)
+            auto pairValidSets = baseValidSets;  //starting out, our valid ranges for the pairs are our base valid ranges
+            if (useNodataValue) { //Only in case we want to include the nodatavalue
+                if (!pairValidSets.hasHigh)//If there are NO ranges given for the highrez
+                  //set high limits to entire datarange
                     pairValidSets.high += imagefusion::Interval::closed(-std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity());
-                if (!pairValidSets.hasLow)
+                if (!pairValidSets.hasLow)//If there are NO ranges given for the lowrez
+                  //set low limits to entire datarange
                     pairValidSets.low  += imagefusion::Interval::closed(-std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity());
-
+                //Now ranges are given.
                 pairValidSets.hasHigh = pairValidSets.hasLow = true;
-
+                
+                //Then we get the NoDataValue from the GeoInfo (if there is one), make an interval of it, and subtract it from the
+                //high rez ranges
                 imagefusion::GeoInfo const& giHigh = gis.get(jat.highTag, datePair);
                 if (giHigh.hasNodataValue()) {
                     imagefusion::Interval nodataInt = imagefusion::Interval::closed(giHigh.getNodataValue(), giHigh.getNodataValue());
                     pairValidSets.high -= nodataInt;
                 }
+                //Then we get the NoDataValue from the GeoInfo (if there is one), make an interval of it, and subtract it from the
+                //low rez ranges
                 imagefusion::GeoInfo const& giLow = gis.get(jat.lowTag, datePair);
                 if (giLow.hasNodataValue()) {
                     imagefusion::Interval nodataInt = imagefusion::Interval::closed(giLow.getNodataValue(), giLow.getNodataValue());
@@ -273,9 +279,9 @@ int main(int argc, char* argv[]) {
                 }
             }
 
-            if (pairValidSets.hasHigh)
+            if (pairValidSets.hasHigh) //If there are any ranges given for the highrez (now we really should have one)
                 pairMask = helpers::processSetMask(std::move(pairMask), mri->get(jat.highTag, datePair), pairValidSets.high);
-            if (pairValidSets.hasLow)
+            if (pairValidSets.hasLow) //If there are any ranges given for the lowrez (now we really should have one)
                 pairMask = helpers::processSetMask(std::move(pairMask), mri->get(jat.lowTag,  datePair), pairValidSets.low);
         }
 

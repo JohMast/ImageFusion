@@ -15,12 +15,22 @@
 #' @param date3 (Optional) Set the date of the second input image pair. By default, will use the pair with the highest date value.
 #' @param data_range_min (Optional) When predicting pixel values ESTARFM can exceed the values that appear in the image. To prevent from writing invalid values (out of a known data range) you can set bounds. By default, the value range will be limited by the natural data range (e. g. -32767 for INT2S).
 #' @param data_range_max (Optional) When predicting pixel values ESTARFM can exceed the values that appear in the image. To prevent from writing invalid values (out of a known data range) you can set bounds. By default, the value range will be limited by the natural data range (e. g.  32767 for INT2S).
+#' @param MASKIMG_options (Optional) A string containing 
+#' @param MASKRANGE_options (Optional) Specify one or more intervals for valid values. Locations with invalid values will be masked out. Ranges should be given in the format '[<float>,<float>]', '(<float>,<float>)', '[<float>,<float>' or '<float>,<float>]'. There are a couple of options:' \itemize{
+##'  \item{"--mask-valid-ranges"}{ Stuff}
+##'  \item{"--mask-invalid-ranges"}{ Stuff}
+##'  \item{"--mask-high-res-valid-ranges"}{ Stuff}
+##'  \item{"--mask-high-res-invalid-ranges"}{ Stuff}
+##'  \item{"--mask-low-res-valid-ranges"}{ Stuff}
+##'  \item{"--mask-low-res-invalid-ranges"}{ Stuff}
+##' }
 #' @param use_local_tol (Optional) This enables the usage of local tolerances to find similar pixels instead of using the global tolerance.  When searching similar pixels, a tolerance of \eqn{2\sigma/m} is used. This options sets whether is calculated only from the local window region around the central pixel or from the whole image. Default is "false".
 #' @param uncertainty_factor (Optional) Sets the uncertainty factor. This is multiplied to the upper limit of the high resolution range. The range can be given by a mask range. Default: 0.002 (0.2 per cent)
 #' @param number_classes (Optional) The number of classes used for similarity. Note all channels of a pixel are considered for similarity. So this value holds for each channel, e. g. with 3 channels there are n^3 classes. Default: c-th root of 64, where c is the number of channels.
 #' @param hightag (Optional) A string which is used in \code{input_resolutions} to describe the high-resolution images. Default is "high".
 #' @param lowtag (Optional) A string which is used in \code{input_resolutions} to describe the low-resolution images.  Default is "low".
 #' @param use_quality_weighted_regression (Optional) This enables the smooth weighting of the regression coefficient by its quality. The regression coefficient is not limited strictly by the quality, but linearly blended to 1 in case of bad quality. Default is "false".
+#' @param output_masks (Optional) Write mask images to disk? Default is "true".
 #' @references Zhu, X., Chen, J., Gao, F., Chen, X., & Masek, J. G. (2010). An enhanced spatial and temporal adaptive reflectance fusion model for complex heterogeneous regions. Remote Sensing of Environment, 114(11), 2610-2623.
 #' @return Nothing. Output files are written to disk.
 #' @export
@@ -30,7 +40,7 @@
 #' @examples Sorry, maybe later
 
 
-estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,pred_filenames,pred_area,winsize,date1,date3,data_range_min, data_range_max, uncertainty_factor,number_classes,hightag,lowtag,use_local_tol,use_quality_weighted_regression
+estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,pred_filenames,pred_area,winsize,date1,date3,data_range_min, data_range_max, uncertainty_factor,number_classes,hightag,lowtag,MASKIMG_options,MASKRANGE_options,use_local_tol,use_quality_weighted_regression,output_masks,use_nodata_value
                         ) {
   library(assertthat)
   library(raster)
@@ -90,6 +100,13 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
     use_quality_weighted_regression_c <- FALSE
   }
   
+  ### output_masks ###
+  if(!missing(output_masks)){
+    assert_that(class(output_masks)=="logical")
+    output_masks_c <- output_masks
+  }else{
+    output_masks_c <- FALSE
+  } 
   
   ### uncertainty_factor ###
   if(!missing(uncertainty_factor)){
@@ -153,6 +170,23 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
   }else{
     lowtag_c <- "low"
   }
+  
+  ### maskimg options ### 
+  if(!missing(MASKIMG_options)){
+    assert_that(class(MASKIMG_options)=="character")
+    MASKIMG_options_c <- MASKIMG_options
+  }else{
+    MASKIMG_options_c <- ""
+  }
+  
+  ### maskrange options###
+  if(!missing(MASKRANGE_options)){
+    assert_that(class(MASKRANGE_options)=="character")
+    MASKRANGE_options_c <- MASKRANGE_options
+  }else{
+    MASKRANGE_options_c <- "--mask-valid-ranges=\"[0, 10000]\""
+  }
+  
   
   ### date1 and date3 ###
   
@@ -245,8 +279,10 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
   print(number_classes_c)
   print("Data_Range: ")
   print(paste(data_range_min_c, data_range_max_c))
-  
-  
+  print("MASKIMG Options: ")
+  print(MASKIMG_options_c)
+  print("MASKRANGE Options: ")
+  print(MASKRANGE_options_c)
   #Call the cpp fusion function with the checked inputs
   ImageFusion::execute_estarfm_job_cpp(input_filenames = input_filenames_c,
                                    input_resolutions = input_resolutions_c,
@@ -259,12 +295,16 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
                                    date3 = date3_c,
                                    use_local_tol = use_local_tol_c,
                                    use_quality_weighted_regression = use_quality_weighted_regression_c,
+                                   output_masks = output_masks_c,
+                                   use_nodata_value = use_nodata_value_c,
                                    uncertainty_factor = uncertainty_factor_c,
                                    number_classes = number_classes_c,
                                    data_range_min = data_range_min_c,
                                    data_range_max = data_range_max_c,
                                    hightag=hightag_c,
-                                   lowtag=lowtag_c
+                                   lowtag=lowtag_c,
+                                   MASKIMG_options= MASKIMG_options_c,
+                                   MASKRANGE_options = MASKRANGE_options_c
                                   )
   #___________________________________________________________________________#
   
