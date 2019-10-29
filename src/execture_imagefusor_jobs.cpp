@@ -24,6 +24,7 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames, //character vector
                          bool use_local_tol,
                          bool use_quality_weighted_regression,
                          bool output_masks,
+                         bool use_nodata_value,
                          double uncertainty_factor,
                          double number_classes,
                          double data_range_min,
@@ -116,7 +117,37 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames, //character vector
   auto baseValidSets = helpers::parseAndCombineRanges<Parse>(rangeoptions["MASKRANGE"]);
   auto pairValidSets = baseValidSets;
   
-  //TO DO: INSERT OPTION FOR USING NODATAVALUE
+  //adjust ranges by including the nodata value, if desired
+  if (use_nodata_value) { //Only in case we want to include the nodatavalue
+    if (!pairValidSets.hasHigh)//If there are NO ranges given for the highrez
+      //set high limits to entire datarange
+      pairValidSets.high += imagefusion::Interval::closed(-std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity());
+    if (!pairValidSets.hasLow)//If there are NO ranges given for the lowrez
+      //set low limits to entire datarange
+      pairValidSets.low  += imagefusion::Interval::closed(-std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity());
+    //Now ranges are given.
+    pairValidSets.hasHigh = pairValidSets.hasLow = true;
+    
+    //Then we get the NoDataValue from the GeoInfo (if there is one), make an interval of it, and subtract it from the
+    //high rez ranges#TO DO: ADJUST SO IT ACTUALLY TAKES THE CORRECT FILE
+    GeoInfo const& giHigh{as<std::string>(input_filenames[1])};
+    if (giHigh.hasNodataValue()) {
+      imagefusion::Interval nodataInt = imagefusion::Interval::closed(giHigh.getNodataValue(), giHigh.getNodataValue());
+      pairValidSets.high -= nodataInt;
+    }
+    //Then we get the NoDataValue from the GeoInfo (if there is one), make an interval of it, and subtract it from the
+    //low rez ranges #TO DO: ADJUST SO IT ACTUALLY TAKES THE CORRECT FILE
+    GeoInfo const& giLow{as<std::string>(input_filenames[1])};
+    if (giLow.hasNodataValue()) {
+      imagefusion::Interval nodataInt = imagefusion::Interval::closed(giLow.getNodataValue(), giLow.getNodataValue());
+      pairValidSets.low -= nodataInt;
+    }
+  }
+  
+  
+  
+  
+  
   imagefusion::Image pairMask = baseMask;
   if (pairValidSets.hasHigh) //If there are any ranges given for the highrez :
     //apply the ranges and update the mask accordingly
@@ -146,6 +177,16 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames, //character vector
     //We use the basic ranges
     auto predValidSets = baseValidSets;
     //TO DO: INSERT OPTION FOR USING NODATAVALUE
+    if (use_nodata_value) {
+      if (!predValidSets.hasLow)
+        predValidSets.low  += imagefusion::Interval::closed(-std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity());
+      predValidSets.hasLow = true;
+    //TO DO: ADJUST SO IT ACTUALLY TAKES THE CORRECT FILE ATM takes just the basic geoinfo
+      if (gi.hasNodataValue()) { 
+        imagefusion::Interval nodataInt = imagefusion::Interval::closed(gi.getNodataValue(), gi.getNodataValue());
+        predValidSets.low -= nodataInt;
+      }
+    }
     //For every prediction, we start out with the pairMask, which we obtained earlier through a combination of Date1 and Date3 masks 
     imagefusion::Image predMask = pairMask;
     

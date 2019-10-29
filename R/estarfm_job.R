@@ -31,6 +31,7 @@
 #' @param lowtag (Optional) A string which is used in \code{input_resolutions} to describe the low-resolution images.  Default is "low".
 #' @param use_quality_weighted_regression (Optional) This enables the smooth weighting of the regression coefficient by its quality. The regression coefficient is not limited strictly by the quality, but linearly blended to 1 in case of bad quality. Default is "false".
 #' @param output_masks (Optional) Write mask images to disk? Default is "true".
+#' @param use_nodata_value (Optional) Use the nodata value as invalid range for masking? Default is "true".
 #' @references Zhu, X., Chen, J., Gao, F., Chen, X., & Masek, J. G. (2010). An enhanced spatial and temporal adaptive reflectance fusion model for complex heterogeneous regions. Remote Sensing of Environment, 114(11), 2610-2623.
 #' @return Nothing. Output files are written to disk.
 #' @export
@@ -106,6 +107,14 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
     output_masks_c <- output_masks
   }else{
     output_masks_c <- FALSE
+  } 
+  
+  ### use_nodata_value ###
+  if(!missing(use_nodata_value)){
+    assert_that(class(use_nodata_value)=="logical")
+    use_nodata_value_c <- use_nodata_value
+  }else{
+    use_nodata_value <- TRUE
   } 
   
   ### uncertainty_factor ###

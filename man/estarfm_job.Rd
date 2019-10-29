@@ -8,7 +8,7 @@ estarfm_job(input_filenames, input_resolutions, input_dates, pred_dates,
   pred_filenames, pred_area, winsize, date1, date3, data_range_min,
   data_range_max, uncertainty_factor, number_classes, hightag, lowtag,
   MASKIMG_options, MASKRANGE_options, use_local_tol,
-  use_quality_weighted_regression, output_masks)
+  use_quality_weighted_regression, output_masks, use_nodata_value)
 }
 \arguments{
 \item{input_filenames}{A string vector containing the filenames of the input images}
@@ -57,6 +57,8 @@ estarfm_job(input_filenames, input_resolutions, input_dates, pred_dates,
 \item{use_quality_weighted_regression}{(Optional) This enables the smooth weighting of the regression coefficient by its quality. The regression coefficient is not limited strictly by the quality, but linearly blended to 1 in case of bad quality. Default is "false".}
 
 \item{output_masks}{(Optional) Write mask images to disk? Default is "true".}
+
+\item{use_nodata_value}{(Optional) Use the nodata value as invalid range for masking? Default is "true".}
 }
 \value{
 Nothing. Output files are written to disk.
