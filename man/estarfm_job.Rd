@@ -41,27 +41,27 @@ estarfm_job(input_filenames, input_resolutions, input_dates, pred_dates,
 
 \item{lowtag}{(Optional) A string which is used in \code{input_resolutions} to describe the low-resolution images.  Default is "low".}
 
-\item{MASKIMG_options}{(Optional) A string containing}
+\item{MASKIMG_options}{(Optional) A string containing information for a mask image (8-bit, boolean, i. e. consists of 0 and 255). "For all input images the pixel values at the locations where the mask is 0 is replaced by the mean value." Example: \code{--mask-img=some_image.png}}
 
 \item{MASKRANGE_options}{(Optional) Specify one or more intervals for valid values. Locations with invalid values will be masked out. Ranges should be given in the format '[<float>,<float>]', '(<float>,<float>)', '[<float>,<float>' or '<float>,<float>]'. There are a couple of options:' \itemize{
- \item{"--mask-valid-ranges"}{ Stuff}
- \item{"--mask-invalid-ranges"}{ Stuff}
- \item{"--mask-high-res-valid-ranges"}{ Stuff}
- \item{"--mask-high-res-invalid-ranges"}{ Stuff}
- \item{"--mask-low-res-valid-ranges"}{ Stuff}
- \item{"--mask-low-res-invalid-ranges"}{ Stuff}
+ \item{"--mask-valid-ranges"}{ Intervals which are marked as valid. Valid ranges can excluded from invalid ranges or vice versa, depending on the order of options.}
+ \item{"--mask-invalid-ranges"}{ Intervals which are marked as invalid. Invalid intervals can be excluded from valid ranges or vice versa, depending on the order of options.}
+ \item{"--mask-high-res-valid-ranges"}{ This is the same as --mask-valid-ranges, but is applied only for the high resolution images.}
+ \item{"--mask-high-res-invalid-ranges"}{ This is the same as --mask-invalid-ranges, but is applied only for the high resolution images.}
+ \item{"--mask-low-res-valid-ranges"}{ This is the same as --mask-valid-ranges, but is applied only for the low resolution images.}
+ \item{"--mask-low-res-invalid-ranges"}{ This is the same as --mask-invalid-ranges, but is applied only for the low resolution images.}
 }}
 
 \item{use_local_tol}{(Optional) This enables the usage of local tolerances to find similar pixels instead of using the global tolerance.  When searching similar pixels, a tolerance of \eqn{2\sigma/m} is used. This options sets whether is calculated only from the local window region around the central pixel or from the whole image. Default is "false".}
 
 \item{use_quality_weighted_regression}{(Optional) This enables the smooth weighting of the regression coefficient by its quality. The regression coefficient is not limited strictly by the quality, but linearly blended to 1 in case of bad quality. Default is "false".}
 
-\item{output_masks}{(Optional) Write mask images to disk? Default is "true".}
+\item{output_masks}{(Optional) Write mask images to disk? Default is "false".}
 
 \item{use_nodata_value}{(Optional) Use the nodata value as invalid range for masking? Default is "true".}
 }
 \value{
-Nothing. Output files are written to disk.
+Nothing. Output files are written to disk. The Geoinformation for the output images is carried over from the input pair images.
 }
 \description{
 A wrapper function for \code{execute_estarfm_job_cpp}. It ensures that all of the arguments passed are of the correct type and creates sensible defaults.

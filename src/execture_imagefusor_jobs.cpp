@@ -8,17 +8,22 @@
 using namespace Rcpp;
 
 using  std::vector;
-using Parse  = imagefusion::option::Parse;
+
+//TO DO:
+//ADD VERBOSE OPTION
+//CLEAN UP CODE INTO SENSIBLE CHAPTERS
+//ADD PARALLELISATION
+
 
 //' @export
 // [[Rcpp::export]]
-void execute_estarfm_job_cpp(CharacterVector input_filenames, //character vector length n_i
-                         CharacterVector input_resolutions, //character vector length n_i
-                         IntegerVector input_dates, //character vector length n_i
-                         IntegerVector pred_dates, //vector of length n_o
-                         CharacterVector pred_filenames,   //vector of length n_o
-                         IntegerVector pred_area, //vector of x1 y1 width height) 
-                         int winsize,   //windowsize
+void execute_estarfm_job_cpp(CharacterVector input_filenames, 
+                         CharacterVector input_resolutions, 
+                         IntegerVector input_dates, 
+                         IntegerVector pred_dates, 
+                         CharacterVector pred_filenames,   
+                         IntegerVector pred_area, 
+                         int winsize,   
                          int date1,
                          int date3,
                          bool use_local_tol,
@@ -29,8 +34,8 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames, //character vector
                          double number_classes,
                          double data_range_min,
                          double data_range_max,
-                         const std::string& hightag,  //string identifying the high res images
-                         const std::string& lowtag,    //string identifying the low res images
+                         const std::string& hightag,  
+                         const std::string& lowtag,   
                          const std::string& MASKIMG_options,
                          const std::string& MASKRANGE_options
                            )
@@ -44,8 +49,26 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames, //character vector
 
   Rectangle pred_rectangle = Rectangle{pred_area[0],pred_area[1],pred_area[2],pred_area[3]};
   //Step 2: Prepare the fusion
-  //Get the Geoinformation from the first of the images
-  GeoInfo gi{as<std::string>(input_filenames[1])};
+  // find the gi the first pair high image 
+  Rcpp::LogicalVector is_high(input_filenames.size());
+  for( int i=0; i<input_filenames.size(); i++){
+    is_high[i] = (input_resolutions[i] == hightag);}
+  Rcpp::CharacterVector filenames_high = input_filenames[is_high];
+  std::string high_template_filename = Rcpp::as<std::vector<std::string> >(filenames_high)[0];
+  GeoInfo const& giHighPair1 {high_template_filename};
+  std::cout<<"Getting High Resolution Geoinformation from File: "<<high_template_filename<<std::endl;
+  // find the gi the first pair low image 
+  Rcpp::LogicalVector is_low(input_filenames.size());
+  for( int i=0; i<input_filenames.size(); i++){
+    is_low[i] = (input_resolutions[i] == lowtag);}
+  Rcpp::CharacterVector filenames_low = input_filenames[is_low];
+  std::string low_template_filename = Rcpp::as<std::vector<std::string> >(filenames_low)[0];
+  std::cout<<"Getting Low Resolution Geoinformation from File: "<<low_template_filename<<std::endl;
+  GeoInfo const& giLowPair1 {low_template_filename};
+  
+  // a copy of the high image gi, which we later use for the output (and might modify a bit)
+  GeoInfo giTemplate {giHighPair1};
+
   //Loop over all the input filenames and load them into a MultiResImages object
   //for every filename, set the corresponding resolution tag
   //and date
@@ -110,7 +133,7 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames, //character vector
     maskImgArgs.push_back(opt.arg);
   //Get the Mask if one was given in the options, otherwise create a base mask from scratch
   //NOTE: TAKES THE NUMBER OF CHANNELS FROM THE TEMPLATE
-  imagefusion::Image baseMask = helpers::parseAndCombineMaskImages<Parse>(maskImgArgs, gi.channels, !maskoptions["MASKRANGE"].empty());
+  imagefusion::Image baseMask = helpers::parseAndCombineMaskImages<Parse>(maskImgArgs, giHighPair1.channels, !maskoptions["MASKRANGE"].empty());
   
   //RANGE
   auto rangeoptions = imagefusion::option::OptionParser::parse(usage,MASKRANGE_options);
@@ -130,23 +153,18 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames, //character vector
     
     //Then we get the NoDataValue from the GeoInfo (if there is one), make an interval of it, and subtract it from the
     //high rez ranges#TO DO: ADJUST SO IT ACTUALLY TAKES THE CORRECT FILE
-    GeoInfo const& giHigh{as<std::string>(input_filenames[1])};
-    if (giHigh.hasNodataValue()) {
-      imagefusion::Interval nodataInt = imagefusion::Interval::closed(giHigh.getNodataValue(), giHigh.getNodataValue());
+    
+    if (giHighPair1.hasNodataValue()) {
+      imagefusion::Interval nodataInt = imagefusion::Interval::closed(giHighPair1.getNodataValue(), giHighPair1.getNodataValue());
       pairValidSets.high -= nodataInt;
     }
     //Then we get the NoDataValue from the GeoInfo (if there is one), make an interval of it, and subtract it from the
     //low rez ranges #TO DO: ADJUST SO IT ACTUALLY TAKES THE CORRECT FILE
-    GeoInfo const& giLow{as<std::string>(input_filenames[1])};
-    if (giLow.hasNodataValue()) {
-      imagefusion::Interval nodataInt = imagefusion::Interval::closed(giLow.getNodataValue(), giLow.getNodataValue());
+    if (giLowPair1.hasNodataValue()) {
+      imagefusion::Interval nodataInt = imagefusion::Interval::closed(giLowPair1.getNodataValue(), giLowPair1.getNodataValue());
       pairValidSets.low -= nodataInt;
     }
   }
-  
-  
-  
-  
   
   imagefusion::Image pairMask = baseMask;
   if (pairValidSets.hasHigh) //If there are any ranges given for the highrez :
@@ -155,17 +173,6 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames, //character vector
   if (pairValidSets.hasLow) //If there are any ranges given for the lowrez :
     //apply the ranges and update the mask accordingly
     pairMask = helpers::processSetMask(std::move(pairMask), mri->get(lowtag,  date1), pairValidSets.low);
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
   
   //Predict for desired Dates
   int n_outputs = pred_dates.size();
@@ -176,14 +183,13 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames, //character vector
     //Make the Mask
     //We use the basic ranges
     auto predValidSets = baseValidSets;
-    //TO DO: INSERT OPTION FOR USING NODATAVALUE
+    
     if (use_nodata_value) {
       if (!predValidSets.hasLow)
         predValidSets.low  += imagefusion::Interval::closed(-std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity());
       predValidSets.hasLow = true;
-    //TO DO: ADJUST SO IT ACTUALLY TAKES THE CORRECT FILE ATM takes just the basic geoinfo
-      if (gi.hasNodataValue()) { 
-        imagefusion::Interval nodataInt = imagefusion::Interval::closed(gi.getNodataValue(), gi.getNodataValue());
+      if (giHighPair1.hasNodataValue()) { 
+        imagefusion::Interval nodataInt = imagefusion::Interval::closed(giHighPair1.getNodataValue(), giHighPair1.getNodataValue());
         predValidSets.low -= nodataInt;
       }
     }
@@ -203,26 +209,18 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames, //character vector
     
     if (output_masks){
       imagefusion::FileFormat outformat = imagefusion::FileFormat::fromFile(pred_filename);
-      std::string outmaskfilename = helpers::outputImageFile(predMask, gi, "Mask", pred_filename, "", outformat, date1, pred_dates[i], date3);}
+      std::string outmaskfilename = helpers::outputImageFile(predMask, giHighPair1, "MaskImage", pred_filename, "MaskImage", outformat, date1, pred_dates[i], date3);}
 
-    //Add the Geoinformation of the TEMPLATE to the written file
-    if (gi.hasGeotransform()) {
-      gi.geotrans.translateImage(pred_rectangle.x, pred_rectangle.y);
+    //Add the Geoinformation of the template to the written file
+    
+    if (giTemplate.hasGeotransform()) {
+      giTemplate.geotrans.translateImage(pred_rectangle.x, pred_rectangle.y);
       if (pred_rectangle.width != 0)
-        gi.size.width = pred_rectangle.width;
+        giTemplate.size.width = pred_rectangle.width;
       if (pred_rectangle.height != 0)
-        gi.size.height = pred_rectangle.height;
-      gi.addTo(pred_filename);
+        giTemplate.size.height = pred_rectangle.height;
+      giTemplate.addTo(pred_filename);
     }
     
   }
 }
-
-
-
-
-
-
-
-
-
