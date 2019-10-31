@@ -50,14 +50,14 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames,
   {
   if(use_parallelisation){
   #ifndef WITH_OMP
-   std::cout<<"Sorry, if you want to use Parallelizer, you need to install OpenMP first."<<std::endl;
+    std::cout<<"Sorry, if you want to use Parallelizer, you need to install OpenMP first."<<std::endl;
+    use_parallelisation = false;
   #endif
   }
   
   
   using namespace imagefusion;
-  //Step 1: Prepare the Inputs
-
+  //Step 1: Prepare the Input
   //create a prediction area rectangle
   Rectangle pred_rectangle = Rectangle{pred_area[0],pred_area[1],pred_area[2],pred_area[3]};
   
@@ -69,6 +69,7 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames,
   std::string high_template_filename = Rcpp::as<std::vector<std::string> >(filenames_high)[0];
   GeoInfo const& giHighPair1 {high_template_filename};
   //std::cout<<"Getting High Resolution Geoinformation from File: "<<high_template_filename<<std::endl;
+  
   // find the gi the first pair low image 
   Rcpp::LogicalVector is_low(input_filenames.size());
   for( int i=0; i<input_filenames.size(); i++){
@@ -85,9 +86,7 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames,
   
   //Step 2: Load the images and set the options
   
-  //Loop over all the input filenames and load them into a MultiResImages object
-  //for every filename, set the corresponding resolution tag
-  //and date
+  //Load the images into a mri
   auto mri = std::make_shared<MultiResImages>();
   int n_inputs = input_filenames.size();
   for(int i=0; i< n_inputs;++i){
@@ -96,7 +95,7 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames,
                   Image(as<std::string>(input_filenames[i])));
   }
   
-  //Set the desired Options
+  //Pass the desired Options
   EstarfmOptions o;
   o.setHighResTag(hightag);
   o.setLowResTag(lowtag);
@@ -109,6 +108,8 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames,
   o.setUseLocalTol(use_local_tol);
   o.setDataRange(data_range_min,data_range_max);
   o.setUseQualityWeightedRegression(use_quality_weighted_regression);
+  
+  //create a parallelizer options object if desired
   #ifdef WITH_OMP
   if(use_parallelisation){
     ParallelizerOptions<EstarfmOptions> po;
@@ -130,6 +131,8 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames,
     pesf.processOptions(po);
   }
   #endif /* WITH_OMP */
+  
+  
   //Step 4: Handle the Masking for the Input Pairs
   //We create a single base mask "pairMask" derived from applying the ranges(if any are given) to the
   //Images for Date1 and Date3
@@ -157,11 +160,11 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames,
   std::vector<std::string> maskImgArgs;
   for (auto const& opt : maskoptions["MASKIMG"])
     maskImgArgs.push_back(opt.arg);
-  //Get the Mask if one was given in the options, otherwise create a base mask from scratch
-  //NOTE: TAKES THE NUMBER OF CHANNELS FROM THE TEMPLATE
+  //Gets the Mask if one was given in the options, otherwise create a base mask
+  // from scratch. Uses first pair high image  as template.
   imagefusion::Image baseMask = helpers::parseAndCombineMaskImages<Parse>(maskImgArgs, giHighPair1.channels, !maskoptions["MASKRANGE"].empty());
   
-  //RANGE
+  //get ranges
   auto rangeoptions = imagefusion::option::OptionParser::parse(usage,MASKRANGE_options);
   auto baseValidSets = helpers::parseAndCombineRanges<Parse>(rangeoptions["MASKRANGE"]);
   auto pairValidSets = baseValidSets;
@@ -177,15 +180,14 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames,
     //Now ranges are given.
     pairValidSets.hasHigh = pairValidSets.hasLow = true;
     
-    //Then we get the NoDataValue from the GeoInfo (if there is one), make an interval of it, and subtract it from the
-    //high rez ranges
-    
+    //Then we get the NoDataValue from the GeoInfo (if there is one),
+    //make an interval of it, and subtract it from the high rez ranges
     if (giHighPair1.hasNodataValue()) {
       imagefusion::Interval nodataInt = imagefusion::Interval::closed(giHighPair1.getNodataValue(), giHighPair1.getNodataValue());
       pairValidSets.high -= nodataInt;
     }
-    //Then we get the NoDataValue from the GeoInfo (if there is one), make an interval of it, and subtract it from the
-    //low rez ranges
+    //Then we get the NoDataValue from the GeoInfo (if there is one),
+    // make an interval of it, and subtract it from the low rez ranges
     if (giLowPair1.hasNodataValue()) {
       imagefusion::Interval nodataInt = imagefusion::Interval::closed(giLowPair1.getNodataValue(), giLowPair1.getNodataValue());
       pairValidSets.low -= nodataInt;
@@ -222,31 +224,31 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames,
     //For every prediction, we start out with the pairMask, which we obtained earlier through a combination of Date1 and Date3 masks 
     imagefusion::Image predMask = pairMask;
     
-    if (predValidSets.hasLow)//If there are any ranges given for the lowrez :
+    //Apply the low res ranges, if there are any 
+    //(pred will always be a high res image, so we only need the low ranges)
+    if (predValidSets.hasLow)
       //Adjust the mask by also applying those ranges.
       predMask = helpers::processSetMask(std::move(predMask), mri->get(lowtag, pred_dates[i]), predValidSets.low);
     
     //Predict using the new mask we have made
-  
+    //If we have a parallelised fusor object, use that
     if(use_parallelisation){
       #ifdef WITH_OMP
       pesf.predict(pred_dates[i],predMask);
       pesf.outputImage().write(pred_filename);
-    #endif /* WITH_OMP */
+    #endif /* Otherwise, use the standard fusor object*/
     }else{
       esf.predict(pred_dates[i],predMask);  
       esf.outputImage().write(pred_filename);
     }
     
-    
-    
-    
-    
+    //Write the masks if desired
     if (output_masks){
       imagefusion::FileFormat outformat = imagefusion::FileFormat::fromFile(pred_filename);
       std::string outmaskfilename = helpers::outputImageFile(predMask, giHighPair1, "MaskImage", pred_filename, "MaskImage", outformat, date1, pred_dates[i], date3);}
 
     //Add the Geoinformation of the template to the written file
+    // and adjust it, if we have used a pred area
     if (giTemplate.hasGeotransform()) {
       giTemplate.geotrans.translateImage(pred_rectangle.x, pred_rectangle.y);
       if (pred_rectangle.width != 0)
