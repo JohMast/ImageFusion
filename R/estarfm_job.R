@@ -49,12 +49,12 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
   library(raster)
   
 
-  #### A: Check all the Optional Inputs ####
+  ##### A: Check all the Optional Inputs #####
   #These are variables which are optional 
   # or can easily infered from the required inputs
   
 
-  ### pred_area ###
+  #### pred_area ####
   # check pred area.
   # if not provided by user, set pred area to max image size of first image
   # TO DO: MAKE SURE THAT THE SPECIFIED IMAGE COORDINATES FIT INTO THE BOUNDING BOX
@@ -78,14 +78,14 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
     #pred_area_c <- template@extent[c(1,3,2,4)]  #Geocoordinates
   }
 
-  ### winsize ###
+  #### winsize ####
   if(!missing(winsize)){
     assert_that(class(winsize)=="numeric")
     winsize_c <- winsize
   }else{
     winsize_c <- 51
   }
-  ### use_local_tol ###
+  #### use_local_tol ####
   if(!missing(use_local_tol)){
     assert_that(class(use_local_tol)=="logical")
     use_local_tol_c <- use_local_tol
@@ -95,7 +95,7 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
   
   
   
-  ### use_quality_weighted_regression ###
+  #### use_quality_weighted_regression ####
   if(!missing(use_quality_weighted_regression)){
     assert_that(class(use_quality_weighted_regression)=="logical")
     use_quality_weighted_regression_c <- use_quality_weighted_regression
@@ -103,7 +103,7 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
     use_quality_weighted_regression_c <- FALSE
   }
   
-  ### output_masks ###
+  #### output_masks ####
   if(!missing(output_masks)){
     assert_that(class(output_masks)=="logical")
     output_masks_c <- output_masks
@@ -111,7 +111,7 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
     output_masks_c <- FALSE
   } 
   
-  ### use_nodata_value ###
+  #### use_nodata_value ####
   if(!missing(use_nodata_value)){
     assert_that(class(use_nodata_value)=="logical")
     use_nodata_value_c <- use_nodata_value
@@ -119,7 +119,7 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
     use_nodata_value_c <- TRUE
   } 
   
-  ### use_nodata_value ###
+  #### use_parallelisation ####
   if(!missing(use_parallelisation)){
     assert_that(class(use_parallelisation)=="logical")
     use_parallelisation_c <- use_parallelisation
@@ -127,7 +127,7 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
     use_parallelisation_c <- FALSE
   } 
   
-  ### uncertainty_factor ###
+  #### uncertainty_factor ####
   if(!missing(uncertainty_factor)){
     assert_that(class(uncertainty_factor)=="numeric")
     uncertainty_factor_c <- uncertainty_factor
@@ -136,7 +136,7 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
   }
   
   
-  ### number_classes ###
+  #### number_classes ####
   if(!missing(number_classes)){
     assert_that(class(number_classes)=="numeric")
     number_classes_c <- number_classes
@@ -146,7 +146,7 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
   
   
   
-  ### data_range_min ###
+  #### data_range_min ####
   if(!missing(data_range_min)){
     assert_that(class(data_range_min)=="numeric")
     data_range_min_c <- data_range_min
@@ -161,7 +161,7 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
     }
     
     
-  ### data_range_min ###
+  #### data_range_min ####
   if(!missing(data_range_max)){
     assert_that(class(data_range_max)=="numeric")
     data_range_max_c <- data_range_max
@@ -175,7 +175,7 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
     if(template_dataType=="FLT8S"){data_range_max_c <- 1.7e+308 }
   } 
   
-  ### hightag and lowtag###
+  #### hightag and lowtag####
   if(!missing(hightag)){
     assert_that(class(hightag)=="character")
     hightag_c <- hightag
@@ -190,7 +190,7 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
     lowtag_c <- "low"
   }
   
-  ### maskimg options ### 
+  #### maskimg options #### 
   if(!missing(MASKIMG_options)){
     assert_that(class(MASKIMG_options)=="character")
     MASKIMG_options_c <- MASKIMG_options
@@ -198,7 +198,7 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
     MASKIMG_options_c <- ""
   }
   
-  ### maskrange options###
+  #### maskrange options####
   if(!missing(MASKRANGE_options)){
     assert_that(class(MASKRANGE_options)=="character")
     MASKRANGE_options_c <- MASKRANGE_options
@@ -207,7 +207,7 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
   }
   
   
-  ### date1 and date3 ###
+  #### date1 and date3 ####
   #Get the High and Low Dates and Pair Dates for finding the first and last pair
   high_dates <- input_dates[input_resolutions==hightag_c]
   low_dates <- input_dates[input_resolutions==lowtag_c]
@@ -227,7 +227,7 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
     date3_c <- pair_dates[length(pair_dates)]
   }
   
-  ### n_cores ###
+  #### n_cores ####
   if(!missing(n_cores)){
     assert_that(class(n_cores)=="numeric",
                 n_cores<=parallel::detectCores())
@@ -238,7 +238,7 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
   
   #___________________________________________________________________________#
   
-  #### B: Check all the required Inputs ####
+  ##### B: Check all the required Inputs #####
   #These are variables which are always provided by the user
   #Here, we simply make sure they are of the correct types and matching length
   
@@ -284,7 +284,7 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
   #___________________________________________________________________________#
   
   
-  #### C: Call the CPP function ####
+  ##### C: Call the CPP function #####
   #And print the used parameters 
   print("Input Filenames: ")
   print(input_filenames_c)

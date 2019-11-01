@@ -38,12 +38,37 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
-// testoptions
-void testoptions();
-RcppExport SEXP _ImageFusion_testoptions() {
+// execute_starfm_job_cpp
+void execute_starfm_job_cpp(CharacterVector input_filenames, CharacterVector input_resolutions, IntegerVector input_dates, IntegerVector pred_dates, CharacterVector pred_filenames, IntegerVector pred_area, int winsize, int date1, int date3, int n_cores, bool output_masks, bool use_nodata_value, bool use_parallelisation, bool use_strict_filtering, bool use_temp_diff_for_weights, double number_classes, double data_range_min, double data_range_max, double logscale_factor, double spectral_uncertainty, double temporal_uncertainty, const std::string& hightag, const std::string& lowtag, const std::string& MASKIMG_options, const std::string& MASKRANGE_options);
+RcppExport SEXP _ImageFusion_execute_starfm_job_cpp(SEXP input_filenamesSEXP, SEXP input_resolutionsSEXP, SEXP input_datesSEXP, SEXP pred_datesSEXP, SEXP pred_filenamesSEXP, SEXP pred_areaSEXP, SEXP winsizeSEXP, SEXP date1SEXP, SEXP date3SEXP, SEXP n_coresSEXP, SEXP output_masksSEXP, SEXP use_nodata_valueSEXP, SEXP use_parallelisationSEXP, SEXP use_strict_filteringSEXP, SEXP use_temp_diff_for_weightsSEXP, SEXP number_classesSEXP, SEXP data_range_minSEXP, SEXP data_range_maxSEXP, SEXP logscale_factorSEXP, SEXP spectral_uncertaintySEXP, SEXP temporal_uncertaintySEXP, SEXP hightagSEXP, SEXP lowtagSEXP, SEXP MASKIMG_optionsSEXP, SEXP MASKRANGE_optionsSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
-    testoptions();
+    Rcpp::traits::input_parameter< CharacterVector >::type input_filenames(input_filenamesSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type input_resolutions(input_resolutionsSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type input_dates(input_datesSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type pred_dates(pred_datesSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type pred_filenames(pred_filenamesSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type pred_area(pred_areaSEXP);
+    Rcpp::traits::input_parameter< int >::type winsize(winsizeSEXP);
+    Rcpp::traits::input_parameter< int >::type date1(date1SEXP);
+    Rcpp::traits::input_parameter< int >::type date3(date3SEXP);
+    Rcpp::traits::input_parameter< int >::type n_cores(n_coresSEXP);
+    Rcpp::traits::input_parameter< bool >::type output_masks(output_masksSEXP);
+    Rcpp::traits::input_parameter< bool >::type use_nodata_value(use_nodata_valueSEXP);
+    Rcpp::traits::input_parameter< bool >::type use_parallelisation(use_parallelisationSEXP);
+    Rcpp::traits::input_parameter< bool >::type use_strict_filtering(use_strict_filteringSEXP);
+    Rcpp::traits::input_parameter< bool >::type use_temp_diff_for_weights(use_temp_diff_for_weightsSEXP);
+    Rcpp::traits::input_parameter< double >::type number_classes(number_classesSEXP);
+    Rcpp::traits::input_parameter< double >::type data_range_min(data_range_minSEXP);
+    Rcpp::traits::input_parameter< double >::type data_range_max(data_range_maxSEXP);
+    Rcpp::traits::input_parameter< double >::type logscale_factor(logscale_factorSEXP);
+    Rcpp::traits::input_parameter< double >::type spectral_uncertainty(spectral_uncertaintySEXP);
+    Rcpp::traits::input_parameter< double >::type temporal_uncertainty(temporal_uncertaintySEXP);
+    Rcpp::traits::input_parameter< const std::string& >::type hightag(hightagSEXP);
+    Rcpp::traits::input_parameter< const std::string& >::type lowtag(lowtagSEXP);
+    Rcpp::traits::input_parameter< const std::string& >::type MASKIMG_options(MASKIMG_optionsSEXP);
+    Rcpp::traits::input_parameter< const std::string& >::type MASKRANGE_options(MASKRANGE_optionsSEXP);
+    execute_starfm_job_cpp(input_filenames, input_resolutions, input_dates, pred_dates, pred_filenames, pred_area, winsize, date1, date3, n_cores, output_masks, use_nodata_value, use_parallelisation, use_strict_filtering, use_temp_diff_for_weights, number_classes, data_range_min, data_range_max, logscale_factor, spectral_uncertainty, temporal_uncertainty, hightag, lowtag, MASKIMG_options, MASKRANGE_options);
     return R_NilValue;
 END_RCPP
 }
@@ -60,7 +85,7 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_ImageFusion_execute_estarfm_job_cpp", (DL_FUNC) &_ImageFusion_execute_estarfm_job_cpp, 23},
-    {"_ImageFusion_testoptions", (DL_FUNC) &_ImageFusion_testoptions, 0},
+    {"_ImageFusion_execute_starfm_job_cpp", (DL_FUNC) &_ImageFusion_execute_starfm_job_cpp, 25},
     {"_ImageFusion_rcpp_hello_world", (DL_FUNC) &_ImageFusion_rcpp_hello_world, 0},
     {NULL, NULL, 0}
 };
