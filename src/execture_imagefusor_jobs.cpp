@@ -289,6 +289,8 @@ void execute_starfm_job_cpp(CharacterVector input_filenames,
                             bool use_parallelisation,
                             bool use_strict_filtering,
                             bool use_temp_diff_for_weights,
+                            bool do_copy_on_zero_diff,
+                            bool double_pair_mode,
                             double number_classes,
                             double data_range_min,
                             double data_range_max,
@@ -358,7 +360,11 @@ void execute_starfm_job_cpp(CharacterVector input_filenames,
   o.setSpectralUncertainty(spectral_uncertainty);
   o.setTemporalUncertainty(temporal_uncertainty);
   o.setUseStrictFiltering(use_strict_filtering);
+  o.setDoCopyOnZeroDiff(do_copy_on_zero_diff);
+
+    
   o.setNumberClasses(number_classes);
+  
     
     imagefusion::StarfmOptions::TempDiffWeighting tempDiffSetting = imagefusion::StarfmOptions::TempDiffWeighting::on_double_pair;
     if (use_temp_diff_for_weights){

@@ -5,10 +5,11 @@
 \title{estarfm_job}
 \usage{
 estarfm_job(input_filenames, input_resolutions, input_dates, pred_dates,
-  pred_filenames, pred_area, winsize, date1, date3, data_range_min,
+  pred_filenames, pred_area, winsize, date1, date3, n_cores, data_range_min,
   data_range_max, uncertainty_factor, number_classes, hightag, lowtag,
   MASKIMG_options, MASKRANGE_options, use_local_tol,
-  use_quality_weighted_regression, output_masks, use_nodata_value)
+  use_quality_weighted_regression, output_masks, use_nodata_value,
+  use_parallelisation)
 }
 \arguments{
 \item{input_filenames}{A string vector containing the filenames of the input images}
@@ -28,6 +29,8 @@ estarfm_job(input_filenames, input_resolutions, input_dates, pred_dates,
 \item{date1}{(Optional) Set the date of the first input image pair. By default, will use the pair with the lowest date value.}
 
 \item{date3}{(Optional) Set the date of the second input image pair. By default, will use the pair with the highest date value.}
+
+\item{n_cores}{(Optional) Set the number of cores to use when using parallelisation. Default is 1.}
 
 \item{data_range_min}{(Optional) When predicting pixel values ESTARFM can exceed the values that appear in the image. To prevent from writing invalid values (out of a known data range) you can set bounds. By default, the value range will be limited by the natural data range (e. g. -32767 for INT2S).}
 
@@ -59,15 +62,17 @@ estarfm_job(input_filenames, input_resolutions, input_dates, pred_dates,
 \item{output_masks}{(Optional) Write mask images to disk? Default is "false".}
 
 \item{use_nodata_value}{(Optional) Use the nodata value as invalid range for masking? Default is "true".}
+
+\item{use_parallelisation}{(Optional) Use parallelisation when possible? Default is "false".}
 }
 \value{
 Nothing. Output files are written to disk. The Geoinformation for the output images is carried over from the input pair images.
 }
 \description{
-A wrapper function for \code{execute_estarfm_job_cpp}. It ensures that all of the arguments passed are of the correct type and creates sensible defaults.
+A wrapper function for \code{execute_estarfm_job_cpp}. Intended to execute a single job, that is a number of predictions based on the same input pairs. It ensures that all of the arguments passed are of the correct type and creates sensible defaults.
 }
 \details{
-Executes the estarfm algorithm to create a number of synthetic high-resolution images from two pairs of matching high- and low-resolution images.  Assumes that the input images already have matching size. See the original paper for details (Note: There is a difference to the algorithm as described in the paper though. The regression for $ R $ is now done with all candidates of one window. This complies to the reference implementation, but not to the paper, since there the regression is done only for the candidates that belong to one single coarse pixel. However, the coarse grid is not known at prediction and not necessarily trivial to find out (e. g. in case of higher order interpolation).
+Executes the ESTARFM algorithm to create a number of synthetic high-resolution images from two pairs of matching high- and low-resolution images.  Assumes that the input images already have matching size. See the original paper for details (Note: There is a difference to the algorithm as described in the paper though. The regression for $ R $ is now done with all candidates of one window. This complies to the reference implementation, but not to the paper, since there the regression is done only for the candidates that belong to one single coarse pixel. However, the coarse grid is not known at prediction and not necessarily trivial to find out (e. g. in case of higher order interpolation).
 }
 \examples{
 Sorry, maybe later

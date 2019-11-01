@@ -1,5 +1,58 @@
 
-starfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,pred_filenames,pred_area,winsize,date1,date3,n_cores,data_range_min, data_range_max, logscale_factor,spectral_uncertainty, temporal_uncertainty, number_classes,hightag,lowtag,MASKIMG_options,MASKRANGE_options,use_local_tol,use_quality_weighted_regression,output_masks,use_nodata_value,use_parallelisation,use_strict_filtering,use_temp_diff_for_weights 
+#' starfm_job
+#' @description A wrapper function for \code{execute_starfm_job_cpp}. Intended to execute a single job, that is a number of predictions based on the same input pair(s). It ensures that all of the arguments passed are of the correct type and creates sensible defaults. 
+#'
+#' @param input_filenames  A string vector containing the filenames of the input images
+#' @param input_resolutions A string vector containing the resolution-tags \code{hightag} and \code{lowtag} of the input images
+#' @param input_dates An integer vector containing the dates of the input images.
+#' @param pred_dates A string vector containing the dates for which images should be predicted.
+#' @param pred_filenames A string vector containing the filenames for the predicted images. Must match \code{pred_dates} in length and order.
+#' @param pred_area (Optional) An integer vector containing parameters in image coordinates for a bounding box which specifies the prediction area. The prediction will only be done in this area. (x_min, y_min, width, height). By default will use the entire area of the first input image.
+#' @param winsize (Optional) Window size of the rectangle around the current pixel. Default is 51.
+#' @param date1 (Optional) Set the date of the first input image pair. By default, will use the pair with the lowest date value.
+#' @param date3 (Optional) Set the date of the second input image pair. By default, will use the pair with the highest date value. Disregarded if using double pair mode.
+#' @param n_cores (Optional) Set the number of cores to use when using parallelisation. Default is 1.
+#' @param data_range_min  (Optional) When predicting pixel values STARFM can exceed the values that appear in the image. To prevent from writing invalid values (out of a known data range) you can set bounds. By default, the value range will be limited by the natural data range (e. g. -32767 for INT2S).
+#' @param data_range_max (Optional) When predicting pixel values STARFM can exceed the values that appear in the image. To prevent from writing invalid values (out of a known data range) you can set bounds. By default, the value range will be limited by the natural data range (e. g.  32767 for INT2S).
+#' @param logscale_factor (Optional) When using a positive scale, the logistic weighting formula is used, which reduces the influence of spectral and temporal differences. Default is 0, i. e. logistic formula not used
+#' @param spectral_uncertainty (Optional) This spectral uncertainty value will influence the spectral difference value. Default is 1 for 8 bit images (INT1U and INT1S), 50 otherwise.
+#' @param temporal_uncertainty (Optional) This spectral uncertainty value will influence the spectral difference value. Default is 1 for 8 bit images (INT1U and INT1S), 50 otherwise.
+#' @param number_classes  (Optional) The number of classes used for similarity. Note all channels of a pixel are considered for similarity. So this value holds for each channel, e. g. with 3 channels there are n^3 classes. Default: 40.
+#' @param hightag (Optional) A string which is used in \code{input_resolutions} to describe the high-resolution images. Default is "high".
+#' @param lowtag (Optional) A string which is used in \code{input_resolutions} to describe the low-resolution images.  Default is "low".
+#' @param MASKIMG_options (Optional) A string containing information for a mask image (8-bit, boolean, i. e. consists of 0 and 255). "For all input images the pixel values at the locations where the mask is 0 is replaced by the mean value." Example: \code{--mask-img=some_image.png}
+#' @param MASKRANGE_options (Optional) Specify one or more intervals for valid values. Locations with invalid values will be masked out. Ranges should be given in the format '[<float>,<float>]', '(<float>,<float>)', '[<float>,<float>' or '<float>,<float>]'. There are a couple of options:' \itemize{
+##'  \item{"--mask-valid-ranges"}{ Intervals which are marked as valid. Valid ranges can excluded from invalid ranges or vice versa, depending on the order of options.}
+##'  \item{"--mask-invalid-ranges"}{ Intervals which are marked as invalid. Invalid intervals can be excluded from valid ranges or vice versa, depending on the order of options.}
+##'  \item{"--mask-high-res-valid-ranges"}{ This is the same as --mask-valid-ranges, but is applied only for the high resolution images.}
+##'  \item{"--mask-high-res-invalid-ranges"}{ This is the same as --mask-invalid-ranges, but is applied only for the high resolution images.}
+##'  \item{"--mask-low-res-valid-ranges"}{ This is the same as --mask-valid-ranges, but is applied only for the low resolution images.}
+##'  \item{"--mask-low-res-invalid-ranges"}{ This is the same as --mask-invalid-ranges, but is applied only for the low resolution images.}
+##' }
+#' @param output_masks  (Optional) Write mask images to disk? Default is "false".
+#' @param use_nodata_value (Optional) Use the nodata value as invalid range for masking? Default is "true".
+#' @param use_parallelisation (Optional) Use parallelisation when possible? Default is "false".
+#' @param use_strict_filtering (Optional) Use strict filtering, which means that candidate pixels will be accepted only if they have less temporal *and* spectral difference than the central pixel (like in the paper). Default is "false".
+#' @param double_pair_mode (Optional) When a prediction date is inbetween two pairs use both pairs for the prediction with the double pair mode. Default is "true" if *all* the pred dates are in between input pairs. 
+#' @param use_temp_diff_for_weights (Optional) Use temporal difference in the candidates weight (like in the paper)? Default is to use temporal weighting in double pair mode, and to not use it in single pair mode.
+#' @param do_copy_on_zero_diff (Optional) Predict for all pixels, even for pixels with zero temporal or spectral difference (behaviour of the reference implementation). Default is "false".
+#' @references Gao, Feng, et al. "On the blending of the Landsat and MODIS surface reflectance: Predicting daily Landsat surface reflectance." IEEE Transactions on Geoscience and Remote sensing 44.8 (2006): 2207-2218.
+#' @return Nothing. Output files are written to disk. The Geoinformation for the output images is carried over from the input pair images.
+#' @export
+#'
+#' @author Johannes Mast
+#' @details Executes the STARFM algorithm to create a number of synthetic high-resolution images from either two pairs (double pair mode) or one pair (single pair mode) of matching high- and low-resolution images.  Assumes that the input images already have matching size. See the original paper for details (TO DO: INSERT CHANGES WITH REGARDS TO THE ORIGINAL PAPER). \itemize{
+##'  \item{  For the weighting (10) states: \eqn{C = S T D}}
+##'  \item{"--mask-invalid-ranges"}{ }
+##'  \item{"--mask-high-res-valid-ranges"}{ }
+##'  \item{"--mask-high-res-invalid-ranges"}{ }
+##'  \item{"--mask-low-res-valid-ranges"}{ }
+##'  \item{"--mask-low-res-invalid-ranges"}{ }
+##' }
+#' @examples Sorry, maybe later
+#' 
+#' 
+starfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,pred_filenames,pred_area,winsize,date1,date3,n_cores,data_range_min, data_range_max, logscale_factor,spectral_uncertainty, temporal_uncertainty, number_classes,hightag,lowtag,MASKIMG_options,MASKRANGE_options,output_masks,use_nodata_value,use_parallelisation,use_strict_filtering,use_temp_diff_for_weights,do_copy_on_zero_diff,double_pair_mode 
 ) {
   library(assertthat)
   library(raster)
@@ -73,13 +126,18 @@ starfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,
     use_strict_filtering_c <- FALSE
   } 
   
-  #### use_temp_diff_for_weights ####
-  if(!missing(use_temp_diff_for_weights)){
-    assert_that(class(use_temp_diff_for_weights)=="logical")
-    use_temp_diff_for_weights_c <- use_temp_diff_for_weights
+
+  
+  
+  #### do_copy_on_zero_diff ####
+  if(!missing(do_copy_on_zero_diff)){
+    assert_that(class(do_copy_on_zero_diff)=="logical")
+    do_copy_on_zero_diff_c <- do_copy_on_zero_diff
   }else{
-    use_temp_diff_for_weights_c <- TRUE
-  } 
+    do_copy_on_zero_diff_c <- FALSE
+  }
+  
+  
   #### number_classes ####
   if(!missing(number_classes)){
     assert_that(class(number_classes)=="numeric")
@@ -123,7 +181,7 @@ starfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,
     assert_that(class(logscale_factor)=="numeric")
     logscale_factor_c <- logscale_factor
   }else{
-    logscale_factor <- 0
+    logscale_factor_c <- 0
   }
   
   #### spectral_uncertainty ####
@@ -165,6 +223,30 @@ starfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,
   }else{
     lowtag_c <- "low"
   }
+  
+  
+  #### double_pair_mode ####
+  if(!missing(double_pair_mode)){
+    assert_that(class(double_pair_mode)=="logical")
+    double_pair_mode_c <- double_pair_mode
+  }else{  
+    #Check if our pred dates are between two pair dates
+    high_dates <- input_dates[input_resolutions==hightag_c]
+    low_dates <- input_dates[input_resolutions==lowtag_c]
+    pair_dates <- which(table(c(unique(high_dates),unique(low_dates)))>=2)
+    if(length(pair_dates)>=2 & any(!pred_dates>max(pair_dates)) & any(!pred_dates<min(pair_dates))){
+      double_pair_mode_c = TRUE
+    }else{
+      double_pair_mode_c = FALSE
+    }
+  }
+  #### use_temp_diff_for_weights ####
+  if(!missing(use_temp_diff_for_weights)){
+    assert_that(class(use_temp_diff_for_weights)=="logical")
+    use_temp_diff_for_weights_c <- use_temp_diff_for_weights
+  }else{
+    use_temp_diff_for_weights_c <- double_pair_mode_c
+  } 
   
   #### maskimg options #### 
   if(!missing(MASKIMG_options)){
@@ -242,6 +324,7 @@ starfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,
   
   
   #Some further Assertions
+  #2DO ADJUST FOR SINGLE PAIR MODE
   assert_that(
     length(pair_dates)>=2,             #At least two pairs?
     any(!pred_dates>max(pair_dates)),  #Pred Dates within the Interval?
@@ -307,6 +390,8 @@ starfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,
                                       use_parallelisation = use_parallelisation_c,
                                       use_strict_filtering = use_strict_filtering_c,
                                       use_temp_diff_for_weights = use_temp_diff_for_weights_c,
+                                      do_copy_on_zero_diff = do_copy_on_zero_diff_c,
+                                      double_pair_mode = double_pair_mode_c,
                                       number_classes = number_classes_c,
                                       data_range_min = data_range_min_c,
                                       data_range_max = data_range_max_c,
