@@ -272,14 +272,19 @@ int main(int argc, char* argv[]) {
                     pairValidSets.low -= nodataInt;
                 }
             }
-
-            if (pairMasks.empty() || !useDoublePairMode)
+            //We fill the mask images into our vector
+            //For the first date (Or on every date in single pair mode), add a new empty mask
+            if (pairMasks.empty() || !useDoublePairMode) 
                 pairMasks.push_back(baseMask);
+            //Update the mask by applying the ranges
             if (pairValidSets.hasHigh)
                 pairMasks.back() = helpers::processSetMask(std::move(pairMasks.back()), mri->get(jat.highTag, datePair), pairValidSets.high);
             if (pairValidSets.hasLow)
                 pairMasks.back() = helpers::processSetMask(std::move(pairMasks.back()), mri->get(jat.lowTag,  datePair), pairValidSets.low);
         }
+        //make sure that:
+        //If single pair mode, we have one mask for every date
+        //Or if double pair mode, we have one combined mask that has been updated for every date
         assert(pairDate_vec.size() == pairMasks.size() || useDoublePairMode && pairMasks.size() == 1);
 
         // loop over a single time series (multiple images with the same date 1 and maybe date 3)
@@ -306,6 +311,7 @@ int main(int argc, char* argv[]) {
 
             for (unsigned int idx = 0; idx < pairMasks.size(); ++idx) {
                 imagefusion::Image predMask = pairMasks.at(idx);
+              //Make the pred mask
                 if (predValidSets.hasLow)
                     predMask = helpers::processSetMask(std::move(predMask), mri->get(jat.lowTag, datePred), predValidSets.low);
 

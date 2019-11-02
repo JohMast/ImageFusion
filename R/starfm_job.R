@@ -33,21 +33,21 @@
 #' @param use_nodata_value (Optional) Use the nodata value as invalid range for masking? Default is "true".
 #' @param use_parallelisation (Optional) Use parallelisation when possible? Default is "false".
 #' @param use_strict_filtering (Optional) Use strict filtering, which means that candidate pixels will be accepted only if they have less temporal *and* spectral difference than the central pixel (like in the paper). Default is "false".
-#' @param double_pair_mode (Optional) When a prediction date is inbetween two pairs use both pairs for the prediction with the double pair mode. Default is "true" if *all* the pred dates are in between input pairs. 
+#' @param double_pair_mode (Optional) Use two dates \code{date1} and \code{date3} for prediction, instead of just \code{date1} for all predictions? Default is "true" if *all* the pred dates are in between input pairs, and "false" otherwise. Note: It may be desirable to predict in double-pair mode where possible, as in the following example: \code{[(7) 10 12 (13) 14] } , where we may wish to predict 10 and 12 in double pair mode, but can only predict 14 in single-pair mode. Do achieve this it is necessary to split the task into different jobs.
 #' @param use_temp_diff_for_weights (Optional) Use temporal difference in the candidates weight (like in the paper)? Default is to use temporal weighting in double pair mode, and to not use it in single pair mode.
 #' @param do_copy_on_zero_diff (Optional) Predict for all pixels, even for pixels with zero temporal or spectral difference (behaviour of the reference implementation). Default is "false".
 #' @references Gao, Feng, et al. "On the blending of the Landsat and MODIS surface reflectance: Predicting daily Landsat surface reflectance." IEEE Transactions on Geoscience and Remote sensing 44.8 (2006): 2207-2218.
-#' @return Nothing. Output files are written to disk. The Geoinformation for the output images is carried over from the input pair images.
+#' @return Nothing. Output files are written to disk. The Geoinformation for the output images is adopted from the first input pair images.
 #' @export
 #'
 #' @author Johannes Mast
-#' @details Executes the STARFM algorithm to create a number of synthetic high-resolution images from either two pairs (double pair mode) or one pair (single pair mode) of matching high- and low-resolution images.  Assumes that the input images already have matching size. See the original paper for details (TO DO: INSERT CHANGES WITH REGARDS TO THE ORIGINAL PAPER). \itemize{
-##'  \item{  For the weighting (10) states: \eqn{C = S T D}}
-##'  \item{"--mask-invalid-ranges"}{ }
-##'  \item{"--mask-high-res-valid-ranges"}{ }
-##'  \item{"--mask-high-res-invalid-ranges"}{ }
-##'  \item{"--mask-low-res-valid-ranges"}{ }
-##'  \item{"--mask-low-res-invalid-ranges"}{ }
+#' @details Executes the STARFM algorithm to create a number of synthetic high-resolution images from either two pairs (double pair mode) or one pair (single pair mode) of matching high- and low-resolution images. Assumes that the input images already have matching size. See the original paper for details (TO DO: INSERT CHANGES WITH REGARDS TO THE ORIGINAL PAPER). \itemize{
+##'  \item{  For the weighting (10) states: \eqn{C = S T D}  but we use  \eqn{C = (S+1)(T+1)D}, according to the reference implementation. With \code{logscale_factor}, the weighting formula can be changed to \eqn{C = ln{(Sb+2)}ln{(Tb+1)D}}}
+##'  \item{ In addition to the temporal uncertainty \eqn{\sigma_t} (see \code{temporal_uncertainty}) and the spectral uncertainty\eqn{ \sigma_s} (see \code{spectral_uncertainty}) there will be used a *combined uncertainty* \eqn{\sigma_c := \sqrt{\sigma_t^2 + \sigma_s^2} }. This will be used in the candidate weighting: If \eqn{(S + 1) \, (T + 1) < \sigma_c }, then \eqn{C = 1 } instead of the formula above.}
+##'  \item{Considering candidate weighting again, there is an option \code{use_tempdiff_for_weights} to not use the temporal difference for the weighting (also not for the combined uncertainty check above), i. e. T = 0 then. This is also the default behaviour.}{ }
+##'  \item{The basic assumption of the original paper that with zero spectral or temporal difference the central pixel will be chosen is wrong since there might be multiple pixels with zero difference within one window. Also due to the addition of 1 to the spectral and temporal differences, the weight will not increase so dramatical from a zero difference. However, these assumptions can be enforced with \code{do_copy_on_zero_diff}, which is the default behaviour.}{ }
+##'  \item{The paper states that a good candidate should satisfy (15) and (16). This can be set with use_strict_filtering, which is by default used. However the other behaviour, that a candidate should fulfill (15) or (16), as in the reference implementation, can be also be selected with that option.}
+##'  \item{The paper uses max in (15) and (16), which would choose the largest spectral and temporal difference from all input pairs (only one or two are possible). Since this should filter out bad candidates, we believe this is a mistake and should be min instead of max, like it is done in the reference implementation. So this implementation uses min here.}
 ##' }
 #' @examples Sorry, maybe later
 #' 
@@ -269,7 +269,7 @@ starfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,
   #Get the High and Low Dates and Pair Dates for finding the first and last pair
   high_dates <- input_dates[input_resolutions==hightag_c]
   low_dates <- input_dates[input_resolutions==lowtag_c]
-  pair_dates <- which(table(c(unique(high_dates),unique(low_dates)))>=2)
+  pair_dates <- as.numeric(names(which(table(c(unique(high_dates),unique(low_dates)))>=2)))
   
   if(!missing(date1)){
     assert_that(class(date1)=="numeric")
@@ -309,7 +309,8 @@ starfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,
   
   #Some basic Assertions about the length of the inputs
   assert_that(
-    length(input_filenames)>=5,
+    !double_pair_mode_c | length(input_filenames)>=5, # at least 5 files in double pair mode?
+    double_pair_mode_c | length(input_filenames)>=3, # at least 3 files in single pair mode?
     length(input_resolutions)==length(input_filenames),
     length(input_dates)==length(input_filenames),
     length(unique(input_resolutions))==2,   
@@ -319,16 +320,17 @@ starfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,
   #Get the High and Low Dates and Pair Dates just for checking
   high_dates <- input_dates[input_resolutions==hightag_c]
   low_dates <- input_dates[input_resolutions==lowtag_c]
-  pair_dates <- which(table(c(unique(high_dates),unique(low_dates)))>=2)
+  pair_dates <- as.numeric(names(which(table(c(unique(high_dates),unique(low_dates)))>=2)))
   
   
   
   #Some further Assertions
   #2DO ADJUST FOR SINGLE PAIR MODE
   assert_that(
-    length(pair_dates)>=2,             #At least two pairs?
-    any(!pred_dates>max(pair_dates)),  #Pred Dates within the Interval?
-    any(!pred_dates<min(pair_dates)),   #Pred Dates within the Interval?
+    !double_pair_mode_c | length(pair_dates)>=2,             #At least two pairs in doublepair mode?
+    double_pair_mode_c | length(pair_dates)>=1,             #At least one pair in singlepair mode?
+    !double_pair_mode_c | any(!pred_dates>max(pair_dates)),  #Pred Dates within the Interval in doublepair mode?
+    !double_pair_mode_c | any(!pred_dates<min(pair_dates)),   #Pred Dates within the Interval in doublepair mode?
     all(input_resolutions %in% c(hightag_c, lowtag_c)) #Resolutions given consistent with hightag and lowtag
   )
   
@@ -352,8 +354,13 @@ starfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,
   print(pred_filenames_c)
   print("Prediction Dates: ")
   print(pred_dates_c)
-  print("Predicting between Pairs on Dates:")
-  print(paste(date1_c,date3_c))
+  if(double_pair_mode_c){
+    print("Predicting between Pairs on Dates:")
+    print(paste(date1_c,date3_c))
+  }else{
+    print("Predicting from Pair on Date:")
+    print(paste(date1_c))
+  }
   print("Prediction Area: ")
   print(pred_area_c)
   print("Number Classes: ")

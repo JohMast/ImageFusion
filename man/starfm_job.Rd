@@ -71,22 +71,22 @@ starfm_job(input_filenames, input_resolutions, input_dates, pred_dates,
 
 \item{do_copy_on_zero_diff}{(Optional) Predict for all pixels, even for pixels with zero temporal or spectral difference (behaviour of the reference implementation). Default is "false".}
 
-\item{double_pair_mode}{(Optional) When a prediction date is inbetween two pairs use both pairs for the prediction with the double pair mode. Default is "true" if *all* the pred dates are in between input pairs.}
+\item{double_pair_mode}{(Optional) Use two dates \code{date1} and \code{date3} for prediction, instead of just \code{date1} for all predictions? Default is "true" if *all* the pred dates are in between input pairs, and "false" otherwise. Note: It may be desirable to predict in double-pair mode where possible, as in the following example: \code{[(7) 10 12 (13) 14] } , where we may wish to predict 10 and 12 in double pair mode, but can only predict 14 in single-pair mode. Do achieve this it is necessary to split the task into different jobs.}
 }
 \value{
-Nothing. Output files are written to disk. The Geoinformation for the output images is carried over from the input pair images.
+Nothing. Output files are written to disk. The Geoinformation for the output images is adopted from the first input pair images.
 }
 \description{
 A wrapper function for \code{execute_starfm_job_cpp}. Intended to execute a single job, that is a number of predictions based on the same input pair(s). It ensures that all of the arguments passed are of the correct type and creates sensible defaults.
 }
 \details{
-Executes the STARFM algorithm to create a number of synthetic high-resolution images from either two pairs (double pair mode) or one pair (single pair mode) of matching high- and low-resolution images.  Assumes that the input images already have matching size. See the original paper for details (TO DO: INSERT CHANGES WITH REGARDS TO THE ORIGINAL PAPER). \itemize{
- \item{  For the weighting (10) states: \eqn{C = S T D}}
- \item{"--mask-invalid-ranges"}{ }
- \item{"--mask-high-res-valid-ranges"}{ }
- \item{"--mask-high-res-invalid-ranges"}{ }
- \item{"--mask-low-res-valid-ranges"}{ }
- \item{"--mask-low-res-invalid-ranges"}{ }
+Executes the STARFM algorithm to create a number of synthetic high-resolution images from either two pairs (double pair mode) or one pair (single pair mode) of matching high- and low-resolution images. Assumes that the input images already have matching size. See the original paper for details (TO DO: INSERT CHANGES WITH REGARDS TO THE ORIGINAL PAPER). \itemize{
+ \item{  For the weighting (10) states: \eqn{C = S T D}  but we use  \eqn{C = (S+1)(T+1)D}, according to the reference implementation. With \code{logscale_factor}, the weighting formula can be changed to \eqn{C = ln{(Sb+2)}ln{(Tb+1)D}}}
+ \item{ In addition to the temporal uncertainty \eqn{\sigma_t} (see \code{temporal_uncertainty}) and the spectral uncertainty\eqn{ \sigma_s} (see \code{spectral_uncertainty}) there will be used a *combined uncertainty* \eqn{\sigma_c := \sqrt{\sigma_t^2 + \sigma_s^2} }. This will be used in the candidate weighting: If \eqn{(S + 1) \, (T + 1) < \sigma_c }, then \eqn{C = 1 } instead of the formula above.}
+ \item{Considering candidate weighting again, there is an option \code{use_tempdiff_for_weights} to not use the temporal difference for the weighting (also not for the combined uncertainty check above), i. e. T = 0 then. This is also the default behaviour.}{ }
+ \item{The basic assumption of the original paper that with zero spectral or temporal difference the central pixel will be chosen is wrong since there might be multiple pixels with zero difference within one window. Also due to the addition of 1 to the spectral and temporal differences, the weight will not increase so dramatical from a zero difference. However, these assumptions can be enforced with \code{do_copy_on_zero_diff}, which is the default behaviour.}{ }
+ \item{The paper states that a good candidate should satisfy (15) and (16). This can be set with use_strict_filtering, which is by default used. However the other behaviour, that a candidate should fulfill (15) or (16), as in the reference implementation, can be also be selected with that option.}
+ \item{The paper uses max in (15) and (16), which would choose the largest spectral and temporal difference from all input pairs (only one or two are possible). Since this should filter out bad candidates, we believe this is a mistake and should be min instead of max, like it is done in the reference implementation. So this implementation uses min here.}
 }
 }
 \examples{

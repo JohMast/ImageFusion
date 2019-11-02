@@ -35,7 +35,7 @@
 #' @param use_nodata_value (Optional) Use the nodata value as invalid range for masking? Default is "true".
 #' @param use_parallelisation (Optional) Use parallelisation when possible? Default is "false".
 #' @references Zhu, X., Chen, J., Gao, F., Chen, X., & Masek, J. G. (2010). An enhanced spatial and temporal adaptive reflectance fusion model for complex heterogeneous regions. Remote Sensing of Environment, 114(11), 2610-2623.
-#' @return Nothing. Output files are written to disk. The Geoinformation for the output images is carried over from the input pair images.
+#' @return Nothing. Output files are written to disk. The Geoinformation for the output images is adopted from the first input pair images.
 #' @export
 #'
 #' @author Johannes Mast
@@ -211,7 +211,7 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
   #Get the High and Low Dates and Pair Dates for finding the first and last pair
   high_dates <- input_dates[input_resolutions==hightag_c]
   low_dates <- input_dates[input_resolutions==lowtag_c]
-  pair_dates <- which(table(c(unique(high_dates),unique(low_dates)))>=2)
+  pair_dates <- as.numeric(names(which(table(c(unique(high_dates),unique(low_dates)))>=2)))
   
   if(!missing(date1)){
     assert_that(class(date1)=="numeric")
@@ -263,7 +263,7 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
   #Get the High and Low Dates and Pair Dates just for checking
   high_dates <- input_dates[input_resolutions==hightag_c]
   low_dates <- input_dates[input_resolutions==lowtag_c]
-  pair_dates <- which(table(c(unique(high_dates),unique(low_dates)))>=2)
+  pair_dates <- as.numeric(names(which(table(c(unique(high_dates),unique(low_dates)))>=2)))
   
   
   

@@ -66,7 +66,7 @@ estarfm_job(input_filenames, input_resolutions, input_dates, pred_dates,
 \item{use_parallelisation}{(Optional) Use parallelisation when possible? Default is "false".}
 }
 \value{
-Nothing. Output files are written to disk. The Geoinformation for the output images is carried over from the input pair images.
+Nothing. Output files are written to disk. The Geoinformation for the output images is adopted from the first input pair images.
 }
 \description{
 A wrapper function for \code{execute_estarfm_job_cpp}. Intended to execute a single job, that is a number of predictions based on the same input pairs. It ensures that all of the arguments passed are of the correct type and creates sensible defaults.

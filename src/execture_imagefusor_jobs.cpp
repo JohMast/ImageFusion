@@ -18,7 +18,6 @@ using  std::vector;
 //TO DO:
 //ADD VERBOSE OPTION
 //CLEAN UP CODE INTO SENSIBLE CHAPTERS
-//ADD PARALLELISATION
 
 //===========================================starfm=================================
 //' @export
@@ -79,8 +78,7 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames,
   //std::cout<<"Getting Low Resolution Geoinformation from File: "<<low_template_filename<<std::endl;
   GeoInfo const& giLowPair1 {low_template_filename};
   
-  // a copy of the high image gi, which we later use for the output (and might modify a bit)
-  GeoInfo giTemplate {giHighPair1};
+
   
   
   
@@ -255,6 +253,7 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames,
     
     //Add the Geoinformation of the template to the written file
     // and adjust it, if we have used a pred area
+    GeoInfo giTemplate {giHighPair1};
     if (giTemplate.hasGeotransform()) {
       giTemplate.geotrans.translateImage(pred_rectangle.x, pred_rectangle.y);
       if (pred_rectangle.width != 0)
@@ -352,7 +351,11 @@ void execute_starfm_job_cpp(CharacterVector input_filenames,
   StarfmOptions o;
   o.setHighResTag(hightag);
   o.setLowResTag(lowtag);
-  o.setDoublePairDates(date1,date3);
+  if(double_pair_mode){
+    o.setDoublePairDates(date1,date3);
+  }else{
+    o.setSinglePairDate(date1);
+  }
   //optional arguments
   o.setWinSize(winsize);
   o.setPredictionArea(pred_rectangle);
@@ -465,11 +468,11 @@ void execute_starfm_job_cpp(CharacterVector input_filenames,
     if (pairValidSets.hasHigh) //If there are any ranges given for the highrez :
       //apply the ranges and update the mask accordingly
       pairMask = helpers::processSetMask(std::move(pairMask), mri->get(hightag, date1), pairValidSets.high);
-    pairMask = helpers::processSetMask(std::move(pairMask), mri->get(hightag, date3), pairValidSets.high);
+      if(double_pair_mode){pairMask = helpers::processSetMask(std::move(pairMask), mri->get(hightag, date3), pairValidSets.high);}
     if (pairValidSets.hasLow) //If there are any ranges given for the lowrez :
       //apply the ranges and update the mask accordingly
       pairMask = helpers::processSetMask(std::move(pairMask), mri->get(lowtag,  date1), pairValidSets.low);
-    pairMask = helpers::processSetMask(std::move(pairMask), mri->get(lowtag,  date3), pairValidSets.low);
+      if(double_pair_mode){pairMask = helpers::processSetMask(std::move(pairMask), mri->get(lowtag,  date3), pairValidSets.low);}
     
     
     
@@ -507,10 +510,27 @@ void execute_starfm_job_cpp(CharacterVector input_filenames,
       //If we have a parallelised fusor object, use that
       if(use_parallelisation){
 #ifdef WITH_OMP
+        //OPTIONAL START
+        std::cout << "Predicting for date " << pred_dates[i];
+        if (po.isDoublePairModeConfigured())
+          std::cout << " using both pairs from dates " << date1 << " and " << date3 << "." << std::endl;
+        else {
+          std::cout << " using a single pair from date " << date1 << "." << std::endl;
+        }
+        //OPTIONAL END
         psf.predict(pred_dates[i],predMask);
         psf.outputImage().write(pred_filename);
 #endif /* Otherwise, use the standard fusor object*/
       }else{
+        //OPTIONAL START
+        std::cout << "Predicting for date " << pred_dates[i];
+        if (o.isDoublePairModeConfigured())
+          std::cout << " using both pairs from dates " << date1 << " and " << date3 << "." << std::endl;
+        else {
+          std::cout << " using a single pair from date " << date1 << "." << std::endl;
+        }
+        
+        //OPTIONAL END
         sf.predict(pred_dates[i],predMask);  
         sf.outputImage().write(pred_filename);
       }
@@ -522,6 +542,7 @@ void execute_starfm_job_cpp(CharacterVector input_filenames,
       
       //Add the Geoinformation of the template to the written file
       // and adjust it, if we have used a pred area
+      GeoInfo giTemplate {giHighPair1};
       if (giTemplate.hasGeotransform()) {
         giTemplate.geotrans.translateImage(pred_rectangle.x, pred_rectangle.y);
         if (pred_rectangle.width != 0)
