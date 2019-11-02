@@ -11,6 +11,11 @@ execute_starfm_job_cpp <- function(input_filenames, input_resolutions, input_dat
     invisible(.Call(`_ImageFusion_execute_starfm_job_cpp`, input_filenames, input_resolutions, input_dates, pred_dates, pred_filenames, pred_area, winsize, date1, date3, n_cores, output_masks, use_nodata_value, use_parallelisation, use_strict_filtering, use_temp_diff_for_weights, do_copy_on_zero_diff, double_pair_mode, number_classes, data_range_min, data_range_max, logscale_factor, spectral_uncertainty, temporal_uncertainty, hightag, lowtag, MASKIMG_options, MASKRANGE_options))
 }
 
+#' @export
+execute_fitfc_job_cpp <- function(input_filenames, input_resolutions, input_dates, pred_dates, pred_filenames, pred_area, winsize, date1, n_cores, n_neighbors, output_masks, use_nodata_value, use_parallelisation, data_range_min, data_range_max, resolution_factor, hightag, lowtag, MASKIMG_options, MASKRANGE_options) {
+    invisible(.Call(`_ImageFusion_execute_fitfc_job_cpp`, input_filenames, input_resolutions, input_dates, pred_dates, pred_filenames, pred_area, winsize, date1, n_cores, n_neighbors, output_masks, use_nodata_value, use_parallelisation, data_range_min, data_range_max, resolution_factor, hightag, lowtag, MASKIMG_options, MASKRANGE_options))
+}
+
 rcpp_hello_world <- function() {
     .Call(`_ImageFusion_rcpp_hello_world`)
 }
