@@ -331,7 +331,7 @@ int main(int argc, char* argv[]) {
 
         spstfm.processOptions(spstfmOpts);
         spstfm.train(pairMask);
-
+        
         // loop over a single time series (multiple images with the same date 1 and 3)
         for (int date2 : p.second) {
             // read in prediction image

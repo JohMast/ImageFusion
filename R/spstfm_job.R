@@ -28,13 +28,20 @@
 ##'  \item{"--mask-low-res-valid-ranges"}{ This is the same as --mask-valid-ranges, but is applied only for the low resolution images.}
 ##'  \item{"--mask-low-res-invalid-ranges"}{ This is the same as --mask-invalid-ranges, but is applied only for the low resolution images.}
 ##' }
+##' @param LOADDICT_options (Optional) A string containing the path to a previously saved dictionary file, which is to be loaded (see \code{REUSE_OPTIONS}).
+##' @param SAVEDICT_options (Optional) A string containing the path to a file to save the dictionary to after training. 
+##' @param REUSE_options (Optional) For a dictionary loaded from file, what to do with the existing dictionary: \itemize{
+##' \item{"clear"} { clear an existing dictionary before training}
+##' \item{"improve"} {improve an existing dictionary (default)}
+##' \item{"use"} { use an existing dictionary without further training}
+##' }
 #' @param hightag (Optional) A string which is used in \code{input_resolutions} to describe the high-resolution images. Default is "high".
 #' @param lowtag (Optional) A string which is used in \code{input_resolutions} to describe the low-resolution images.  Default is "low".
 #' @param output_masks (Optional) Write mask images to disk? Default is "false".
 #' @param use_nodata_value (Optional) Use the nodata value as invalid range for masking? Default is "true".
 #' @param use_parallelisation (Optional) Use parallelisation when possible? Note that parallelisation is currently not implemented for spstfm, and only listed here for consistency. Default is "false".
 #' @param random_sampling (Optional) Use random samples for training data instead of the samples with the most variance? Default is "false".
-#'  @references Huang, B., & Song, H. (2012). Spatiotemporal reflectance fusion via sparse representation. IEEE Transactions on Geoscience and Remote Sensing, 50(10), 3707-3716.
+#' @references Huang, B., & Song, H. (2012). Spatiotemporal reflectance fusion via sparse representation. IEEE Transactions on Geoscience and Remote Sensing, 50(10), 3707-3716.
 #' @return Nothing. Output files are written to disk. The Geoinformation for the output images is adopted from the first input pair images.
 #' @export
 #'
@@ -45,7 +52,7 @@
 
 spstfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,pred_filenames,pred_area,winsize,date1,date3,n_cores,dict_size,
                        n_training_samples,patch_size,patch_overlap,min_train_iter,max_train_iter,
-                       hightag,lowtag,MASKIMG_options,MASKRANGE_options,output_masks,use_nodata_value,use_parallelisation,random_sampling
+                       hightag,lowtag,MASKIMG_options,MASKRANGE_options,LOADDICT_options,SAVEDICT_options,REUSE_options,output_masks,use_nodata_value,use_parallelisation,random_sampling
 ) {
   library(assertthat)
   library(raster)
@@ -145,7 +152,27 @@ spstfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,
     MASKRANGE_options_c <- ""
   }
   
+  #### dictionary options####
+  if(!missing(LOADDICT_options)){
+    assert_that(class(LOADDICT_options)=="character")
+    LOADDICT_options_c <- LOADDICT_options
+  }else{
+    LOADDICT_options_c <- ""
+  }
   
+  if(!missing(SAVEDICT_options)){
+    assert_that(class(SAVEDICT_options)=="character")
+    SAVEDICT_options_c <- SAVEDICT_options
+  }else{
+    SAVEDICT_options_c <- ""
+  }
+  
+  if(!missing(REUSE_options)){
+    assert_that(class(REUSE_options)=="character")
+    REUSE_options_c <- REUSE_options
+  }else{
+    REUSE_options_c <- "improve"
+  }
   #### date1 and date3 ####
   #Get the High and Low Dates and Pair Dates for finding the first and last pair
   high_dates <- input_dates[input_resolutions==hightag_c]
@@ -308,20 +335,23 @@ spstfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,
                                        date1 = date1_c,
                                        date3 = date3_c,
                                        n_cores = n_cores_c,
-                                      dict_size = dict_size_c,
-                                      n_training_samples = n_training_samples_c,
-                                      patch_size = patch_size_c,
-                                      patch_overlap = patch_overlap_c,
-                                      min_train_iter = min_train_iter_c,
-                                      max_train_iter = max_train_iter_c,
+                                        dict_size = dict_size_c,
+                                        n_training_samples = n_training_samples_c,
+                                        patch_size = patch_size_c,
+                                        patch_overlap = patch_overlap_c,
+                                        min_train_iter = min_train_iter_c,
+                                        max_train_iter = max_train_iter_c,
                                        output_masks = output_masks_c,
                                        use_nodata_value = use_nodata_value_c,
                                        use_parallelisation = use_parallelisation_c,
-                                      random_sampling = random_sampling_c,
+                                        random_sampling = random_sampling_c,
                                        hightag=hightag_c,
                                        lowtag=lowtag_c,
                                        MASKIMG_options= MASKIMG_options_c,
-                                       MASKRANGE_options = MASKRANGE_options_c
+                                       MASKRANGE_options = MASKRANGE_options_c,
+                                        LOADDICT_options = LOADDICT_options_c,
+                                        SAVEDICT_options = SAVEDICT_options_c,
+                                        REUSE_options = REUSE_options_c
   )
   #___________________________________________________________________________#
   

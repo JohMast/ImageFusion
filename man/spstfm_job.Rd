@@ -7,8 +7,9 @@
 spstfm_job(input_filenames, input_resolutions, input_dates, pred_dates,
   pred_filenames, pred_area, winsize, date1, date3, n_cores, dict_size,
   n_training_samples, patch_size, patch_overlap, min_train_iter, max_train_iter,
-  hightag, lowtag, MASKIMG_options, MASKRANGE_options, output_masks,
-  use_nodata_value, use_parallelisation, random_sampling)
+  hightag, lowtag, MASKIMG_options, MASKRANGE_options, LOADDICT_options,
+  SAVEDICT_options, REUSE_options, output_masks, use_nodata_value,
+  use_parallelisation, random_sampling)
 }
 \arguments{
 \item{input_filenames}{A string vector containing the filenames of the input images}
@@ -54,6 +55,16 @@ spstfm_job(input_filenames, input_resolutions, input_dates, pred_dates,
  \item{"--mask-high-res-invalid-ranges"}{ This is the same as --mask-invalid-ranges, but is applied only for the high resolution images.}
  \item{"--mask-low-res-valid-ranges"}{ This is the same as --mask-valid-ranges, but is applied only for the low resolution images.}
  \item{"--mask-low-res-invalid-ranges"}{ This is the same as --mask-invalid-ranges, but is applied only for the low resolution images.}
+}}
+
+\item{LOADDICT_options}{(Optional) A string containing the path to a previously saved dictionary file, which is to be loaded (see \code{REUSE_OPTIONS}).}
+
+\item{SAVEDICT_options}{(Optional) A string containing the path to a file to save the dictionary to after training.}
+
+\item{REUSE_options}{(Optional) For a dictionary loaded from file, what to do with the existing dictionary: \itemize{
+\item{"clear"} { clear an existing dictionary before training}
+\item{"improve"} {improve an existing dictionary (default)}
+\item{"use"} { use an existing dictionary without further training}
 }}
 
 \item{output_masks}{(Optional) Write mask images to disk? Default is "false".}

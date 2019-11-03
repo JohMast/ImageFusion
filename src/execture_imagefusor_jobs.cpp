@@ -824,7 +824,8 @@ void execute_spstfm_job_cpp(CharacterVector input_filenames,
                              const std::string& MASKIMG_options,
                              const std::string& MASKRANGE_options,
                              const std::string& LOADDICT_options,
-                             const std::string& SAVEDICT_options
+                             const std::string& SAVEDICT_options,
+                             const std::string& REUSE_options
                              
 )
 {
@@ -838,6 +839,12 @@ void execute_spstfm_job_cpp(CharacterVector input_filenames,
   //Step 1: Prepare the Input
   //create a prediction area rectangle
   Rectangle pred_rectangle = Rectangle{pred_area[0],pred_area[1],pred_area[2],pred_area[3]};
+  
+  // check spelling of reuse dictionary option
+  std::string reuseOpt = REUSE_options;
+  if (reuseOpt != "improve" && reuseOpt != "clear" && reuseOpt != "use") {
+    std::cerr << "For --dict-reuse you must either give 'improve', 'clear' or 'use'. You gave " << reuseOpt << "." << std::endl;
+  }
   
   // find the gi the first pair high image 
   Rcpp::LogicalVector is_high(input_filenames.size());
@@ -899,7 +906,7 @@ void execute_spstfm_job_cpp(CharacterVector input_filenames,
   //Create the Fusor
   SpstfmFusor spsf;
   spsf.srcImages(mri); 
-  spsf.processOptions(o);
+
   
   
   //Step 4: Handle the Masking for the Input Pairs
@@ -927,7 +934,7 @@ void execute_spstfm_job_cpp(CharacterVector input_filenames,
   
   //LOAD DICT
   // load dictionary from file
-  if (LOADDICT_options.empty()) {
+  if (!LOADDICT_options.empty()) {
     std::string dictPath = LOADDICT_options;
     unsigned int chans = mri->getAny().channels();
     if (chans == 1) {
@@ -1030,7 +1037,21 @@ void execute_spstfm_job_cpp(CharacterVector input_filenames,
   pairMask = helpers::processSetMask(std::move(pairMask), mri->get(lowtag,  date3), pairValidSets.low);
   
   
-  //Step 5: Predictions
+  //Step 6: Training
+  // train dictionary (if there is one from a previous time series, improve it)
+  std::cout << "Training with dates " << date1 << " and " << date3 << std::endl;
+  if (reuseOpt == "improve")
+    o.setDictionaryReuse(imagefusion::SpstfmOptions::ExistingDictionaryHandling::improve);
+  else if (reuseOpt == "clear")
+    o.setDictionaryReuse(imagefusion::SpstfmOptions::ExistingDictionaryHandling::clear);
+  else // (reuseOpt == "use")
+    o.setDictionaryReuse(imagefusion::SpstfmOptions::ExistingDictionaryHandling::use);
+  
+  spsf.processOptions(o);
+  spsf.train(pairMask);
+  
+  
+  //Step 6: Predictions
   //Predict for desired Dates
   int n_outputs = pred_dates.size();
   for(int i=0; i< n_outputs;++i){
@@ -1079,6 +1100,38 @@ void execute_spstfm_job_cpp(CharacterVector input_filenames,
       giTemplate.addTo(pred_filename);
     }
   }
+  // save dictionary to file
+  if (!SAVEDICT_options.empty()) {
+    bool success = true;
+    std::string dictPath = SAVEDICT_options;
+    unsigned int chans = mri->getAny().channels();
+    if (chans == 1) {
+      success = spsf.getDictionary().save(dictPath);
+      if (success)
+        std::cout << "Saved dictionary to " << dictPath << "." << std::endl;
+      else
+        std::cerr << "Could not save dictionary to " << dictPath << "." << std::endl;
+    }
+    else {
+      boost::filesystem::path p = dictPath;
+      std::string extension = p.extension().string();
+      std::string basename  = p.stem().string();
+      for (unsigned int c = 0; c < chans; ++c) {
+        p = basename + std::to_string(c) + extension;
+        auto outpath = p;
+        
+        std::string outfilename = outpath.string();
+        bool saved = spsf.getDictionary(c).save(outfilename);
+        if (saved)
+          std::cout << "Saved dictionary for channel " << c << " to " << outfilename << "." << std::endl;
+        success &= saved;
+      }
+      
+      if (success)
+        std::cout << "For loading the dictionaries later on, you can still use --load-dict=" << dictPath << "." << std::endl;
+    }
+  }
+  
 }
 
 

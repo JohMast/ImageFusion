@@ -17,8 +17,8 @@ execute_fitfc_job_cpp <- function(input_filenames, input_resolutions, input_date
 }
 
 #' @export
-execute_spstfm_job_cpp <- function(input_filenames, input_resolutions, input_dates, pred_dates, pred_filenames, pred_area, date1, date3, n_cores, dict_size, n_training_samples, patch_size, patch_overlap, min_train_iter, max_train_iter, output_masks, use_nodata_value, use_parallelisation, random_sampling, hightag, lowtag, MASKIMG_options, MASKRANGE_options, LOADDICT_options, SAVEDICT_options) {
-    invisible(.Call(`_ImageFusion_execute_spstfm_job_cpp`, input_filenames, input_resolutions, input_dates, pred_dates, pred_filenames, pred_area, date1, date3, n_cores, dict_size, n_training_samples, patch_size, patch_overlap, min_train_iter, max_train_iter, output_masks, use_nodata_value, use_parallelisation, random_sampling, hightag, lowtag, MASKIMG_options, MASKRANGE_options, LOADDICT_options, SAVEDICT_options))
+execute_spstfm_job_cpp <- function(input_filenames, input_resolutions, input_dates, pred_dates, pred_filenames, pred_area, date1, date3, n_cores, dict_size, n_training_samples, patch_size, patch_overlap, min_train_iter, max_train_iter, output_masks, use_nodata_value, use_parallelisation, random_sampling, hightag, lowtag, MASKIMG_options, MASKRANGE_options, LOADDICT_options, SAVEDICT_options, REUSE_options) {
+    invisible(.Call(`_ImageFusion_execute_spstfm_job_cpp`, input_filenames, input_resolutions, input_dates, pred_dates, pred_filenames, pred_area, date1, date3, n_cores, dict_size, n_training_samples, patch_size, patch_overlap, min_train_iter, max_train_iter, output_masks, use_nodata_value, use_parallelisation, random_sampling, hightag, lowtag, MASKIMG_options, MASKRANGE_options, LOADDICT_options, SAVEDICT_options, REUSE_options))
 }
 
 rcpp_hello_world <- function() {

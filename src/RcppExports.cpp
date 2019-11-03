@@ -100,8 +100,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // execute_spstfm_job_cpp
-void execute_spstfm_job_cpp(CharacterVector input_filenames, CharacterVector input_resolutions, IntegerVector input_dates, IntegerVector pred_dates, CharacterVector pred_filenames, IntegerVector pred_area, int date1, int date3, int n_cores, int dict_size, int n_training_samples, int patch_size, int patch_overlap, int min_train_iter, int max_train_iter, bool output_masks, bool use_nodata_value, bool use_parallelisation, bool random_sampling, const std::string& hightag, const std::string& lowtag, const std::string& MASKIMG_options, const std::string& MASKRANGE_options, const std::string& LOADDICT_options, const std::string& SAVEDICT_options);
-RcppExport SEXP _ImageFusion_execute_spstfm_job_cpp(SEXP input_filenamesSEXP, SEXP input_resolutionsSEXP, SEXP input_datesSEXP, SEXP pred_datesSEXP, SEXP pred_filenamesSEXP, SEXP pred_areaSEXP, SEXP date1SEXP, SEXP date3SEXP, SEXP n_coresSEXP, SEXP dict_sizeSEXP, SEXP n_training_samplesSEXP, SEXP patch_sizeSEXP, SEXP patch_overlapSEXP, SEXP min_train_iterSEXP, SEXP max_train_iterSEXP, SEXP output_masksSEXP, SEXP use_nodata_valueSEXP, SEXP use_parallelisationSEXP, SEXP random_samplingSEXP, SEXP hightagSEXP, SEXP lowtagSEXP, SEXP MASKIMG_optionsSEXP, SEXP MASKRANGE_optionsSEXP, SEXP LOADDICT_optionsSEXP, SEXP SAVEDICT_optionsSEXP) {
+void execute_spstfm_job_cpp(CharacterVector input_filenames, CharacterVector input_resolutions, IntegerVector input_dates, IntegerVector pred_dates, CharacterVector pred_filenames, IntegerVector pred_area, int date1, int date3, int n_cores, int dict_size, int n_training_samples, int patch_size, int patch_overlap, int min_train_iter, int max_train_iter, bool output_masks, bool use_nodata_value, bool use_parallelisation, bool random_sampling, const std::string& hightag, const std::string& lowtag, const std::string& MASKIMG_options, const std::string& MASKRANGE_options, const std::string& LOADDICT_options, const std::string& SAVEDICT_options, const std::string& REUSE_options);
+RcppExport SEXP _ImageFusion_execute_spstfm_job_cpp(SEXP input_filenamesSEXP, SEXP input_resolutionsSEXP, SEXP input_datesSEXP, SEXP pred_datesSEXP, SEXP pred_filenamesSEXP, SEXP pred_areaSEXP, SEXP date1SEXP, SEXP date3SEXP, SEXP n_coresSEXP, SEXP dict_sizeSEXP, SEXP n_training_samplesSEXP, SEXP patch_sizeSEXP, SEXP patch_overlapSEXP, SEXP min_train_iterSEXP, SEXP max_train_iterSEXP, SEXP output_masksSEXP, SEXP use_nodata_valueSEXP, SEXP use_parallelisationSEXP, SEXP random_samplingSEXP, SEXP hightagSEXP, SEXP lowtagSEXP, SEXP MASKIMG_optionsSEXP, SEXP MASKRANGE_optionsSEXP, SEXP LOADDICT_optionsSEXP, SEXP SAVEDICT_optionsSEXP, SEXP REUSE_optionsSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< CharacterVector >::type input_filenames(input_filenamesSEXP);
@@ -129,7 +129,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const std::string& >::type MASKRANGE_options(MASKRANGE_optionsSEXP);
     Rcpp::traits::input_parameter< const std::string& >::type LOADDICT_options(LOADDICT_optionsSEXP);
     Rcpp::traits::input_parameter< const std::string& >::type SAVEDICT_options(SAVEDICT_optionsSEXP);
-    execute_spstfm_job_cpp(input_filenames, input_resolutions, input_dates, pred_dates, pred_filenames, pred_area, date1, date3, n_cores, dict_size, n_training_samples, patch_size, patch_overlap, min_train_iter, max_train_iter, output_masks, use_nodata_value, use_parallelisation, random_sampling, hightag, lowtag, MASKIMG_options, MASKRANGE_options, LOADDICT_options, SAVEDICT_options);
+    Rcpp::traits::input_parameter< const std::string& >::type REUSE_options(REUSE_optionsSEXP);
+    execute_spstfm_job_cpp(input_filenames, input_resolutions, input_dates, pred_dates, pred_filenames, pred_area, date1, date3, n_cores, dict_size, n_training_samples, patch_size, patch_overlap, min_train_iter, max_train_iter, output_masks, use_nodata_value, use_parallelisation, random_sampling, hightag, lowtag, MASKIMG_options, MASKRANGE_options, LOADDICT_options, SAVEDICT_options, REUSE_options);
     return R_NilValue;
 END_RCPP
 }
@@ -148,7 +149,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ImageFusion_execute_estarfm_job_cpp", (DL_FUNC) &_ImageFusion_execute_estarfm_job_cpp, 23},
     {"_ImageFusion_execute_starfm_job_cpp", (DL_FUNC) &_ImageFusion_execute_starfm_job_cpp, 25},
     {"_ImageFusion_execute_fitfc_job_cpp", (DL_FUNC) &_ImageFusion_execute_fitfc_job_cpp, 18},
-    {"_ImageFusion_execute_spstfm_job_cpp", (DL_FUNC) &_ImageFusion_execute_spstfm_job_cpp, 25},
+    {"_ImageFusion_execute_spstfm_job_cpp", (DL_FUNC) &_ImageFusion_execute_spstfm_job_cpp, 26},
     {"_ImageFusion_rcpp_hello_world", (DL_FUNC) &_ImageFusion_rcpp_hello_world, 0},
     {NULL, NULL, 0}
 };
