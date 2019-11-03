@@ -5,11 +5,11 @@
 \title{starfm_job}
 \usage{
 starfm_job(input_filenames, input_resolutions, input_dates, pred_dates,
-  pred_filenames, pred_area, winsize, date1, date3, n_cores, data_range_min,
-  data_range_max, logscale_factor, spectral_uncertainty, temporal_uncertainty,
-  number_classes, hightag, lowtag, MASKIMG_options, MASKRANGE_options,
-  output_masks, use_nodata_value, use_parallelisation, use_strict_filtering,
-  use_temp_diff_for_weights, do_copy_on_zero_diff, double_pair_mode)
+  pred_filenames, pred_area, winsize, date1, date3, n_cores, logscale_factor,
+  spectral_uncertainty, temporal_uncertainty, number_classes, hightag, lowtag,
+  MASKIMG_options, MASKRANGE_options, output_masks, use_nodata_value,
+  use_parallelisation, use_strict_filtering, use_temp_diff_for_weights,
+  do_copy_on_zero_diff, double_pair_mode)
 }
 \arguments{
 \item{input_filenames}{A string vector containing the filenames of the input images}
@@ -31,10 +31,6 @@ starfm_job(input_filenames, input_resolutions, input_dates, pred_dates,
 \item{date3}{(Optional) Set the date of the second input image pair. By default, will use the pair with the highest date value. Disregarded if using double pair mode.}
 
 \item{n_cores}{(Optional) Set the number of cores to use when using parallelisation. Default is 1.}
-
-\item{data_range_min}{(Optional) When predicting pixel values STARFM can exceed the values that appear in the image. To prevent from writing invalid values (out of a known data range) you can set bounds. By default, the value range will be limited by the natural data range (e. g. -32767 for INT2S).}
-
-\item{data_range_max}{(Optional) When predicting pixel values STARFM can exceed the values that appear in the image. To prevent from writing invalid values (out of a known data range) you can set bounds. By default, the value range will be limited by the natural data range (e. g.  32767 for INT2S).}
 
 \item{logscale_factor}{(Optional) When using a positive scale, the logistic weighting formula is used, which reduces the influence of spectral and temporal differences. Default is 0, i. e. logistic formula not used}
 

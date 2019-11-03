@@ -12,8 +12,6 @@
 #' @param date1 (Optional) Set the date of the first input image pair. By default, will use the pair with the lowest date value.
 #' @param n_cores (Optional) Set the number of cores to use when using parallelisation. Default is 1.
 #' @param n_neighbors (Optional) The number of near pixels (including the center) to use in the filtering step (spatial filtering and residual compensation). Default is 10.
-#' @param data_range_min  (Optional) When predicting pixel values FitFC can exceed the values that appear in the image. To prevent from writing invalid values (out of a known data range) you can set bounds. By default, the value range will be limited by the natural data range (e. g. -32767 for INT2S).
-#' @param data_range_max (Optional) When predicting pixel values FitFC can exceed the values that appear in the image. To prevent from writing invalid values (out of a known data range) you can set bounds. By default, the value range will be limited by the natural data range (e. g.  32767 for INT2S).
 #' @param hightag (Optional) A string which is used in \code{input_resolutions} to describe the high-resolution images. Default is "high".
 #' @param lowtag (Optional) A string which is used in \code{input_resolutions} to describe the low-resolution images.  Default is "low".
 #' @param MASKIMG_options (Optional) A string containing information for a mask image (8-bit, boolean, i. e. consists of 0 and 255). "For all input images the pixel values at the locations where the mask is 0 is replaced by the mean value." Example: \code{--mask-img=some_image.png}
@@ -38,7 +36,7 @@
 #' @examples Sorry, maybe later
 #' 
 #' 
-fitfc_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,pred_filenames,pred_area,winsize,date1,date3,n_cores,n_neighbors,data_range_min, data_range_max,hightag,lowtag,MASKIMG_options,MASKRANGE_options,output_masks,use_nodata_value,use_parallelisation,resolution_factor 
+fitfc_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,pred_filenames,pred_area,winsize,date1,date3,n_cores,n_neighbors,hightag,lowtag,MASKIMG_options,MASKRANGE_options,output_masks,use_nodata_value,use_parallelisation,resolution_factor 
 ) {
   library(assertthat)
   library(raster)
@@ -105,35 +103,6 @@ fitfc_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,p
   }   
   
 
-  #### data_range_min ####
-  if(!missing(data_range_min)){
-    assert_that(class(data_range_min)=="numeric")
-    data_range_min_c <- data_range_min
-  }else{
-    template_dataType <- dataType(template[[1]])
-    if(template_dataType=="INT1U"){data_range_min_c <- 0}
-    if(template_dataType=="INT1S"){data_range_min_c <- -127}
-    if(template_dataType=="INT2U"){data_range_min_c <- 0}
-    if(template_dataType=="INT2S"){data_range_min_c <-  -32767}
-    if(template_dataType=="FLT4S"){data_range_min_c <- -3.4e+38}
-    if(template_dataType=="FLT8S"){data_range_min_c <- -1.7e+308}
-  }
-  
-  
-  #### data_range_max ####
-  if(!missing(data_range_max)){
-    assert_that(class(data_range_max)=="numeric")
-    data_range_max_c <- data_range_max
-  }else{
-    template_dataType <- dataType(template[[1]])
-    if(template_dataType=="INT1U"){data_range_max_c <- 255}
-    if(template_dataType=="INT1S"){data_range_max_c <- 127}
-    if(template_dataType=="INT2U"){data_range_max_c <- 65534}
-    if(template_dataType=="INT2S"){data_range_max_c <- 32767}
-    if(template_dataType=="FLT4S"){data_range_max_c <- 3.4e+38}
-    if(template_dataType=="FLT8S"){data_range_max_c <- 1.7e+308 }
-  } 
-  
   #### resolution_factor ####
   if(!missing(resolution_factor)){
     assert_that(class(resolution_factor)=="numeric")
@@ -265,8 +234,6 @@ fitfc_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,p
   print(paste(date1_c))
   print("Prediction Area: ")
   print(pred_area_c)
-  print("Data_Range: ")
-  print(paste(data_range_min_c, data_range_max_c))
   if (!grepl("^\\s*$", MASKIMG_options_c)){
     print("MASKIMG Options: ")
     print(MASKIMG_options_c)
@@ -295,8 +262,6 @@ fitfc_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,p
                                       output_masks = output_masks_c,
                                       use_nodata_value = use_nodata_value_c,
                                       use_parallelisation = use_parallelisation_c,
-                                      data_range_min = data_range_min_c,
-                                      data_range_max = data_range_max_c,
                                       resolution_factor = resolution_factor_c,
                                       hightag = hightag_c,
                                       lowtag = lowtag_c,

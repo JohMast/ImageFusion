@@ -6,9 +6,8 @@
 \usage{
 fitfc_job(input_filenames, input_resolutions, input_dates, pred_dates,
   pred_filenames, pred_area, winsize, date1, date3, n_cores, n_neighbors,
-  data_range_min, data_range_max, hightag, lowtag, MASKIMG_options,
-  MASKRANGE_options, output_masks, use_nodata_value, use_parallelisation,
-  resolution_factor)
+  hightag, lowtag, MASKIMG_options, MASKRANGE_options, output_masks,
+  use_nodata_value, use_parallelisation, resolution_factor)
 }
 \arguments{
 \item{input_filenames}{A string vector containing the filenames of the input images}
@@ -30,10 +29,6 @@ fitfc_job(input_filenames, input_resolutions, input_dates, pred_dates,
 \item{n_cores}{(Optional) Set the number of cores to use when using parallelisation. Default is 1.}
 
 \item{n_neighbors}{(Optional) The number of near pixels (including the center) to use in the filtering step (spatial filtering and residual compensation). Default is 10.}
-
-\item{data_range_min}{(Optional) When predicting pixel values FitFC can exceed the values that appear in the image. To prevent from writing invalid values (out of a known data range) you can set bounds. By default, the value range will be limited by the natural data range (e. g. -32767 for INT2S).}
-
-\item{data_range_max}{(Optional) When predicting pixel values FitFC can exceed the values that appear in the image. To prevent from writing invalid values (out of a known data range) you can set bounds. By default, the value range will be limited by the natural data range (e. g.  32767 for INT2S).}
 
 \item{hightag}{(Optional) A string which is used in \code{input_resolutions} to describe the high-resolution images. Default is "high".}
 

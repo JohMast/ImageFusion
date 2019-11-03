@@ -12,8 +12,6 @@
 #' @param date1 (Optional) Set the date of the first input image pair. By default, will use the pair with the lowest date value.
 #' @param date3 (Optional) Set the date of the second input image pair. By default, will use the pair with the highest date value. Disregarded if using double pair mode.
 #' @param n_cores (Optional) Set the number of cores to use when using parallelisation. Default is 1.
-#' @param data_range_min  (Optional) When predicting pixel values STARFM can exceed the values that appear in the image. To prevent from writing invalid values (out of a known data range) you can set bounds. By default, the value range will be limited by the natural data range (e. g. -32767 for INT2S).
-#' @param data_range_max (Optional) When predicting pixel values STARFM can exceed the values that appear in the image. To prevent from writing invalid values (out of a known data range) you can set bounds. By default, the value range will be limited by the natural data range (e. g.  32767 for INT2S).
 #' @param logscale_factor (Optional) When using a positive scale, the logistic weighting formula is used, which reduces the influence of spectral and temporal differences. Default is 0, i. e. logistic formula not used
 #' @param spectral_uncertainty (Optional) This spectral uncertainty value will influence the spectral difference value. Default is 1 for 8 bit images (INT1U and INT1S), 50 otherwise.
 #' @param temporal_uncertainty (Optional) This spectral uncertainty value will influence the spectral difference value. Default is 1 for 8 bit images (INT1U and INT1S), 50 otherwise.
@@ -52,7 +50,7 @@
 #' @examples Sorry, maybe later
 #' 
 #' 
-starfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,pred_filenames,pred_area,winsize,date1,date3,n_cores,data_range_min, data_range_max, logscale_factor,spectral_uncertainty, temporal_uncertainty, number_classes,hightag,lowtag,MASKIMG_options,MASKRANGE_options,output_masks,use_nodata_value,use_parallelisation,use_strict_filtering,use_temp_diff_for_weights,do_copy_on_zero_diff,double_pair_mode 
+starfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,pred_filenames,pred_area,winsize,date1,date3,n_cores, logscale_factor,spectral_uncertainty, temporal_uncertainty, number_classes,hightag,lowtag,MASKIMG_options,MASKRANGE_options,output_masks,use_nodata_value,use_parallelisation,use_strict_filtering,use_temp_diff_for_weights,do_copy_on_zero_diff,double_pair_mode 
 ) {
   library(assertthat)
   library(raster)
@@ -145,36 +143,6 @@ starfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,
   }else{
     number_classes_c <- 40
   }
-  
-
-  #### data_range_min ####
-  if(!missing(data_range_min)){
-    assert_that(class(data_range_min)=="numeric")
-    data_range_min_c <- data_range_min
-  }else{
-    template_dataType <- dataType(template[[1]])
-    if(template_dataType=="INT1U"){data_range_min_c <- 0}
-    if(template_dataType=="INT1S"){data_range_min_c <- -127}
-    if(template_dataType=="INT2U"){data_range_min_c <- 0}
-    if(template_dataType=="INT2S"){data_range_min_c <-  -32767}
-    if(template_dataType=="FLT4S"){data_range_min_c <- -3.4e+38}
-    if(template_dataType=="FLT8S"){data_range_min_c <- -1.7e+308}
-  }
-  
-  
-  #### data_range_max ####
-  if(!missing(data_range_max)){
-    assert_that(class(data_range_max)=="numeric")
-    data_range_max_c <- data_range_max
-  }else{
-    template_dataType <- dataType(template[[1]])
-    if(template_dataType=="INT1U"){data_range_max_c <- 255}
-    if(template_dataType=="INT1S"){data_range_max_c <- 127}
-    if(template_dataType=="INT2U"){data_range_max_c <- 65534}
-    if(template_dataType=="INT2S"){data_range_max_c <- 32767}
-    if(template_dataType=="FLT4S"){data_range_max_c <- 3.4e+38}
-    if(template_dataType=="FLT8S"){data_range_max_c <- 1.7e+308 }
-  } 
   
   #### logscalefactor ####
   if(!missing(logscale_factor)){
@@ -365,8 +333,6 @@ starfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,
   print(pred_area_c)
   print("Number Classes: ")
   print(number_classes_c)
-  print("Data_Range: ")
-  print(paste(data_range_min_c, data_range_max_c))
   if (!grepl("^\\s*$", MASKIMG_options_c)){
     print("MASKIMG Options: ")
     print(MASKIMG_options_c)
@@ -400,8 +366,6 @@ starfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,
                                       do_copy_on_zero_diff = do_copy_on_zero_diff_c,
                                       double_pair_mode = double_pair_mode_c,
                                       number_classes = number_classes_c,
-                                      data_range_min = data_range_min_c,
-                                      data_range_max = data_range_max_c,
                                       logscale_factor = logscale_factor_c,
                                       spectral_uncertainty = spectral_uncertainty_c,
                                       temporal_uncertainty = temporal_uncertainty_c,
