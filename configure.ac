@@ -1,83 +1,41 @@
-# dnl Process this file with autoconf to produce a configure script.
-define([pkgversion], esyscmd([sh -c "grep Version: DESCRIPTION | cut -d' ' -f2 | tr -d '\n'"]))dnl
-AC_INIT(rgdal, [pkgversion], Roger.Bivand@nhh.no)
-AC_CONFIG_SRCDIR(src/gdal-bindings.cpp)
+# Process this file with autoconf to produce a configure script.
 
-# AC_PROG_CXX()
+AC_INIT(gdalcubes, 0.2.3, marius.appel@uni-muenster.de)
+AC_LANG(C++)
 
-# find R home and set correct compiler + flags
+# find R home and set CC/CFLAGS
 : ${R_HOME=`R RHOME`}
 if test -z "${R_HOME}"; then
-  AC_MSG_ERROR([cannot determine R_HOME. Make sure you use R CMD INSTALL!])
+  echo "could not determine R_HOME"
+  exit 1
 fi
-AC_MSG_NOTICE([R_HOME: ${R_HOME}])
 RBIN="${R_HOME}/bin/R"
+CC=`"${RBIN}" CMD config CC`;
+CFLAGS=`"${RBIN}" CMD config CFLAGS`;
+AC_SUBST(R_HOME)
 
-# pick all flags for testing from R
-: ${CC=`"${RBIN}" CMD config CC`}
-: ${CXX=`"${RBIN}" CMD config CXX`}
-: ${CPP=`"${RBIN}" CMD config CPP`}
-: ${CFLAGS=`"${RBIN}" CMD config CFLAGS`}
-: ${CPPFLAGS=`"${RBIN}" CMD config CPPFLAGS`}
-: ${LDFLAGS=`"${RBIN}" CMD config LDFLAGS`}
-# AC_SUBST([CC],["clang"])
-# AC_SUBST([CXX],["clang++"])
-AC_MSG_NOTICE([CC: ${CC}])
-AC_MSG_NOTICE([CXX: ${CXX}])
 
-#CXX_11
+INLIBS="${LIBS}"
+INCPPFLAGS="${CPPFLAGS}"
+INPKG_CPPFLAGS="${PKG_CPPFLAGS}"
+INPKG_LIBS="${PKG_LIBS}"
 
-R_VERSION=`echo 'cat(unlist(R.Version()$minor))' | ${RBIN} --vanilla --slave`
-R_MINOR=`echo $R_VERSION | cut -f1 -d"."`
 
-#if test ${R_MINOR} -ge 4; then
-#: ${CXX=`"${RBIN}" CMD config CXX11`}
-#else
-#: ${CXX=`"${RBIN}" CMD config CXX1X`}
-#fi
 
-if test ${R_MINOR} -ge 4; then
- CXX11=`"${RBIN}" CMD config CXX11`
- CXX11STD=`"${RBIN}" CMD config CXX11STD`
-else
- CXX11=`"${RBIN}" CMD config CXX1X`
- CXX11STD=`"${RBIN}" CMD config CXX1XSTD`
-fi
 
+# C++11 ########################################################################################################
+# 2019-10-04: remove C++11 test based on R version because package now dependes on R(>=3.4)
+
+
+CXX11=`"${RBIN}" CMD config CXX11`
+CXX11STD=`"${RBIN}" CMD config CXX11STD`
 CXX="${CXX11} ${CXX11STD}"
 
-if test -n "${CXX11}"; then
-HAVE_CXX11=1
-else
-HAVE_CXX11=0
-fi
-
-#HAVE_CXX11=1
-
-#m4_include([inst/m4/ax_cxx_compile_stdcxx.m4])
-#AX_CXX_COMPILE_STDCXX([11], [ext], [optional])
-if test [${HAVE_CXX11} = 1] ; then
-  AC_MSG_NOTICE([C++11 support available])
-else
-  AC_MSG_NOTICE([C++11 support not available])
-fi
 
 
-AC_MSG_NOTICE([${PACKAGE_NAME}: ${PACKAGE_VERSION}])
 
-AC_CHECK_FILE([/usr/bin/svnversion],
- [SVN_VERSION=`svnversion -n '.'`],
- [SVN_VERSION=""])
-
-#SVN_VERSION=`svnversion -n '.'`
-if test "${SVN_VERSION}" != "exported" && test -n "${SVN_VERSION}" && test "${SVN_VERSION}" != "Unversioned directory"; then
-  echo "${SVN_VERSION}" > inst/SVN_VERSION
-else
-  SVN_VERSION=`cat inst/SVN_VERSION | tr -d '\n'`
-fi
-AC_MSG_NOTICE([svn revision: ${SVN_VERSION}])
-
-#GDAL
+# GDAL #########################################################################################################
+# largely copied from https://github.com/cran/rgdal/blob/master/configure.ac
 
 GDAL_CONFIG="gdal-config"
 
@@ -151,58 +109,25 @@ GDAL_MAJOR=`echo $GDAL_VERSION | cut -f1 -d"."`
 GDAL_MINOR=`echo $GDAL_VERSION | cut -f2 -d"."`
 GDAL_PATCH=`echo $GDAL_VERSION | cut -f3 -d"."`
 
-if test ${GDAL_MAJOR} = 2 -a ${GDAL_MINOR} -ge 3 ; then
-  AC_MSG_CHECKING([C++11 support for GDAL >= 2.3.0])
-  if test ${HAVE_CXX11} = 1 ; then
-    AC_MSG_RESULT(yes)
-  else
-    AC_MSG_RESULT(no)
-    AC_MSG_ERROR([provide at least CXX11 compiler support for GDAL >= 2.3.0])
-  fi
-fi
 
-AC_MSG_CHECKING([GDAL version >= 1.11.4])
-if test ${GDAL_MAJOR} -gt 1 ; then
-  AC_MSG_RESULT(yes)
-else
-  if test ${GDAL_MAJOR} = 1 -a ${GDAL_MINOR} = 11 -a ${GDAL_PATCH} -ge 4 ; then
-    AC_MSG_RESULT(yes)
-  else
-    AC_MSG_RESULT(no)
-    AC_MSG_ERROR([upgrade GDAL to 1.11.4 or later])
-  fi
-fi
-
-
-AC_MSG_CHECKING([GDAL version <= 2.5.0])
+AC_MSG_CHECKING([GDAL version >= 2.0.1])
 if test ${GDAL_MAJOR} -lt 2 ; then
-  AC_MSG_RESULT(yes)
+  AC_MSG_RESULT(no)
+  AC_MSG_ERROR([gdalcubes is not compatible with GDAL versions below 2.0.1])
 else
-  if test ${GDAL_MAJOR} = 2 -a ${GDAL_MINOR} -le 5 ; then
-    AC_MSG_RESULT(yes)
-  else
-    AC_MSG_RESULT(no)
-    AC_MSG_ERROR([GDAL version out of bounds])
-  fi
+  AC_MSG_RESULT(yes)
 fi
 
 
-INLIBS="${LIBS}"
-INCPPFLAGS="${CPPFLAGS}"
-INPKG_CPPFLAGS="${PKG_CPPFLAGS}"
-INPKG_LIBS="${PKG_LIBS}"
 
-AC_SUBST([PKG_CPPFLAGS], ["${INPKG_CPPFLAGS} ${GDAL_CPPFLAGS}"])
-AC_SUBST([PKG_LIBS], ["${INPKG_LIBS} ${GDAL_LIBS}"])
 
-# honor PKG_xx overrides
-# for CPPFLAGS we will superfluously double R's flags
-# since we'll set PKG_CPPFLAGS with this, but that shouldn't hurt
-CPPFLAGS="${INCPPFLAGS} ${PKG_CPPFLAGS}"
+
 
 
 NEED_DEPS=no
-LIBS="${INLIBS} ${PKG_LIBS}"
+LIBS="${INLIBS} ${GDAL_LIBS}"
+CPPFLAGS="${INCPPFLAGS} ${GDAL_CPPFLAGS}"
+
 [cat > gdal_test.cc <<_EOCONF
 #include <gdal.h>
 #ifdef __cplusplus
@@ -268,18 +193,47 @@ else
   fi
 fi
 
+#GDAL_DATA_TEST_FILE="${GDAL_DATADIR}/pcs.csv"
+#AC_MSG_CHECKING(GDAL: ${GDAL_DATADIR}/pcs.csv readable)
+#if test -r "${GDAL_DATA_TEST_FILE}" ; then
+#  AC_MSG_RESULT(yes)
+#else
+#  AC_MSG_RESULT(no)
+#  AC_MSG_ERROR([pcs.csv not found in GDAL data directory.])
+#fi
+
+GDAL_GE_250="no"
+#GDAL_MAJ_VER=`echo $GDAL_VERSION | cut -d "." -f1`
+#GDAL_MOD_VER=`echo $GDAL_VERSION | cut -d "." -f2`
+if test "${GDAL_MAJOR}" = 2 ; then
+  if test "${GDAL_MINOR}" -ge 5 ; then
+    GDAL_GE_250="yes"
+  fi
+else
+  if test "${GDAL_MAJOR}" -ge 3 ; then
+    GDAL_GE_250="yes"
+  fi
+fi
+
 GDAL_DATA_TEST_FILE="${GDAL_DATADIR}/pcs.csv"
 AC_MSG_CHECKING(GDAL: ${GDAL_DATADIR}/pcs.csv readable)
 if test -r "${GDAL_DATA_TEST_FILE}" ; then
   AC_MSG_RESULT(yes)
 else
   AC_MSG_RESULT(no)
-  AC_MSG_ERROR([pcs.csv not found in GDAL data directory.])
+  if test "${GDAL_GE_250}" = no; then
+    AC_MSG_ERROR([pcs.csv not found in GDAL data directory.])
+  fi
 fi
 
-# PROJ.4
 
-# copied from sf/configure.ac
+
+
+
+
+
+# proj #########################################################################################################
+# largely copied from https://github.com/cran/rgdal/blob/master/configure.ac
 
 PROJ_CONFIG="pkg-config proj"
 
@@ -343,7 +297,7 @@ CPPFLAGS="${INCPPFLAGS} ${PKG_CPPFLAGS}"
 AC_MSG_NOTICE([proj CPP flags: ${PKG_CPPFLAGS}])
 
 PKG_LIBS=""
-
+          
 # dnl ditto for a library path
 AC_ARG_WITH([proj-lib],
     AC_HELP_STRING([--with-proj-lib=LIB_PATH],
@@ -679,8 +633,322 @@ AC_MSG_NOTICE([Copy data for:])
 fi
 
 
-# concluding substitution
 
+# NetCDF #######################################################################################################
+# largely copied from https://github.com/cran/ncdf4/blob/master/tools/netcdf.m4
+
+err=0
+if test x$NC_CONFIG = x; then
+	NC_CONFIG_SHORT=nc-config
+	NC_CONFIG_FULLQUAL=nc-config
+	NC_CONFIG_PATH=$PATH
+else
+	echo "user specified nc-config is $NC_CONFIG"
+	NC_CONFIG_SHORT=`basename $NC_CONFIG`
+	NC_CONFIG_FULLQUAL=$NC_CONFIG
+	NC_CONFIG_PATH=`dirname $NC_CONFIG`
+fi
+AC_CHECK_PROG( HAS_NC_CONFIG, [$NC_CONFIG_SHORT], [yes], [no], [$NC_CONFIG_PATH] )
+if test x$HAS_NC_CONFIG = xno; then
+	echo "-----------------------------------------------------------------------------------"
+	echo "Error, nc-config not found or not executable.  This is a script that comes with the"
+	echo "netcdf library, version 4.1-beta2 or later, and must be present for configuration"
+	echo "to succeed."
+	echo " "
+	echo "If you installed the netcdf library (and nc-config) in a standard location, nc-config"
+	echo "should be found automatically.  Otherwise, you can specify the full path and name of"
+	echo "the nc-config script by passing the --with-nc-config=/full/path/nc-config argument"
+	echo "flag to the configure script.  For example:"
+	echo " "
+	echo "./configure --with-nc-config=/sw/dist/netcdf4/bin/nc-config"
+	echo " "
+	echo "Special note for R users:"
+	echo "-------------------------"
+	echo "To pass the configure flag to R, use something like this:"
+	echo " "
+	echo "R CMD INSTALL --configure-args=\"--with-nc-config=/home/joe/bin/nc-config\" ncdf4"
+	echo " "
+	echo "where you should replace /home/joe/bin etc. with the location where you have"
+	echo "installed the nc-config script that came with the netcdf 4 distribution."
+	echo "-----------------------------------------------------------------------------------"
+	exit -1
+fi
+dnl
+NETCDF_CC=`$NC_CONFIG_FULLQUAL --cc`
+NETCDF_LDFLAGS=`$NC_CONFIG_FULLQUAL --libs`
+NETCDF_CPPFLAGS=`$NC_CONFIG_FULLQUAL --cflags`
+NETCDF_VERSION=`$NC_CONFIG_FULLQUAL --version`
+dnl
+dnl -------------------------------------------------------------------
+dnl Convert the --libs string to a rpath string. 
+dnl Example input string:
+dnl	"-L/home/pierce/src/packages/data/netcdf/netcdf-4.1.2/install/lib -lnetcdf  -L/home/pierce/lib -lhdf5_hl -lhdf5 -lz -lcurl -Wl,-Bsymbolic-functions -lgssapi_krb5"
+dnl Example output string:
+dnl	"-Wl,-rpath,/home/pierce/src/packages/data/netcdf/netcdf-4.1.2/install/lib -Wl,-rpath,/home/pierce/lib"
+dnl -------------------------------------------------------------------
+NETCDF_RPATH=' '
+echo "netcdf.m4: about to set rpath, here is source string: >$NETCDF_LDFLAGS<"
+for word in $NETCDF_LDFLAGS; do
+	v2=`expr "$word" : '-L/'`
+	if test $v2 -eq 3; then
+		slibdir=${word:2}
+		NETCDF_RPATH="$NETCDF_RPATH -Wl,-rpath,$slibdir"
+	fi
+done
+echo "netcdf.m4: final rpath: $NETCDF_RPATH"
+dnl
+dnl The following will be either "yes" or "no"
+NETCDF_V4=`$NC_CONFIG_FULLQUAL --has-nc4`
+dnl
+dnl If we get here, we assume that netcdf exists.  It might not if, for example,
+dnl the package was installed and nc-config is present, but then the libraries
+dnl were erased.  Assume such deliberately broken behavior is not the case.
+dnl
+AC_DEFINE([HAVE_NETCDF],1,[Define if you have the NETCDF library, either v3 or v4])
+dnl
+if test x$NETCDF_V4 = xyes; then
+	AC_DEFINE([HAVE_NETCDF4],1,[Define if you have version 4 of the NETCDF library])
+fi
+dnl -----------------------------------------------------------------------------------
+dnl At this piont, $NETCDF_V4 will be either "yes" or "no"
+dnl
+echo "Netcdf library version: $NETCDF_VERSION"
+echo "Netcdf library has version 4 interface present: $NETCDF_V4"
+echo "Netcdf library was compiled with C compiler: $NETCDF_CC"
+dnl
+dnl Export our variables
+dnl
+AC_SUBST(NETCDF_CPPFLAGS)
+AC_SUBST(NETCDF_LDFLAGS)
+AC_SUBST(NETCDF_LIBS)
+AC_SUBST(NETCDF_VERSION)
+AC_SUBST(NETCDF_CC)
+AC_SUBST(NETCDF_RPATH)
+
+
+
+if test $NETCDF_V4 = "no"; then
+	echo "-------------------------------------------------------------------"
+	echo "gdalcubes REQUIRES the netcdf library be version 4 or above,"
+	echo "AND installed with HDF-5 support (i.e., the netcdf library must be"
+	echo "compiled with the --enable-netcdf-4 flag)."
+	echo "-------------------------------------------------------------------"
+	exit -1
+fi
+
+HAVE_NETCDF=TRUE
+
+NETCDF_LDFLAGS="$NETCDF_RPATH $NETCDF_LDFLAGS $LDFLAGS"
+
+AC_SUBST(NETCDF_CPPFLAGS)
+AC_SUBST(NETCDF_LDFLAGS)
+AC_SUBST(NETCDF_RPATH)
+AC_SUBST(HAVE_NETCDF)
+
+
+
+# curl #########################################################################################################
+# largely copied from https://github.com/cran/RCurl/blob/master/configure.ac
+
+if test -z "${CURL_CONFIG}" ; then
+ AC_PATH_PROG(CURL_CONFIG, curl-config)
+fi
+
+if test -z "${CURL_CONFIG}" ; then
+  echo "Cannot find curl-config"
+  exit 1
+fi
+
+if test -n "${enable_debug}" && test "${enable_debug}" == "yes" ; then
+ DEFINES=-DRCURL_DEBUG_MEMORY
+fi
+
+
+dnl Trying to find out if we have a libidn field.
+AC_PROG_CC
+AC_PROG_CPP
+
+CURL_CPPFLAGS=`$CURL_CONFIG --cflags`
+CPPFLAGS="${CPPFLAGS} $CURL_CPPFLAGS"
+
+AC_TRY_COMPILE([
+#include <curl/curl.h>
+],
+[
+ curl_version_info_data *data;
+ char *ptr;
+ ptr = data->libidn;
+],
+[DEFINES="$DEFINES -DHAVE_LIBIDN_FIELD=1"; echo "Version has a libidn field"], 
+[echo "No libidn field in version structure."])
+
+
+LDFLAGS=`${CURL_CONFIG} --libs`
+
+
+AC_DEFUN([RCURL_CHECK_ENUM], [
+
+AC_TRY_COMPILE([
+#include <curl/curl.h>
+],
+[
+  int val;
+  val = $1;
+],
+[DEFINES="$DEFINES -DHAVE_$1=1"; echo "Version has $1"], 
+[echo "No $1 enumeration value."])
+])
+
+RCURL_CHECK_ENUM(CURLOPT_URL)
+RCURL_CHECK_ENUM(CURLINFO_EFFECTIVE_URL)
+RCURL_CHECK_ENUM(CURLINFO_RESPONSE_CODE)
+RCURL_CHECK_ENUM(CURLINFO_TOTAL_TIME)
+RCURL_CHECK_ENUM(CURLINFO_NAMELOOKUP_TIME)
+RCURL_CHECK_ENUM(CURLINFO_CONNECT_TIME)
+RCURL_CHECK_ENUM(CURLINFO_PRETRANSFER_TIME)
+RCURL_CHECK_ENUM(CURLINFO_SIZE_UPLOAD)
+RCURL_CHECK_ENUM(CURLINFO_SIZE_DOWNLOAD)
+RCURL_CHECK_ENUM(CURLINFO_SPEED_DOWNLOAD)
+RCURL_CHECK_ENUM(CURLINFO_SPEED_UPLOAD)
+RCURL_CHECK_ENUM(CURLINFO_HEADER_SIZE)
+RCURL_CHECK_ENUM(CURLINFO_REQUEST_SIZE)
+RCURL_CHECK_ENUM(CURLINFO_SSL_VERIFYRESULT)
+RCURL_CHECK_ENUM(CURLINFO_FILETIME)
+RCURL_CHECK_ENUM(CURLINFO_CONTENT_LENGTH_DOWNLOAD)
+RCURL_CHECK_ENUM(CURLINFO_CONTENT_LENGTH_UPLOAD)
+RCURL_CHECK_ENUM(CURLINFO_STARTTRANSFER_TIME)
+RCURL_CHECK_ENUM(CURLINFO_CONTENT_TYPE)
+RCURL_CHECK_ENUM(CURLINFO_REDIRECT_TIME)
+RCURL_CHECK_ENUM(CURLINFO_REDIRECT_COUNT)
+RCURL_CHECK_ENUM(CURLINFO_PRIVATE)
+RCURL_CHECK_ENUM(CURLINFO_HTTP_CONNECTCODE)
+RCURL_CHECK_ENUM(CURLINFO_HTTPAUTH_AVAIL)
+RCURL_CHECK_ENUM(CURLINFO_PROXYAUTH_AVAIL)
+RCURL_CHECK_ENUM(CURLINFO_OS_ERRNO)
+RCURL_CHECK_ENUM(CURLINFO_NUM_CONNECTS)
+RCURL_CHECK_ENUM(CURLINFO_SSL_ENGINES)
+RCURL_CHECK_ENUM(CURLINFO_COOKIELIST)
+RCURL_CHECK_ENUM(CURLINFO_LASTSOCKET)
+RCURL_CHECK_ENUM(CURLINFO_FTP_ENTRY_PATH)
+RCURL_CHECK_ENUM(CURLINFO_REDIRECT_URL)
+RCURL_CHECK_ENUM(CURLINFO_PRIMARY_IP)
+RCURL_CHECK_ENUM(CURLINFO_APPCONNECT_TIME)
+RCURL_CHECK_ENUM(CURLINFO_CERTINFO)
+RCURL_CHECK_ENUM(CURLINFO_CONDITION_UNMET)
+
+
+dnl RCURL_CHECK_ENUM(CURLINFO_CONDITION_UNMET)
+dnl RCURL_CHECK_ENUM(CURLINFO_REDIRECT_URL)
+dnl RCURL_CHECK_ENUM(CURLINFO_CERTINFO)
+dnl RCURL_CHECK_ENUM(CURLINFO_PRIMARY_IP)
+dnl RCURL_CHECK_ENUM(CURLINFO_APPCONNECT_TIME)
+
+
+ RCURL_CHECK_ENUM(CURLOPT_WRITEDATA)
+ RCURL_CHECK_ENUM(CURLOPT_KEYPASSWD)
+ RCURL_CHECK_ENUM(CURLOPT_DIRLISTONLY)
+ RCURL_CHECK_ENUM(CURLOPT_APPEND)
+ RCURL_CHECK_ENUM(CURLOPT_KRBLEVEL)
+ RCURL_CHECK_ENUM(CURLOPT_USE_SSL)
+ RCURL_CHECK_ENUM(CURLOPT_TIMEOUT_MS)
+ RCURL_CHECK_ENUM(CURLOPT_CONNECTTIMEOUT_MS)
+ RCURL_CHECK_ENUM(CURLOPT_HTTP_TRANSFER_DECODING)
+ RCURL_CHECK_ENUM(CURLOPT_HTTP_CONTENT_DECODING)
+ RCURL_CHECK_ENUM(CURLOPT_NEW_FILE_PERMS)
+ RCURL_CHECK_ENUM(CURLOPT_NEW_DIRECTORY_PERMS)
+ RCURL_CHECK_ENUM(CURLOPT_POSTREDIR)
+ RCURL_CHECK_ENUM(CURLOPT_OPENSOCKETFUNCTION)
+ RCURL_CHECK_ENUM(CURLOPT_OPENSOCKETDATA)
+ RCURL_CHECK_ENUM(CURLOPT_COPYPOSTFIELDS)
+ RCURL_CHECK_ENUM(CURLOPT_PROXY_TRANSFER_MODE)
+ RCURL_CHECK_ENUM(CURLOPT_SEEKFUNCTION)
+ RCURL_CHECK_ENUM(CURLOPT_SEEKDATA)
+ RCURL_CHECK_ENUM(CURLOPT_CRLFILE)
+ RCURL_CHECK_ENUM(CURLOPT_ISSUERCERT)
+ RCURL_CHECK_ENUM(CURLOPT_ADDRESS_SCOPE)
+ RCURL_CHECK_ENUM(CURLOPT_CERTINFO)
+ RCURL_CHECK_ENUM(CURLOPT_USERNAME)
+ RCURL_CHECK_ENUM(CURLOPT_PASSWORD)
+ RCURL_CHECK_ENUM(CURLOPT_PROXYUSERNAME)
+ RCURL_CHECK_ENUM(CURLOPT_PROXYPASSWORD)
+ RCURL_CHECK_ENUM(CURLOPT_SSH_HOST_PUBLIC_KEY_MD5)
+ RCURL_CHECK_ENUM(CURLOPT_NOPROXY)
+ RCURL_CHECK_ENUM(CURLOPT_TFTP_BLKSIZE)
+ RCURL_CHECK_ENUM(CURLOPT_SOCKS5_GSSAPI_SERVICE)
+ RCURL_CHECK_ENUM(CURLOPT_SOCKS5_GSSAPI_NEC)
+ RCURL_CHECK_ENUM(CURLOPT_PROTOCOLS)
+ RCURL_CHECK_ENUM(CURLOPT_REDIR_PROTOCOLS)
+ RCURL_CHECK_ENUM(CURLOPT_SSH_AUTH_TYPES)
+ RCURL_CHECK_ENUM(CURLOPT_SSH_PUBLIC_KEYFILE)
+ RCURL_CHECK_ENUM(CURLOPT_SSH_PRIVATE_KEYFILE)
+ RCURL_CHECK_ENUM(CURLOPT_FTP_SSL_CCC)
+ RCURL_CHECK_ENUM(CURLOPT_COOKIELIST)
+ RCURL_CHECK_ENUM(CURLOPT_IGNORE_CONTENT_LENGTH)
+ RCURL_CHECK_ENUM(CURLOPT_FTP_SKIP_PASV_IP)
+ RCURL_CHECK_ENUM(CURLOPT_FTP_FILEMETHOD)
+ RCURL_CHECK_ENUM(CURLOPT_LOCALPORT)
+ RCURL_CHECK_ENUM(CURLOPT_LOCALPORTRANGE)
+ RCURL_CHECK_ENUM(CURLOPT_CONNECT_ONLY)
+ RCURL_CHECK_ENUM(CURLOPT_CONV_FROM_NETWORK_FUNCTION)
+ RCURL_CHECK_ENUM(CURLOPT_CONV_TO_NETWORK_FUNCTION)
+ RCURL_CHECK_ENUM(CURLOPT_CONV_FROM_UTF8_FUNCTION)
+ RCURL_CHECK_ENUM(CURLOPT_MAX_SEND_SPEED_LARGE)
+ RCURL_CHECK_ENUM(CURLOPT_MAX_RECV_SPEED_LARGE)
+ RCURL_CHECK_ENUM(CURLOPT_FTP_ALTERNATIVE_TO_USER)
+ RCURL_CHECK_ENUM(CURLOPT_SOCKOPTFUNCTION)
+ RCURL_CHECK_ENUM(CURLOPT_SOCKOPTDATA)
+ RCURL_CHECK_ENUM(CURLOPT_SSL_SESSIONID_CACHE)
+
+
+dnl Next we determine if the Curl_base64_encode routine has an extra parameter
+dnl which appeared in curl-7.18.0 (approx?). This routine is not in the header
+dnl file, so we can't use compilation warnings, etc. So we use the old style call and
+dnl make  a sample program that uses this invocation. If it seg faults, we need the new style.
+#AC_TRY_RUN([
+##include <curl/curl.h>
+##include <string.h>
+#
+#int main(int argc, char *argv[])
+#{
+#  char text[100] = "Some text", ans[200];
+#  int len;
+#  len = Curl_base64_encode(text, strlen(text), &ans);
+#  return(0);
+#}
+#],
+#[echo "Using older Curl_base64_enccode form with _no_ SessionHandle parameter."],
+#[echo "Using Curl_base64_encode with SessionHandle parameter."; DEFINES="$DEFINES -DBASE64_NEEDS_SESSION_DATA=1"] 
+#)
+
+
+CURL_LIBS=`${CURL_CONFIG} --libs`
+CURL_CFLAGS=`${CURL_CONFIG} --cflags`
+
+
+AC_SUBST(DEFINES)
+
+AC_SUBST(CURL_CONFIG)
+AC_SUBST(CURL_CFLAGS)
+AC_SUBST(CURL_LIBS)
+
+
+echo "libcurl version: `${CURL_CONFIG} --version`"
+
+
+
+
+
+
+
+
+# Bringing everything together #################################################################################
+
+
+
+
+
+## PKG_CPPFLAGS
+AC_SUBST([PKG_CPPFLAGS], ["${INPKG_CPPFLAGS} ${GDAL_CPPFLAGS}"])
 AC_SUBST([PKG_CPPFLAGS], ["${INPKG_CPPFLAGS} ${GDAL_CPPFLAGS}"])
 if test [ -n "$proj_include_path" ] ; then
 AC_SUBST([PKG_CPPFLAGS], ["${PKG_CPPFLAGS} ${proj_include_path}"])
@@ -688,7 +956,13 @@ fi
 if test ${PROJ6} = "yes" ; then
 AC_SUBST([PKG_CPPFLAGS], ["${PKG_CPPFLAGS} -DACCEPT_USE_OF_DEPRECATED_PROJ_API_H"])
 fi
+AC_SUBST([PKG_CPPFLAGS], ["${PKG_CPPFLAGS} ${NETCDF_CPPFLAGS}"])
+AC_SUBST([PKG_CPPFLAGS], ["${PKG_CPPFLAGS} ${CZRL_CFLAGS}"])
+AC_SUBST([PKG_CPPFLAGS], ["${PKG_CPPFLAGS} -DR_PACKAGE"])
 
+
+
+## PKG_LIBS
 AC_SUBST([PKG_LIBS], ["${INPKG_LIBS} ${GDAL_LIBS}"])
 if test "${NEED_DEPS}" = yes; then
    AC_SUBST([PKG_LIBS], ["${PKG_LIBS} ${GDAL_DEP_LIBS}"])
@@ -697,13 +971,15 @@ if test [ -n "$proj_lib_path" ] ; then
 AC_SUBST([PKG_LIBS], ["${PKG_LIBS} -L${proj_lib_path}"])
 fi
 AC_SUBST([PKG_LIBS], ["${PKG_LIBS} -lproj"])
+AC_SUBST([PKG_LIBS], ["${PKG_LIBS}  ${NETCDF_LDFLAGS}"])
+AC_SUBST([PKG_LIBS], ["${PKG_LIBS}  ${CURL_LIBS}"])
+
 
 AC_MSG_NOTICE([Package CPP flags: ${PKG_CPPFLAGS}])
 AC_MSG_NOTICE([Package LIBS: ${PKG_LIBS}])
 
-AC_CONFIG_FILES(src/Makevars)
 
-
-
+AC_CONFIG_FILES([src/Makevars])
+AC_OUTPUT
 
 

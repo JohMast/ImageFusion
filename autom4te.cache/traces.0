@@ -1,0 +1,742 @@
+m4trace:configure.ac:3: -1- AC_INIT([gdalcubes], [0.2.3], [marius.appel@uni-muenster.de])
+m4trace:configure.ac:3: -1- m4_pattern_forbid([^_?A[CHUM]_])
+m4trace:configure.ac:3: -1- m4_pattern_forbid([_AC_])
+m4trace:configure.ac:3: -1- m4_pattern_forbid([^LIBOBJS$], [do not use LIBOBJS directly, use AC_LIBOBJ (see section `AC_LIBOBJ vs LIBOBJS'])
+m4trace:configure.ac:3: -1- m4_pattern_allow([^AS_FLAGS$])
+m4trace:configure.ac:3: -1- m4_pattern_forbid([^_?m4_])
+m4trace:configure.ac:3: -1- m4_pattern_forbid([^dnl$])
+m4trace:configure.ac:3: -1- m4_pattern_forbid([^_?AS_])
+m4trace:configure.ac:3: -1- AC_SUBST([SHELL])
+m4trace:configure.ac:3: -1- AC_SUBST_TRACE([SHELL])
+m4trace:configure.ac:3: -1- m4_pattern_allow([^SHELL$])
+m4trace:configure.ac:3: -1- AC_SUBST([PATH_SEPARATOR])
+m4trace:configure.ac:3: -1- AC_SUBST_TRACE([PATH_SEPARATOR])
+m4trace:configure.ac:3: -1- m4_pattern_allow([^PATH_SEPARATOR$])
+m4trace:configure.ac:3: -1- AC_SUBST([PACKAGE_NAME], [m4_ifdef([AC_PACKAGE_NAME],      ['AC_PACKAGE_NAME'])])
+m4trace:configure.ac:3: -1- AC_SUBST_TRACE([PACKAGE_NAME])
+m4trace:configure.ac:3: -1- m4_pattern_allow([^PACKAGE_NAME$])
+m4trace:configure.ac:3: -1- AC_SUBST([PACKAGE_TARNAME], [m4_ifdef([AC_PACKAGE_TARNAME],   ['AC_PACKAGE_TARNAME'])])
+m4trace:configure.ac:3: -1- AC_SUBST_TRACE([PACKAGE_TARNAME])
+m4trace:configure.ac:3: -1- m4_pattern_allow([^PACKAGE_TARNAME$])
+m4trace:configure.ac:3: -1- AC_SUBST([PACKAGE_VERSION], [m4_ifdef([AC_PACKAGE_VERSION],   ['AC_PACKAGE_VERSION'])])
+m4trace:configure.ac:3: -1- AC_SUBST_TRACE([PACKAGE_VERSION])
+m4trace:configure.ac:3: -1- m4_pattern_allow([^PACKAGE_VERSION$])
+m4trace:configure.ac:3: -1- AC_SUBST([PACKAGE_STRING], [m4_ifdef([AC_PACKAGE_STRING],    ['AC_PACKAGE_STRING'])])
+m4trace:configure.ac:3: -1- AC_SUBST_TRACE([PACKAGE_STRING])
+m4trace:configure.ac:3: -1- m4_pattern_allow([^PACKAGE_STRING$])
+m4trace:configure.ac:3: -1- AC_SUBST([PACKAGE_BUGREPORT], [m4_ifdef([AC_PACKAGE_BUGREPORT], ['AC_PACKAGE_BUGREPORT'])])
+m4trace:configure.ac:3: -1- AC_SUBST_TRACE([PACKAGE_BUGREPORT])
+m4trace:configure.ac:3: -1- m4_pattern_allow([^PACKAGE_BUGREPORT$])
+m4trace:configure.ac:3: -1- AC_SUBST([PACKAGE_URL], [m4_ifdef([AC_PACKAGE_URL],       ['AC_PACKAGE_URL'])])
+m4trace:configure.ac:3: -1- AC_SUBST_TRACE([PACKAGE_URL])
+m4trace:configure.ac:3: -1- m4_pattern_allow([^PACKAGE_URL$])
+m4trace:configure.ac:3: -1- AC_SUBST([exec_prefix], [NONE])
+m4trace:configure.ac:3: -1- AC_SUBST_TRACE([exec_prefix])
+m4trace:configure.ac:3: -1- m4_pattern_allow([^exec_prefix$])
+m4trace:configure.ac:3: -1- AC_SUBST([prefix], [NONE])
+m4trace:configure.ac:3: -1- AC_SUBST_TRACE([prefix])
+m4trace:configure.ac:3: -1- m4_pattern_allow([^prefix$])
+m4trace:configure.ac:3: -1- AC_SUBST([program_transform_name], [s,x,x,])
+m4trace:configure.ac:3: -1- AC_SUBST_TRACE([program_transform_name])
+m4trace:configure.ac:3: -1- m4_pattern_allow([^program_transform_name$])
+m4trace:configure.ac:3: -1- AC_SUBST([bindir], ['${exec_prefix}/bin'])
+m4trace:configure.ac:3: -1- AC_SUBST_TRACE([bindir])
+m4trace:configure.ac:3: -1- m4_pattern_allow([^bindir$])
+m4trace:configure.ac:3: -1- AC_SUBST([sbindir], ['${exec_prefix}/sbin'])
+m4trace:configure.ac:3: -1- AC_SUBST_TRACE([sbindir])
+m4trace:configure.ac:3: -1- m4_pattern_allow([^sbindir$])
+m4trace:configure.ac:3: -1- AC_SUBST([libexecdir], ['${exec_prefix}/libexec'])
+m4trace:configure.ac:3: -1- AC_SUBST_TRACE([libexecdir])
+m4trace:configure.ac:3: -1- m4_pattern_allow([^libexecdir$])
+m4trace:configure.ac:3: -1- AC_SUBST([datarootdir], ['${prefix}/share'])
+m4trace:configure.ac:3: -1- AC_SUBST_TRACE([datarootdir])
+m4trace:configure.ac:3: -1- m4_pattern_allow([^datarootdir$])
+m4trace:configure.ac:3: -1- AC_SUBST([datadir], ['${datarootdir}'])
+m4trace:configure.ac:3: -1- AC_SUBST_TRACE([datadir])
+m4trace:configure.ac:3: -1- m4_pattern_allow([^datadir$])
+m4trace:configure.ac:3: -1- AC_SUBST([sysconfdir], ['${prefix}/etc'])
+m4trace:configure.ac:3: -1- AC_SUBST_TRACE([sysconfdir])
+m4trace:configure.ac:3: -1- m4_pattern_allow([^sysconfdir$])
+m4trace:configure.ac:3: -1- AC_SUBST([sharedstatedir], ['${prefix}/com'])
+m4trace:configure.ac:3: -1- AC_SUBST_TRACE([sharedstatedir])
+m4trace:configure.ac:3: -1- m4_pattern_allow([^sharedstatedir$])
+m4trace:configure.ac:3: -1- AC_SUBST([localstatedir], ['${prefix}/var'])
+m4trace:configure.ac:3: -1- AC_SUBST_TRACE([localstatedir])
+m4trace:configure.ac:3: -1- m4_pattern_allow([^localstatedir$])
+m4trace:configure.ac:3: -1- AC_SUBST([runstatedir], ['${localstatedir}/run'])
+m4trace:configure.ac:3: -1- AC_SUBST_TRACE([runstatedir])
+m4trace:configure.ac:3: -1- m4_pattern_allow([^runstatedir$])
+m4trace:configure.ac:3: -1- AC_SUBST([includedir], ['${prefix}/include'])
+m4trace:configure.ac:3: -1- AC_SUBST_TRACE([includedir])
+m4trace:configure.ac:3: -1- m4_pattern_allow([^includedir$])
+m4trace:configure.ac:3: -1- AC_SUBST([oldincludedir], ['/usr/include'])
+m4trace:configure.ac:3: -1- AC_SUBST_TRACE([oldincludedir])
+m4trace:configure.ac:3: -1- m4_pattern_allow([^oldincludedir$])
+m4trace:configure.ac:3: -1- AC_SUBST([docdir], [m4_ifset([AC_PACKAGE_TARNAME],
+				     ['${datarootdir}/doc/${PACKAGE_TARNAME}'],
+				     ['${datarootdir}/doc/${PACKAGE}'])])
+m4trace:configure.ac:3: -1- AC_SUBST_TRACE([docdir])
+m4trace:configure.ac:3: -1- m4_pattern_allow([^docdir$])
+m4trace:configure.ac:3: -1- AC_SUBST([infodir], ['${datarootdir}/info'])
+m4trace:configure.ac:3: -1- AC_SUBST_TRACE([infodir])
+m4trace:configure.ac:3: -1- m4_pattern_allow([^infodir$])
+m4trace:configure.ac:3: -1- AC_SUBST([htmldir], ['${docdir}'])
+m4trace:configure.ac:3: -1- AC_SUBST_TRACE([htmldir])
+m4trace:configure.ac:3: -1- m4_pattern_allow([^htmldir$])
+m4trace:configure.ac:3: -1- AC_SUBST([dvidir], ['${docdir}'])
+m4trace:configure.ac:3: -1- AC_SUBST_TRACE([dvidir])
+m4trace:configure.ac:3: -1- m4_pattern_allow([^dvidir$])
+m4trace:configure.ac:3: -1- AC_SUBST([pdfdir], ['${docdir}'])
+m4trace:configure.ac:3: -1- AC_SUBST_TRACE([pdfdir])
+m4trace:configure.ac:3: -1- m4_pattern_allow([^pdfdir$])
+m4trace:configure.ac:3: -1- AC_SUBST([psdir], ['${docdir}'])
+m4trace:configure.ac:3: -1- AC_SUBST_TRACE([psdir])
+m4trace:configure.ac:3: -1- m4_pattern_allow([^psdir$])
+m4trace:configure.ac:3: -1- AC_SUBST([libdir], ['${exec_prefix}/lib'])
+m4trace:configure.ac:3: -1- AC_SUBST_TRACE([libdir])
+m4trace:configure.ac:3: -1- m4_pattern_allow([^libdir$])
+m4trace:configure.ac:3: -1- AC_SUBST([localedir], ['${datarootdir}/locale'])
+m4trace:configure.ac:3: -1- AC_SUBST_TRACE([localedir])
+m4trace:configure.ac:3: -1- m4_pattern_allow([^localedir$])
+m4trace:configure.ac:3: -1- AC_SUBST([mandir], ['${datarootdir}/man'])
+m4trace:configure.ac:3: -1- AC_SUBST_TRACE([mandir])
+m4trace:configure.ac:3: -1- m4_pattern_allow([^mandir$])
+m4trace:configure.ac:3: -1- AC_DEFINE_TRACE_LITERAL([PACKAGE_NAME])
+m4trace:configure.ac:3: -1- m4_pattern_allow([^PACKAGE_NAME$])
+m4trace:configure.ac:3: -1- AH_OUTPUT([PACKAGE_NAME], [/* Define to the full name of this package. */
+@%:@undef PACKAGE_NAME])
+m4trace:configure.ac:3: -1- AC_DEFINE_TRACE_LITERAL([PACKAGE_TARNAME])
+m4trace:configure.ac:3: -1- m4_pattern_allow([^PACKAGE_TARNAME$])
+m4trace:configure.ac:3: -1- AH_OUTPUT([PACKAGE_TARNAME], [/* Define to the one symbol short name of this package. */
+@%:@undef PACKAGE_TARNAME])
+m4trace:configure.ac:3: -1- AC_DEFINE_TRACE_LITERAL([PACKAGE_VERSION])
+m4trace:configure.ac:3: -1- m4_pattern_allow([^PACKAGE_VERSION$])
+m4trace:configure.ac:3: -1- AH_OUTPUT([PACKAGE_VERSION], [/* Define to the version of this package. */
+@%:@undef PACKAGE_VERSION])
+m4trace:configure.ac:3: -1- AC_DEFINE_TRACE_LITERAL([PACKAGE_STRING])
+m4trace:configure.ac:3: -1- m4_pattern_allow([^PACKAGE_STRING$])
+m4trace:configure.ac:3: -1- AH_OUTPUT([PACKAGE_STRING], [/* Define to the full name and version of this package. */
+@%:@undef PACKAGE_STRING])
+m4trace:configure.ac:3: -1- AC_DEFINE_TRACE_LITERAL([PACKAGE_BUGREPORT])
+m4trace:configure.ac:3: -1- m4_pattern_allow([^PACKAGE_BUGREPORT$])
+m4trace:configure.ac:3: -1- AH_OUTPUT([PACKAGE_BUGREPORT], [/* Define to the address where bug reports for this package should be sent. */
+@%:@undef PACKAGE_BUGREPORT])
+m4trace:configure.ac:3: -1- AC_DEFINE_TRACE_LITERAL([PACKAGE_URL])
+m4trace:configure.ac:3: -1- m4_pattern_allow([^PACKAGE_URL$])
+m4trace:configure.ac:3: -1- AH_OUTPUT([PACKAGE_URL], [/* Define to the home page for this package. */
+@%:@undef PACKAGE_URL])
+m4trace:configure.ac:3: -1- AC_SUBST([DEFS])
+m4trace:configure.ac:3: -1- AC_SUBST_TRACE([DEFS])
+m4trace:configure.ac:3: -1- m4_pattern_allow([^DEFS$])
+m4trace:configure.ac:3: -1- AC_SUBST([ECHO_C])
+m4trace:configure.ac:3: -1- AC_SUBST_TRACE([ECHO_C])
+m4trace:configure.ac:3: -1- m4_pattern_allow([^ECHO_C$])
+m4trace:configure.ac:3: -1- AC_SUBST([ECHO_N])
+m4trace:configure.ac:3: -1- AC_SUBST_TRACE([ECHO_N])
+m4trace:configure.ac:3: -1- m4_pattern_allow([^ECHO_N$])
+m4trace:configure.ac:3: -1- AC_SUBST([ECHO_T])
+m4trace:configure.ac:3: -1- AC_SUBST_TRACE([ECHO_T])
+m4trace:configure.ac:3: -1- m4_pattern_allow([^ECHO_T$])
+m4trace:configure.ac:3: -1- AC_SUBST([LIBS])
+m4trace:configure.ac:3: -1- AC_SUBST_TRACE([LIBS])
+m4trace:configure.ac:3: -1- m4_pattern_allow([^LIBS$])
+m4trace:configure.ac:3: -1- AC_SUBST([build_alias])
+m4trace:configure.ac:3: -1- AC_SUBST_TRACE([build_alias])
+m4trace:configure.ac:3: -1- m4_pattern_allow([^build_alias$])
+m4trace:configure.ac:3: -1- AC_SUBST([host_alias])
+m4trace:configure.ac:3: -1- AC_SUBST_TRACE([host_alias])
+m4trace:configure.ac:3: -1- m4_pattern_allow([^host_alias$])
+m4trace:configure.ac:3: -1- AC_SUBST([target_alias])
+m4trace:configure.ac:3: -1- AC_SUBST_TRACE([target_alias])
+m4trace:configure.ac:3: -1- m4_pattern_allow([^target_alias$])
+m4trace:configure.ac:15: -1- AC_SUBST([R_HOME])
+m4trace:configure.ac:15: -1- AC_SUBST_TRACE([R_HOME])
+m4trace:configure.ac:15: -1- m4_pattern_allow([^R_HOME$])
+m4trace:configure.ac:45: -2- _m4_warn([obsolete], [The macro `AC_HELP_STRING' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:207: AC_HELP_STRING is expanded from...
+configure.ac:45: the top level])
+m4trace:configure.ac:50: -1- AC_SUBST([GDAL_CONFIG], ["${gdal_config}"])
+m4trace:configure.ac:50: -1- AC_SUBST_TRACE([GDAL_CONFIG])
+m4trace:configure.ac:50: -1- m4_pattern_allow([^GDAL_CONFIG$])
+m4trace:configure.ac:55: -1- AC_SUBST([GDAL_CONFIG])
+m4trace:configure.ac:55: -1- AC_SUBST_TRACE([GDAL_CONFIG])
+m4trace:configure.ac:55: -1- m4_pattern_allow([^GDAL_CONFIG$])
+m4trace:configure.ac:188: -1- AC_SUBST([GDAL_DATADIR], [${GDAL_DATA}])
+m4trace:configure.ac:188: -1- AC_SUBST_TRACE([GDAL_DATADIR])
+m4trace:configure.ac:188: -1- m4_pattern_allow([^GDAL_DATADIR$])
+m4trace:configure.ac:278: -2- _m4_warn([obsolete], [The macro `AC_HELP_STRING' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:207: AC_HELP_STRING is expanded from...
+configure.ac:278: the top level])
+m4trace:configure.ac:283: -1- AC_SUBST([PKG_CPPFLAGS], ["${PKG_CPPFLAGS} ${proj_include_path} ${INPKG_CPPFLAGS}"])
+m4trace:configure.ac:283: -1- AC_SUBST_TRACE([PKG_CPPFLAGS])
+m4trace:configure.ac:283: -1- m4_pattern_allow([^PKG_CPPFLAGS$])
+m4trace:configure.ac:288: -1- AC_SUBST([PKG_CPPFLAGS], ["${PKG_CPPFLAGS} ${PROJ_INCLUDE_PATH} ${INPKG_CPPFLAGS}"])
+m4trace:configure.ac:288: -1- AC_SUBST_TRACE([PKG_CPPFLAGS])
+m4trace:configure.ac:288: -1- m4_pattern_allow([^PKG_CPPFLAGS$])
+m4trace:configure.ac:303: -2- _m4_warn([obsolete], [The macro `AC_HELP_STRING' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:207: AC_HELP_STRING is expanded from...
+configure.ac:303: the top level])
+m4trace:configure.ac:307: -1- AC_SUBST([PKG_LIBS], ["-L${proj_lib_path} ${INPKG_LIBS}"])
+m4trace:configure.ac:307: -1- AC_SUBST_TRACE([PKG_LIBS])
+m4trace:configure.ac:307: -1- m4_pattern_allow([^PKG_LIBS$])
+m4trace:configure.ac:311: -1- AC_SUBST([PKG_LIBS], ["${PROJ_LIB_PATH} ${INPKG_LIBS}"])
+m4trace:configure.ac:311: -1- AC_SUBST_TRACE([PKG_LIBS])
+m4trace:configure.ac:311: -1- m4_pattern_allow([^PKG_LIBS$])
+m4trace:configure.ac:313: -1- AC_SUBST([PKG_LIBS], ["${INPKG_LIBS} -lproj"])
+m4trace:configure.ac:313: -1- AC_SUBST_TRACE([PKG_LIBS])
+m4trace:configure.ac:313: -1- m4_pattern_allow([^PKG_LIBS$])
+m4trace:configure.ac:388: -1- AC_SUBST([PKG_CPPFLAGS], ["${PKG_CPPFLAGS} -I${ADDED_PKG_INCL_480}"])
+m4trace:configure.ac:388: -1- AC_SUBST_TRACE([PKG_CPPFLAGS])
+m4trace:configure.ac:388: -1- m4_pattern_allow([^PKG_CPPFLAGS$])
+m4trace:configure.ac:427: -1- AC_SUBST([PKG_CPPFLAGS], ["-DP4CTX=1 ${PKG_CPPFLAGS}"])
+m4trace:configure.ac:427: -1- AC_SUBST_TRACE([PKG_CPPFLAGS])
+m4trace:configure.ac:427: -1- m4_pattern_allow([^PKG_CPPFLAGS$])
+m4trace:configure.ac:430: -2- _m4_warn([obsolete], [The macro `AC_HELP_STRING' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:207: AC_HELP_STRING is expanded from...
+configure.ac:430: the top level])
+m4trace:configure.ac:601: -2- _m4_warn([obsolete], [The macro `AC_HELP_STRING' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:207: AC_HELP_STRING is expanded from...
+configure.ac:601: the top level])
+m4trace:configure.ac:608: -2- _m4_warn([obsolete], [The macro `AC_HELP_STRING' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:207: AC_HELP_STRING is expanded from...
+configure.ac:608: the top level])
+m4trace:configure.ac:651: -1- AC_SUBST([HAS_NC_CONFIG])
+m4trace:configure.ac:651: -1- AC_SUBST_TRACE([HAS_NC_CONFIG])
+m4trace:configure.ac:651: -1- m4_pattern_allow([^HAS_NC_CONFIG$])
+m4trace:configure.ac:707: -1- AC_DEFINE_TRACE_LITERAL([HAVE_NETCDF])
+m4trace:configure.ac:707: -1- m4_pattern_allow([^HAVE_NETCDF$])
+m4trace:configure.ac:707: -1- AH_OUTPUT([HAVE_NETCDF], [/* Define if you have the NETCDF library, either v3 or v4 */
+@%:@undef HAVE_NETCDF])
+m4trace:configure.ac:710: -1- AC_DEFINE_TRACE_LITERAL([HAVE_NETCDF4])
+m4trace:configure.ac:710: -1- m4_pattern_allow([^HAVE_NETCDF4$])
+m4trace:configure.ac:710: -1- AH_OUTPUT([HAVE_NETCDF4], [/* Define if you have version 4 of the NETCDF library */
+@%:@undef HAVE_NETCDF4])
+m4trace:configure.ac:721: -1- AC_SUBST([NETCDF_CPPFLAGS])
+m4trace:configure.ac:721: -1- AC_SUBST_TRACE([NETCDF_CPPFLAGS])
+m4trace:configure.ac:721: -1- m4_pattern_allow([^NETCDF_CPPFLAGS$])
+m4trace:configure.ac:722: -1- AC_SUBST([NETCDF_LDFLAGS])
+m4trace:configure.ac:722: -1- AC_SUBST_TRACE([NETCDF_LDFLAGS])
+m4trace:configure.ac:722: -1- m4_pattern_allow([^NETCDF_LDFLAGS$])
+m4trace:configure.ac:723: -1- AC_SUBST([NETCDF_LIBS])
+m4trace:configure.ac:723: -1- AC_SUBST_TRACE([NETCDF_LIBS])
+m4trace:configure.ac:723: -1- m4_pattern_allow([^NETCDF_LIBS$])
+m4trace:configure.ac:724: -1- AC_SUBST([NETCDF_VERSION])
+m4trace:configure.ac:724: -1- AC_SUBST_TRACE([NETCDF_VERSION])
+m4trace:configure.ac:724: -1- m4_pattern_allow([^NETCDF_VERSION$])
+m4trace:configure.ac:725: -1- AC_SUBST([NETCDF_CC])
+m4trace:configure.ac:725: -1- AC_SUBST_TRACE([NETCDF_CC])
+m4trace:configure.ac:725: -1- m4_pattern_allow([^NETCDF_CC$])
+m4trace:configure.ac:726: -1- AC_SUBST([NETCDF_RPATH])
+m4trace:configure.ac:726: -1- AC_SUBST_TRACE([NETCDF_RPATH])
+m4trace:configure.ac:726: -1- m4_pattern_allow([^NETCDF_RPATH$])
+m4trace:configure.ac:743: -1- AC_SUBST([NETCDF_CPPFLAGS])
+m4trace:configure.ac:743: -1- AC_SUBST_TRACE([NETCDF_CPPFLAGS])
+m4trace:configure.ac:743: -1- m4_pattern_allow([^NETCDF_CPPFLAGS$])
+m4trace:configure.ac:744: -1- AC_SUBST([NETCDF_LDFLAGS])
+m4trace:configure.ac:744: -1- AC_SUBST_TRACE([NETCDF_LDFLAGS])
+m4trace:configure.ac:744: -1- m4_pattern_allow([^NETCDF_LDFLAGS$])
+m4trace:configure.ac:745: -1- AC_SUBST([NETCDF_RPATH])
+m4trace:configure.ac:745: -1- AC_SUBST_TRACE([NETCDF_RPATH])
+m4trace:configure.ac:745: -1- m4_pattern_allow([^NETCDF_RPATH$])
+m4trace:configure.ac:746: -1- AC_SUBST([HAVE_NETCDF])
+m4trace:configure.ac:746: -1- AC_SUBST_TRACE([HAVE_NETCDF])
+m4trace:configure.ac:746: -1- m4_pattern_allow([^HAVE_NETCDF$])
+m4trace:configure.ac:754: -1- AC_SUBST([CURL_CONFIG])
+m4trace:configure.ac:754: -1- AC_SUBST_TRACE([CURL_CONFIG])
+m4trace:configure.ac:754: -1- m4_pattern_allow([^CURL_CONFIG$])
+m4trace:configure.ac:768: -1- AC_SUBST([CC])
+m4trace:configure.ac:768: -1- AC_SUBST_TRACE([CC])
+m4trace:configure.ac:768: -1- m4_pattern_allow([^CC$])
+m4trace:configure.ac:768: -1- AC_SUBST([CFLAGS])
+m4trace:configure.ac:768: -1- AC_SUBST_TRACE([CFLAGS])
+m4trace:configure.ac:768: -1- m4_pattern_allow([^CFLAGS$])
+m4trace:configure.ac:768: -1- AC_SUBST([LDFLAGS])
+m4trace:configure.ac:768: -1- AC_SUBST_TRACE([LDFLAGS])
+m4trace:configure.ac:768: -1- m4_pattern_allow([^LDFLAGS$])
+m4trace:configure.ac:768: -1- AC_SUBST([LIBS])
+m4trace:configure.ac:768: -1- AC_SUBST_TRACE([LIBS])
+m4trace:configure.ac:768: -1- m4_pattern_allow([^LIBS$])
+m4trace:configure.ac:768: -1- AC_SUBST([CPPFLAGS])
+m4trace:configure.ac:768: -1- AC_SUBST_TRACE([CPPFLAGS])
+m4trace:configure.ac:768: -1- m4_pattern_allow([^CPPFLAGS$])
+m4trace:configure.ac:768: -1- AC_SUBST([CC])
+m4trace:configure.ac:768: -1- AC_SUBST_TRACE([CC])
+m4trace:configure.ac:768: -1- m4_pattern_allow([^CC$])
+m4trace:configure.ac:768: -1- AC_SUBST([CC])
+m4trace:configure.ac:768: -1- AC_SUBST_TRACE([CC])
+m4trace:configure.ac:768: -1- m4_pattern_allow([^CC$])
+m4trace:configure.ac:768: -1- AC_SUBST([CC])
+m4trace:configure.ac:768: -1- AC_SUBST_TRACE([CC])
+m4trace:configure.ac:768: -1- m4_pattern_allow([^CC$])
+m4trace:configure.ac:768: -1- AC_SUBST([CC])
+m4trace:configure.ac:768: -1- AC_SUBST_TRACE([CC])
+m4trace:configure.ac:768: -1- m4_pattern_allow([^CC$])
+m4trace:configure.ac:768: -1- AC_SUBST([ac_ct_CC])
+m4trace:configure.ac:768: -1- AC_SUBST_TRACE([ac_ct_CC])
+m4trace:configure.ac:768: -1- m4_pattern_allow([^ac_ct_CC$])
+m4trace:configure.ac:768: -1- AC_SUBST([EXEEXT], [$ac_cv_exeext])
+m4trace:configure.ac:768: -1- AC_SUBST_TRACE([EXEEXT])
+m4trace:configure.ac:768: -1- m4_pattern_allow([^EXEEXT$])
+m4trace:configure.ac:768: -1- AC_SUBST([OBJEXT], [$ac_cv_objext])
+m4trace:configure.ac:768: -1- AC_SUBST_TRACE([OBJEXT])
+m4trace:configure.ac:768: -1- m4_pattern_allow([^OBJEXT$])
+m4trace:configure.ac:769: -1- AC_SUBST([CPP])
+m4trace:configure.ac:769: -1- AC_SUBST_TRACE([CPP])
+m4trace:configure.ac:769: -1- m4_pattern_allow([^CPP$])
+m4trace:configure.ac:769: -1- AC_SUBST([CPPFLAGS])
+m4trace:configure.ac:769: -1- AC_SUBST_TRACE([CPPFLAGS])
+m4trace:configure.ac:769: -1- m4_pattern_allow([^CPPFLAGS$])
+m4trace:configure.ac:769: -1- AC_SUBST([CPP])
+m4trace:configure.ac:769: -1- AC_SUBST_TRACE([CPP])
+m4trace:configure.ac:769: -1- m4_pattern_allow([^CPP$])
+m4trace:configure.ac:774: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:774: the top level])
+m4trace:configure.ac:774: -1- AC_SUBST([CXX])
+m4trace:configure.ac:774: -1- AC_SUBST_TRACE([CXX])
+m4trace:configure.ac:774: -1- m4_pattern_allow([^CXX$])
+m4trace:configure.ac:774: -1- AC_SUBST([CXXFLAGS])
+m4trace:configure.ac:774: -1- AC_SUBST_TRACE([CXXFLAGS])
+m4trace:configure.ac:774: -1- m4_pattern_allow([^CXXFLAGS$])
+m4trace:configure.ac:774: -1- AC_SUBST([LDFLAGS])
+m4trace:configure.ac:774: -1- AC_SUBST_TRACE([LDFLAGS])
+m4trace:configure.ac:774: -1- m4_pattern_allow([^LDFLAGS$])
+m4trace:configure.ac:774: -1- AC_SUBST([LIBS])
+m4trace:configure.ac:774: -1- AC_SUBST_TRACE([LIBS])
+m4trace:configure.ac:774: -1- m4_pattern_allow([^LIBS$])
+m4trace:configure.ac:774: -1- AC_SUBST([CPPFLAGS])
+m4trace:configure.ac:774: -1- AC_SUBST_TRACE([CPPFLAGS])
+m4trace:configure.ac:774: -1- m4_pattern_allow([^CPPFLAGS$])
+m4trace:configure.ac:774: -1- AC_SUBST([CXX])
+m4trace:configure.ac:774: -1- AC_SUBST_TRACE([CXX])
+m4trace:configure.ac:774: -1- m4_pattern_allow([^CXX$])
+m4trace:configure.ac:774: -1- AC_SUBST([ac_ct_CXX])
+m4trace:configure.ac:774: -1- AC_SUBST_TRACE([ac_ct_CXX])
+m4trace:configure.ac:774: -1- m4_pattern_allow([^ac_ct_CXX$])
+m4trace:configure.ac:802: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:802: the top level])
+m4trace:configure.ac:803: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:803: the top level])
+m4trace:configure.ac:804: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:804: the top level])
+m4trace:configure.ac:805: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:805: the top level])
+m4trace:configure.ac:806: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:806: the top level])
+m4trace:configure.ac:807: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:807: the top level])
+m4trace:configure.ac:808: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:808: the top level])
+m4trace:configure.ac:809: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:809: the top level])
+m4trace:configure.ac:810: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:810: the top level])
+m4trace:configure.ac:811: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:811: the top level])
+m4trace:configure.ac:812: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:812: the top level])
+m4trace:configure.ac:813: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:813: the top level])
+m4trace:configure.ac:814: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:814: the top level])
+m4trace:configure.ac:815: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:815: the top level])
+m4trace:configure.ac:816: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:816: the top level])
+m4trace:configure.ac:817: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:817: the top level])
+m4trace:configure.ac:818: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:818: the top level])
+m4trace:configure.ac:819: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:819: the top level])
+m4trace:configure.ac:820: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:820: the top level])
+m4trace:configure.ac:821: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:821: the top level])
+m4trace:configure.ac:822: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:822: the top level])
+m4trace:configure.ac:823: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:823: the top level])
+m4trace:configure.ac:824: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:824: the top level])
+m4trace:configure.ac:825: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:825: the top level])
+m4trace:configure.ac:826: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:826: the top level])
+m4trace:configure.ac:827: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:827: the top level])
+m4trace:configure.ac:828: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:828: the top level])
+m4trace:configure.ac:829: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:829: the top level])
+m4trace:configure.ac:830: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:830: the top level])
+m4trace:configure.ac:831: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:831: the top level])
+m4trace:configure.ac:832: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:832: the top level])
+m4trace:configure.ac:833: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:833: the top level])
+m4trace:configure.ac:834: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:834: the top level])
+m4trace:configure.ac:835: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:835: the top level])
+m4trace:configure.ac:836: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:836: the top level])
+m4trace:configure.ac:837: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:837: the top level])
+m4trace:configure.ac:847: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:847: the top level])
+m4trace:configure.ac:848: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:848: the top level])
+m4trace:configure.ac:849: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:849: the top level])
+m4trace:configure.ac:850: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:850: the top level])
+m4trace:configure.ac:851: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:851: the top level])
+m4trace:configure.ac:852: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:852: the top level])
+m4trace:configure.ac:853: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:853: the top level])
+m4trace:configure.ac:854: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:854: the top level])
+m4trace:configure.ac:855: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:855: the top level])
+m4trace:configure.ac:856: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:856: the top level])
+m4trace:configure.ac:857: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:857: the top level])
+m4trace:configure.ac:858: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:858: the top level])
+m4trace:configure.ac:859: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:859: the top level])
+m4trace:configure.ac:860: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:860: the top level])
+m4trace:configure.ac:861: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:861: the top level])
+m4trace:configure.ac:862: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:862: the top level])
+m4trace:configure.ac:863: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:863: the top level])
+m4trace:configure.ac:864: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:864: the top level])
+m4trace:configure.ac:865: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:865: the top level])
+m4trace:configure.ac:866: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:866: the top level])
+m4trace:configure.ac:867: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:867: the top level])
+m4trace:configure.ac:868: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:868: the top level])
+m4trace:configure.ac:869: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:869: the top level])
+m4trace:configure.ac:870: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:870: the top level])
+m4trace:configure.ac:871: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:871: the top level])
+m4trace:configure.ac:872: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:872: the top level])
+m4trace:configure.ac:873: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:873: the top level])
+m4trace:configure.ac:874: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:874: the top level])
+m4trace:configure.ac:875: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:875: the top level])
+m4trace:configure.ac:876: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:876: the top level])
+m4trace:configure.ac:877: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:877: the top level])
+m4trace:configure.ac:878: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:878: the top level])
+m4trace:configure.ac:879: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:879: the top level])
+m4trace:configure.ac:880: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:880: the top level])
+m4trace:configure.ac:881: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:881: the top level])
+m4trace:configure.ac:882: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:882: the top level])
+m4trace:configure.ac:883: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:883: the top level])
+m4trace:configure.ac:884: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:884: the top level])
+m4trace:configure.ac:885: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:885: the top level])
+m4trace:configure.ac:886: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:886: the top level])
+m4trace:configure.ac:887: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:887: the top level])
+m4trace:configure.ac:888: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:888: the top level])
+m4trace:configure.ac:889: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:889: the top level])
+m4trace:configure.ac:890: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:890: the top level])
+m4trace:configure.ac:891: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:891: the top level])
+m4trace:configure.ac:892: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:892: the top level])
+m4trace:configure.ac:893: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:893: the top level])
+m4trace:configure.ac:894: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:894: the top level])
+m4trace:configure.ac:895: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:895: the top level])
+m4trace:configure.ac:896: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:896: the top level])
+m4trace:configure.ac:897: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:897: the top level])
+m4trace:configure.ac:898: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:898: the top level])
+m4trace:configure.ac:899: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:899: the top level])
+m4trace:configure.ac:900: -1- _m4_warn([obsolete], [The macro `AC_TRY_COMPILE' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:2625: AC_TRY_COMPILE is expanded from...
+configure.ac:789: RCURL_CHECK_ENUM is expanded from...
+configure.ac:900: the top level])
+m4trace:configure.ac:928: -1- AC_SUBST([DEFINES])
+m4trace:configure.ac:928: -1- AC_SUBST_TRACE([DEFINES])
+m4trace:configure.ac:928: -1- m4_pattern_allow([^DEFINES$])
+m4trace:configure.ac:930: -1- AC_SUBST([CURL_CONFIG])
+m4trace:configure.ac:930: -1- AC_SUBST_TRACE([CURL_CONFIG])
+m4trace:configure.ac:930: -1- m4_pattern_allow([^CURL_CONFIG$])
+m4trace:configure.ac:931: -1- AC_SUBST([CURL_CFLAGS])
+m4trace:configure.ac:931: -1- AC_SUBST_TRACE([CURL_CFLAGS])
+m4trace:configure.ac:931: -1- m4_pattern_allow([^CURL_CFLAGS$])
+m4trace:configure.ac:932: -1- AC_SUBST([CURL_LIBS])
+m4trace:configure.ac:932: -1- AC_SUBST_TRACE([CURL_LIBS])
+m4trace:configure.ac:932: -1- m4_pattern_allow([^CURL_LIBS$])
+m4trace:configure.ac:951: -1- AC_SUBST([PKG_CPPFLAGS], ["${INPKG_CPPFLAGS} ${GDAL_CPPFLAGS}"])
+m4trace:configure.ac:951: -1- AC_SUBST_TRACE([PKG_CPPFLAGS])
+m4trace:configure.ac:951: -1- m4_pattern_allow([^PKG_CPPFLAGS$])
+m4trace:configure.ac:952: -1- AC_SUBST([PKG_CPPFLAGS], ["${INPKG_CPPFLAGS} ${GDAL_CPPFLAGS}"])
+m4trace:configure.ac:952: -1- AC_SUBST_TRACE([PKG_CPPFLAGS])
+m4trace:configure.ac:952: -1- m4_pattern_allow([^PKG_CPPFLAGS$])
+m4trace:configure.ac:954: -1- AC_SUBST([PKG_CPPFLAGS], ["${PKG_CPPFLAGS} ${proj_include_path}"])
+m4trace:configure.ac:954: -1- AC_SUBST_TRACE([PKG_CPPFLAGS])
+m4trace:configure.ac:954: -1- m4_pattern_allow([^PKG_CPPFLAGS$])
+m4trace:configure.ac:957: -1- AC_SUBST([PKG_CPPFLAGS], ["${PKG_CPPFLAGS} -DACCEPT_USE_OF_DEPRECATED_PROJ_API_H"])
+m4trace:configure.ac:957: -1- AC_SUBST_TRACE([PKG_CPPFLAGS])
+m4trace:configure.ac:957: -1- m4_pattern_allow([^PKG_CPPFLAGS$])
+m4trace:configure.ac:959: -1- AC_SUBST([PKG_CPPFLAGS], ["${PKG_CPPFLAGS} ${NETCDF_CPPFLAGS}"])
+m4trace:configure.ac:959: -1- AC_SUBST_TRACE([PKG_CPPFLAGS])
+m4trace:configure.ac:959: -1- m4_pattern_allow([^PKG_CPPFLAGS$])
+m4trace:configure.ac:960: -1- AC_SUBST([PKG_CPPFLAGS], ["${PKG_CPPFLAGS} ${CZRL_CFLAGS}"])
+m4trace:configure.ac:960: -1- AC_SUBST_TRACE([PKG_CPPFLAGS])
+m4trace:configure.ac:960: -1- m4_pattern_allow([^PKG_CPPFLAGS$])
+m4trace:configure.ac:961: -1- AC_SUBST([PKG_CPPFLAGS], ["${PKG_CPPFLAGS} -DR_PACKAGE"])
+m4trace:configure.ac:961: -1- AC_SUBST_TRACE([PKG_CPPFLAGS])
+m4trace:configure.ac:961: -1- m4_pattern_allow([^PKG_CPPFLAGS$])
+m4trace:configure.ac:966: -1- AC_SUBST([PKG_LIBS], ["${INPKG_LIBS} ${GDAL_LIBS}"])
+m4trace:configure.ac:966: -1- AC_SUBST_TRACE([PKG_LIBS])
+m4trace:configure.ac:966: -1- m4_pattern_allow([^PKG_LIBS$])
+m4trace:configure.ac:968: -1- AC_SUBST([PKG_LIBS], ["${PKG_LIBS} ${GDAL_DEP_LIBS}"])
+m4trace:configure.ac:968: -1- AC_SUBST_TRACE([PKG_LIBS])
+m4trace:configure.ac:968: -1- m4_pattern_allow([^PKG_LIBS$])
+m4trace:configure.ac:971: -1- AC_SUBST([PKG_LIBS], ["${PKG_LIBS} -L${proj_lib_path}"])
+m4trace:configure.ac:971: -1- AC_SUBST_TRACE([PKG_LIBS])
+m4trace:configure.ac:971: -1- m4_pattern_allow([^PKG_LIBS$])
+m4trace:configure.ac:973: -1- AC_SUBST([PKG_LIBS], ["${PKG_LIBS} -lproj"])
+m4trace:configure.ac:973: -1- AC_SUBST_TRACE([PKG_LIBS])
+m4trace:configure.ac:973: -1- m4_pattern_allow([^PKG_LIBS$])
+m4trace:configure.ac:974: -1- AC_SUBST([PKG_LIBS], ["${PKG_LIBS}  ${NETCDF_LDFLAGS}"])
+m4trace:configure.ac:974: -1- AC_SUBST_TRACE([PKG_LIBS])
+m4trace:configure.ac:974: -1- m4_pattern_allow([^PKG_LIBS$])
+m4trace:configure.ac:975: -1- AC_SUBST([PKG_LIBS], ["${PKG_LIBS}  ${CURL_LIBS}"])
+m4trace:configure.ac:975: -1- AC_SUBST_TRACE([PKG_LIBS])
+m4trace:configure.ac:975: -1- m4_pattern_allow([^PKG_LIBS$])
+m4trace:configure.ac:982: -1- AC_CONFIG_FILES([src/Makevars])
+m4trace:configure.ac:983: -1- AC_SUBST([LIB@&t@OBJS], [$ac_libobjs])
+m4trace:configure.ac:983: -1- AC_SUBST_TRACE([LIB@&t@OBJS])
+m4trace:configure.ac:983: -1- m4_pattern_allow([^LIB@&t@OBJS$])
+m4trace:configure.ac:983: -1- AC_SUBST([LTLIBOBJS], [$ac_ltlibobjs])
+m4trace:configure.ac:983: -1- AC_SUBST_TRACE([LTLIBOBJS])
+m4trace:configure.ac:983: -1- m4_pattern_allow([^LTLIBOBJS$])
+m4trace:configure.ac:983: -1- AC_SUBST_TRACE([top_builddir])
+m4trace:configure.ac:983: -1- AC_SUBST_TRACE([top_build_prefix])
+m4trace:configure.ac:983: -1- AC_SUBST_TRACE([srcdir])
+m4trace:configure.ac:983: -1- AC_SUBST_TRACE([abs_srcdir])
+m4trace:configure.ac:983: -1- AC_SUBST_TRACE([top_srcdir])
+m4trace:configure.ac:983: -1- AC_SUBST_TRACE([abs_top_srcdir])
+m4trace:configure.ac:983: -1- AC_SUBST_TRACE([builddir])
+m4trace:configure.ac:983: -1- AC_SUBST_TRACE([abs_builddir])
+m4trace:configure.ac:983: -1- AC_SUBST_TRACE([abs_top_builddir])
