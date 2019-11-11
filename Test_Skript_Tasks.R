@@ -15,7 +15,7 @@ dates_low <- filenames_low %>%
   sapply(substr,8,10) %>% 
   as.numeric()
 
-dates_pred <- c(100,123,158,200,201,202,355)
+dates_pred <- c(50,51,100,107,123,125,126,128,155,158,200,201,202,280,281,282,283,355)
 filenames_pred <- paste("Pred_",dates_pred,".tif",sep = "")
 
 
@@ -48,25 +48,13 @@ all<- all %>% mutate(pred_case = case_when(
   predict == TRUE & has_low == TRUE & has_high==TRUE ~ 4,    #Both High and Low available. -> Prediction Unnecessary
   predict == TRUE & has_low == FALSE & has_high==TRUE ~ 5    #Only High available -> Prediction impossible, but unnecessary
 )) %>% 
-  mutate(interval_breaks = cut(date,breaks = c(0,pairs$date,Inf),right = T,include.lowest = T)) %>% 
-  mutate(interval_ids = cut(date,breaks = c(0,pairs$date,Inf),labels = F,right = T,include.lowest = T)) %>% 
+  mutate(interval_breaks = cut(date,breaks = c(-Inf,pairs$date,Inf),right = T,include.lowest = T)) %>% 
+  mutate(interval_ids = cut(date,breaks = c(-Inf,pairs$date,Inf),labels = F,right = T,include.lowest = T)) %>% 
   group_by(interval_ids) %>%
   mutate(interval_start = min(date)-1) %>% 
   mutate(interval_end = max(date)) %>% 
-  mutate(interval_npred = sum(predict,na.rm = T)) %>% 
+  mutate(interval_npred = sum(predict[pred_case==1],na.rm = T)) %>% 
   ungroup()
-all_tasks <- all %>%
-  group_by(interval_ids) %>% 
-  filter(interval_npred>0)
-
-####Plot Overview####
-ggplot(all, aes(x=date, y=resolutions,colour=resolutions,shape=predict,size=predict)) + 
-  ggtitle("Task Overview")+
-  geom_jitter(alpha=1,width=0,height=0.1) +
-  scale_y_discrete(name="",limits=c("FALSE-FALSE","FALSE-TRUE","TRUE-TRUE","TRUE-FALSE"),labels=c("None","Low","Both \n(Pair)","High"))+
-  scale_color_discrete(name="Available \nResolutions",labels=c("None","Low","Both \n(Pair)","High"))+
-  scale_shape_manual(name="Predict \nDate?",values=c(1,15))+
-  scale_size_manual(values=c(2,3),guide="none")
 
 case_1 <- all$date[all$pred_case==1]
 if(length(case_1)){cat(paste("Performing prediction for dates:", case_1))}
@@ -77,11 +65,47 @@ if(length(case_3)){cat(paste("Cannot attempt prediction for dates:", case_3,"\nN
 case_4 <- all$date[all$pred_case==4]
 if(length(case_4)){cat(paste("Will not attempt prediction for dates", case_4,"\nHigh and low resolution input images were found for those dates, making prediction possible, but unnecessary."))}
 case_5 <- all$date[all$pred_case==5]
-if(length(case_5)){cat(paste("Will not attempt prediction for dates", case_5,"\nOnly a high resolution input image was found for those dates,making prediction impossible but unnecessary."))}
+if(length(case_5)){cat(paste("Will not attempt prediction for dates", case_5,"\nOnly a high resolution input image was found for those dates, making prediction impossible but unnecessary."))}
 case_6 <- all$date[all$pred_case==6]
 
 
-####Prepare Prediction####
-all[all$predict,]
+####Find jobs####
+valid_job_table <- all %>% 
+  group_by(interval_ids,interval_breaks,interval_start,interval_end,interval_npred) %>% 
+  filter(sum(interval_npred)>0) %>% 
+  summarise()
 
 
+####Plot Overview####
+ggplot(all, aes(x=date, y=resolutions,colour=resolutions,shape=predict,size=predict)) + 
+  ggtitle("Task Overview")+
+  geom_jitter(alpha=1,width=0,height=0.1) +
+  scale_y_discrete(name="",limits=c("FALSE-FALSE","FALSE-TRUE","TRUE-TRUE","TRUE-FALSE"),labels=c("None","Low","Both \n(Pair)","High"))+
+  scale_color_discrete(name="Available \nResolutions",labels=c("None","Low","Both \n(Pair)","High"))+
+  scale_shape_manual(name="Predict \nDate?",values=c(1,15))+
+  scale_size_manual(values=c(2,3),guide="none")+
+  geom_rect(data=valid_job_table, aes(xmin=interval_start, xmax=interval_end, ymin=-Inf, ymax=+Inf),
+            color=rainbow(length(valid_job_table$interval_end)),
+            alpha=0.5,
+            inherit.aes = FALSE)
+
+
+####Predictions####
+#For every job
+for(i in 1:nrow(valid_job_table)){ 
+  #Get the pair dates
+  current_job <- valid_job_table[i,]
+  start <- current_job$interval_start
+  end <-  current_job$interval_end
+  current_case_1 <- all[all$interval_ids==current_job$interval_ids & all$pred_case == 1,]
+  current_case_2 <- all[all$interval_ids==current_job$interval_ids & all$pred_case == 2,]
+  current_case_3 <- all[all$interval_ids==current_job$interval_ids & all$pred_case == 3,]
+  current_case_4 <- all[all$interval_ids==current_job$interval_ids & all$pred_case == 4,]
+  current_case_5 <- all[all$interval_ids==current_job$interval_ids & all$pred_case == 5,]
+  #Start normal doublepair prediction (case1)
+  #2DO: Handle other cases
+  cat(paste("Starting Job ",i,"predicting in doublepair mode for dates", paste(current_case_1$date,collapse = " ")," in interval ", valid_job_table$interval_breaks[i]))
+
+  
+  
+}
