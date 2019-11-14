@@ -32,12 +32,12 @@
 #' @export
 #'
 #' @author Johannes Mast
-#' @details Executes the FITFC Algorithm.
+#' @details Executes the FITFC Algorithm. If more than one pair is given, will perform prediction for the pred dates twice, once for each of the input pairs.
 #' @examples Sorry, maybe later
 #' 
 #' 
 fitfc_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,pred_filenames,pred_area,winsize,date1,date3,n_cores,n_neighbors,hightag,lowtag,MASKIMG_options,MASKRANGE_options,output_masks,use_nodata_value,use_parallelisation,resolution_factor 
-) {
+){
   library(assertthat)
   library(raster)
   
@@ -156,8 +156,14 @@ fitfc_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,p
   }else{
     date1_c <- pair_dates[1]
   }
-  
-  
+  #Note: If only one pair was given, Date1 and Date3 should be identical.
+  if(!missing(date3)){
+    assert_that(class(date3)=="numeric")
+    date3_c <- date3
+  }else{
+    date3_c <- pair_dates[length(pair_dates)]
+  }
+    
   #### n_cores ####
   if(!missing(n_cores)){
     assert_that(class(n_cores)=="numeric",
@@ -246,9 +252,14 @@ fitfc_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,p
     print(paste("USING PARALLELISATION WITH ", n_cores_c," CORES"))
   }
   
+  testnameremovelater <- c("../Fitfc_Test_Singleband.tif","lol.tiff")
+  
+
   
   #___________________________________________________________________________#
-  #Call the cpp fusion function with the checked inputs
+  #If we are in singlepair mode (only one pair specified)
+  if(date1_c==date3_c){
+  #Call the cpp fusion function once from date 1 with the checked inputs
   ImageFusion::execute_fitfc_job_cpp(input_filenames = input_filenames_c,
                                       input_resolutions = input_resolutions_c,
                                       input_dates = input_dates_c,
@@ -268,6 +279,62 @@ fitfc_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,p
                                       MASKIMG_options = MASKIMG_options_c,
                                       MASKRANGE_options = MASKRANGE_options_c
   )
+  }
+  #If we are in "doublepair" mode (two pairs specified)
+  if(date1_c!=date3_c){
+    #Call the cpp function twice, once based on each input pair
+    #modify output names a bit to make them unique for each input pair
+    pred_filenames_c1 <- paste(paste(tools::file_path_sans_ext(pred_filenames_c),"from_pair",date1_c,sep="_"),tools::file_ext(pred_filenames_c),sep=".")
+    #executre job from date1
+    ImageFusion::execute_fitfc_job_cpp(input_filenames = input_filenames_c,
+                                       input_resolutions = input_resolutions_c,
+                                       input_dates = input_dates_c,
+                                       pred_dates = pred_dates_c,
+                                       pred_filenames = pred_filenames_c1,
+                                       pred_area = pred_area_c,
+                                       winsize = winsize_c,
+                                       date1 = date1_c,
+                                       n_cores = n_cores_c,
+                                       n_neighbors = n_neighbors_c,
+                                       output_masks = output_masks_c,
+                                       use_nodata_value = use_nodata_value_c,
+                                       use_parallelisation = use_parallelisation_c,
+                                       resolution_factor = resolution_factor_c,
+                                       hightag = hightag_c,
+                                       lowtag = lowtag_c,
+                                       MASKIMG_options = MASKIMG_options_c,
+                                       MASKRANGE_options = MASKRANGE_options_c
+    )
+    #modify output names a bit to make them unique for each input pair
+    pred_filenames_c3 <- paste(paste(tools::file_path_sans_ext(pred_filenames_c),"from_pair",date3_c,sep="_"),tools::file_ext(pred_filenames_c),sep=".")
+    #execture job fromdate 3
+    ImageFusion::execute_fitfc_job_cpp(input_filenames = input_filenames_c,
+                                       input_resolutions = input_resolutions_c,
+                                       input_dates = input_dates_c,
+                                       pred_dates = pred_dates_c,
+                                       pred_filenames = pred_filenames_c3,
+                                       pred_area = pred_area_c,
+                                       winsize = winsize_c,
+                                       date1 = date3_c,
+                                       n_cores = n_cores_c,
+                                       n_neighbors = n_neighbors_c,
+                                       output_masks = output_masks_c,
+                                       use_nodata_value = use_nodata_value_c,
+                                       use_parallelisation = use_parallelisation_c,
+                                       resolution_factor = resolution_factor_c,
+                                       hightag = hightag_c,
+                                       lowtag = lowtag_c,
+                                       MASKIMG_options = MASKIMG_options_c,
+                                       MASKRANGE_options = MASKRANGE_options_c
+    )
+    
+    
+  }
+  
+  #
+  
+  
+  
   #___________________________________________________________________________#
   
 }

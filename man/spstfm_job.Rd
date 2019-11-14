@@ -73,8 +73,7 @@ spstfm_job(input_filenames, input_resolutions, input_dates, pred_dates,
 
 \item{use_parallelisation}{(Optional) Use parallelisation when possible? Note that parallelisation is currently not implemented for spstfm, and only listed here for consistency. Default is "false".}
 
-\item{random_sampling}{(Optional) Use random samples for training data instead of the samples with the most variance? Default is "false".
-@references Huang, B., & Song, H. (2012). Spatiotemporal reflectance fusion via sparse representation. IEEE Transactions on Geoscience and Remote Sensing, 50(10), 3707-3716.}
+\item{random_sampling}{(Optional) Use random samples for training data instead of the samples with the most variance? Default is "false".}
 }
 \value{
 Nothing. Output files are written to disk. The Geoinformation for the output images is adopted from the first input pair images.
@@ -87,6 +86,9 @@ Executes the SPSTFM algorithm to create a number of synthetic high-resolution im
 }
 \examples{
 Sorry, maybe later
+}
+\references{
+Huang, B., & Song, H. (2012). Spatiotemporal reflectance fusion via sparse representation. IEEE Transactions on Geoscience and Remote Sensing, 50(10), 3707-3716.
 }
 \author{
 Johannes Mast

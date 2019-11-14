@@ -1,7 +1,7 @@
 #Add the gdal opencv headers and the imagefusion headers from the /include directory
-PKG_CPPFLAGS= -I/usr/include/gdal -I/usr/include -I/usr/include/hdf5/serial  -DR_PACKAGE  `$(R_HOME)/bin/Rscript -e 'ROpenCVLite::opencvConfig("cflags")'`  -I../src/include -I../src/utils/helpers 
+PKG_CPPFLAGS= `$(R_HOME)/bin/Rscript -e 'ROpenCVLite::opencvConfig("cflags")'`  -I/usr/include/gdal -I/usr/include -I/usr/include/hdf5/serial  -DR_PACKAGE -I../src/utils/helpers 
 #Also include boost_filesystem manually 
-PKG_LIBS= -L/usr/lib -lgdal -lproj    -Wl,-rpath,/usr/lib/x86_64-linux-gnu -Wl,-rpath,/usr/lib/x86_64-linux-gnu/hdf5/serial -L/usr/lib/x86_64-linux-gnu -L/usr/lib/x86_64-linux-gnu/hdf5/serial -lnetcdf -lhdf5_hl -lhdf5 -lpthread -lsz -lz -ldl -lm -lcurl   -lcurl -L/usr/include -lboost_filesystem `$(R_HOME)/bin/Rscript -e 'ROpenCVLite::opencvConfig("libs")'`
+PKG_LIBS= `$(R_HOME)/bin/Rscript -e 'ROpenCVLite::opencvConfig("libs")'` -lboost_filesystem  -L/usr/lib -lgdal -lproj    -Wl,-rpath,/usr/lib/x86_64-linux-gnu -Wl,-rpath,/usr/lib/x86_64-linux-gnu/hdf5/serial -L/usr/lib/x86_64-linux-gnu -L/usr/lib/x86_64-linux-gnu/hdf5/serial -lnetcdf -lhdf5_hl -lhdf5 -lpthread -lsz -lz -ldl -lm -lcurl   -lcurl -L/usr/include 
 PKG_CXXFLAGS = -Iinclude 
 CXX_STD=CXX11
 
@@ -9,4 +9,3 @@ CXX_STD=CXX11
 CPPFILES = $(wildcard *.cpp src/*.cpp utils/helpers/*common.cpp)
 SOURCES = $(CPPFILES)
 OBJECTS = $(CPPFILES:.cpp=.o)
-

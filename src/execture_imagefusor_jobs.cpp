@@ -5,7 +5,6 @@
 #include "spstfm.h"
 #include "utils_common.h"
 #include "MultiResImages.h"
-
 #include <boost/filesystem.hpp>
 #ifdef WITH_OMP
 #include "Parallelizer.h"

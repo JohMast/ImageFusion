@@ -1,12 +1,8 @@
 
 #include <Rcpp.h>
-#include <gdal.h>
-#include <opencv2/opencv.hpp>
+//#include <gdal.h>
 #include "Estarfm.h"
 using namespace Rcpp;
-
-
-
 
 
 

@@ -60,7 +60,7 @@ Nothing. Output files are written to disk. The Geoinformation for the output ima
 A wrapper function for \code{execute_fitfc_job_cpp}. Intended to execute a single job, that is a number of predictions based on the same input pair(s). It ensures that all of the arguments passed are of the correct type and creates sensible defaults.
 }
 \details{
-Executes the FITFC Algorithm.
+Executes the FITFC Algorithm. If more than one pair is given, will perform prediction for the pred dates twice, once for each of the input pairs.
 }
 \examples{
 Sorry, maybe later
