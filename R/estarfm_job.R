@@ -43,7 +43,7 @@
 #' @examples Sorry, maybe later
 
 
-estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,pred_filenames,pred_area,winsize,date1,date3,n_cores,data_range_min, data_range_max, uncertainty_factor,number_classes,hightag,lowtag,MASKIMG_options,MASKRANGE_options,use_local_tol,use_quality_weighted_regression,output_masks,use_nodata_value,use_parallelisation
+estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,pred_filenames,pred_area,winsize,date1,date3,n_cores,data_range_min, data_range_max, uncertainty_factor,number_classes,hightag,lowtag,MASKIMG_options,MASKRANGE_options,use_local_tol,use_quality_weighted_regression,output_masks,use_nodata_value,use_parallelisation,verbose=T
                         ) {
   library(assertthat)
   library(raster)
@@ -211,7 +211,7 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
   #Get the High and Low Dates and Pair Dates for finding the first and last pair
   high_dates <- input_dates[input_resolutions==hightag_c]
   low_dates <- input_dates[input_resolutions==lowtag_c]
-  pair_dates <- as.numeric(names(which(table(c(unique(high_dates),unique(low_dates)))>=2)))
+  pair_dates <- as.numeric(names(table(c(unique(high_dates),unique(low_dates))))[which(table(c(unique(high_dates),unique(low_dates)))>=2)])
   
   if(!missing(date1)){
     assert_that(class(date1)=="numeric")
@@ -263,7 +263,7 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
   #Get the High and Low Dates and Pair Dates just for checking
   high_dates <- input_dates[input_resolutions==hightag_c]
   low_dates <- input_dates[input_resolutions==lowtag_c]
-  pair_dates <- as.numeric(names(which(table(c(unique(high_dates),unique(low_dates)))>=2)))
+  pair_dates <- as.numeric(names(table(c(unique(high_dates),unique(low_dates))))[which(table(c(unique(high_dates),unique(low_dates)))>=2)])
   
   
   
@@ -285,37 +285,38 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
   
   
   ##### C: Call the CPP function #####
-  #And print the used parameters 
-  print("Input Filenames: ")
-  print(input_filenames_c)
-  print("Input Resolutions: ")
-  print(input_resolutions_c)
-  print("Input Dates: ")
-  print(input_dates_c)
-  print("Prediction Filenames: ")
-  print(pred_filenames_c)
-  print("Prediction Dates: ")
-  print(pred_dates_c)
-  print("Predicting between Pairs on Dates:")
-  print(paste(date1_c,date3_c))
-  print("Prediction Area: ")
-  print(pred_area_c)
-  print("Number Classes: ")
-  print(number_classes_c)
-  print("Data_Range: ")
-  print(paste(data_range_min_c, data_range_max_c))
-  if (!grepl("^\\s*$", MASKIMG_options_c)){
-    print("MASKIMG Options: ")
-    print(MASKIMG_options_c)
+  if(verbose){
+    #And print the used parameters 
+    print("Input Filenames: ")
+    print(input_filenames_c)
+    print("Input Resolutions: ")
+    print(input_resolutions_c)
+    print("Input Dates: ")
+    print(input_dates_c)
+    print("Prediction Filenames: ")
+    print(pred_filenames_c)
+    print("Prediction Dates: ")
+    print(pred_dates_c)
+    print("Predicting between Pairs on Dates:")
+    print(paste(date1_c,date3_c))
+    print("Prediction Area: ")
+    print(pred_area_c)
+    print("Number Classes: ")
+    print(number_classes_c)
+    print("Data_Range: ")
+    print(paste(data_range_min_c, data_range_max_c))
+    if (!grepl("^\\s*$", MASKIMG_options_c)){
+      print("MASKIMG Options: ")
+      print(MASKIMG_options_c)
+    }
+    if (!grepl("^\\s*$", MASKRANGE_options_c)){
+      print("MASKRANGE Options: ")
+      print(MASKRANGE_options_c)
+    }
+    if(use_parallelisation_c){
+      print(paste("USING PARALLELISATION WITH ", n_cores_c," CORES"))
+    }
   }
-  if (!grepl("^\\s*$", MASKRANGE_options_c)){
-    print("MASKRANGE Options: ")
-    print(MASKRANGE_options_c)
-  }
-  if(use_parallelisation_c){
-    print(paste("USING PARALLELISATION WITH ", n_cores_c," CORES"))
-  }
-  
   
   #Call the cpp fusion function with the checked inputs
   ImageFusion::execute_estarfm_job_cpp(input_filenames = input_filenames_c,

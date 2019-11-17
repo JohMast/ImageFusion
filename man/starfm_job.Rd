@@ -8,8 +8,8 @@ starfm_job(input_filenames, input_resolutions, input_dates, pred_dates,
   pred_filenames, pred_area, winsize, date1, date3, n_cores, logscale_factor,
   spectral_uncertainty, temporal_uncertainty, number_classes, hightag, lowtag,
   MASKIMG_options, MASKRANGE_options, output_masks, use_nodata_value,
-  use_parallelisation, use_strict_filtering, use_temp_diff_for_weights,
-  do_copy_on_zero_diff, double_pair_mode)
+  use_parallelisation, use_strict_filtering, double_pair_mode,
+  use_temp_diff_for_weights, do_copy_on_zero_diff, verbose = T)
 }
 \arguments{
 \item{input_filenames}{A string vector containing the filenames of the input images}
@@ -66,8 +66,6 @@ starfm_job(input_filenames, input_resolutions, input_dates, pred_dates,
 \item{use_temp_diff_for_weights}{(Optional) Use temporal difference in the candidates weight (like in the paper)? Default is to use temporal weighting in double pair mode, and to not use it in single pair mode.}
 
 \item{do_copy_on_zero_diff}{(Optional) Predict for all pixels, even for pixels with zero temporal or spectral difference (behaviour of the reference implementation). Default is "false".}
-
-\item{double_pair_mode}{(Optional) Use two dates \code{date1} and \code{date3} for prediction, instead of just \code{date1} for all predictions? Default is "true" if *all* the pred dates are in between input pairs, and "false" otherwise. Note: It may be desirable to predict in double-pair mode where possible, as in the following example: \code{[(7) 10 12 (13) 14] } , where we may wish to predict 10 and 12 in double pair mode, but can only predict 14 in single-pair mode. Do achieve this it is necessary to split the task into different jobs.}
 }
 \value{
 Nothing. Output files are written to disk. The Geoinformation for the output images is adopted from the first input pair images.

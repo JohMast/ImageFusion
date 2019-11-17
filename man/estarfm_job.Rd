@@ -9,7 +9,7 @@ estarfm_job(input_filenames, input_resolutions, input_dates, pred_dates,
   data_range_max, uncertainty_factor, number_classes, hightag, lowtag,
   MASKIMG_options, MASKRANGE_options, use_local_tol,
   use_quality_weighted_regression, output_masks, use_nodata_value,
-  use_parallelisation)
+  use_parallelisation, verbose = T)
 }
 \arguments{
 \item{input_filenames}{A string vector containing the filenames of the input images}

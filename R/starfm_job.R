@@ -31,7 +31,7 @@
 #' @param use_nodata_value (Optional) Use the nodata value as invalid range for masking? Default is "true".
 #' @param use_parallelisation (Optional) Use parallelisation when possible? Default is "false".
 #' @param use_strict_filtering (Optional) Use strict filtering, which means that candidate pixels will be accepted only if they have less temporal *and* spectral difference than the central pixel (like in the paper). Default is "false".
-## @param double_pair_mode (Optional) Use two dates \code{date1} and \code{date3} for prediction, instead of just \code{date1} for all predictions? Default is "true" if *all* the pred dates are in between input pairs, and "false" otherwise. Note: It may be desirable to predict in double-pair mode where possible, as in the following example: \code{[(7) 10 12 (13) 14] } , where we may wish to predict 10 and 12 in double pair mode, but can only predict 14 in single-pair mode. Do achieve this it is necessary to split the task into different jobs.
+# @param double_pair_mode (Optional) Use two dates \code{date1} and \code{date3} for prediction, instead of just \code{date1} for all predictions? Default is "true" if *all* the pred dates are in between input pairs, and "false" otherwise. Note: It may be desirable to predict in double-pair mode where possible, as in the following example: \code{[(7) 10 12 (13) 14] } , where we may wish to predict 10 and 12 in double pair mode, but can only predict 14 in single-pair mode. Do achieve this it is necessary to split the task into different jobs.
 #' @param use_temp_diff_for_weights (Optional) Use temporal difference in the candidates weight (like in the paper)? Default is to use temporal weighting in double pair mode, and to not use it in single pair mode.
 #' @param do_copy_on_zero_diff (Optional) Predict for all pixels, even for pixels with zero temporal or spectral difference (behaviour of the reference implementation). Default is "false".
 #' @references Gao, Feng, et al. "On the blending of the Landsat and MODIS surface reflectance: Predicting daily Landsat surface reflectance." IEEE Transactions on Geoscience and Remote sensing 44.8 (2006): 2207-2218.
@@ -50,8 +50,7 @@
 #' @examples Sorry, maybe later
 #' 
 #' 
-starfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,pred_filenames,pred_area,winsize,date1,date3,n_cores, logscale_factor,spectral_uncertainty, temporal_uncertainty, number_classes,hightag,lowtag,MASKIMG_options,MASKRANGE_options,output_masks,use_nodata_value,use_parallelisation,use_strict_filtering,use_temp_diff_for_weights,do_copy_on_zero_diff, 
-) {
+starfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,pred_filenames,pred_area,winsize,date1,date3,n_cores, logscale_factor,spectral_uncertainty, temporal_uncertainty, number_classes,hightag,lowtag,MASKIMG_options,MASKRANGE_options,output_masks,use_nodata_value,use_parallelisation,use_strict_filtering,double_pair_mode,use_temp_diff_for_weights,do_copy_on_zero_diff,verbose=T) {
   library(assertthat)
   library(raster)
   
@@ -194,20 +193,20 @@ starfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,
   
   
   # #### double_pair_mode ####
-  # if(!missing(double_pair_mode)){
-  #   assert_that(class(double_pair_mode)=="logical")
-  #   double_pair_mode_c <- double_pair_mode
-  # }else{  
-  #   #Check if our pred dates are between two pair dates
-  #   high_dates <- input_dates[input_resolutions==hightag_c]
-  #   low_dates <- input_dates[input_resolutions==lowtag_c]
-  #   pair_dates <- which(table(c(unique(high_dates),unique(low_dates)))>=2)
-  #   if(length(pair_dates)>=2 & any(!pred_dates>max(pair_dates)) & any(!pred_dates<min(pair_dates))){
-  #     double_pair_mode_c = TRUE
-  #   }else{
-  #     double_pair_mode_c = FALSE
-  #   }
-  # }
+  if(!missing(double_pair_mode)){
+    assert_that(class(double_pair_mode)=="logical")
+    double_pair_mode_c <- double_pair_mode
+  }else{
+    #Check if our pred dates are between two pair dates
+    high_dates <- input_dates[input_resolutions==hightag_c]
+    low_dates <- input_dates[input_resolutions==lowtag_c]
+    pair_dates <- as.numeric(names(table(c(unique(high_dates),unique(low_dates))))[which(table(c(unique(high_dates),unique(low_dates)))>=2)])
+    if(length(pair_dates)>=2 & any(!pred_dates>max(pair_dates)) & any(!pred_dates<min(pair_dates))){
+      double_pair_mode_c = TRUE
+    }else{
+      double_pair_mode_c = FALSE
+    }
+  }
   #### use_temp_diff_for_weights ####
   if(!missing(use_temp_diff_for_weights)){
     assert_that(class(use_temp_diff_for_weights)=="logical")
@@ -237,7 +236,7 @@ starfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,
   #Get the High and Low Dates and Pair Dates for finding the first and last pair
   high_dates <- input_dates[input_resolutions==hightag_c]
   low_dates <- input_dates[input_resolutions==lowtag_c]
-  pair_dates <- as.numeric(names(which(table(c(unique(high_dates),unique(low_dates)))>=2)))
+  pair_dates <- as.numeric(names(table(c(unique(high_dates),unique(low_dates))))[which(table(c(unique(high_dates),unique(low_dates)))>=2)])
   
   if(!missing(date1)){
     assert_that(class(date1)=="numeric")
@@ -288,18 +287,18 @@ starfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,
   #Get the High and Low Dates and Pair Dates just for checking
   high_dates <- input_dates[input_resolutions==hightag_c]
   low_dates <- input_dates[input_resolutions==lowtag_c]
-  pair_dates <- as.numeric(names(which(table(c(unique(high_dates),unique(low_dates)))>=2)))
+  pair_dates <- as.numeric(names(table(c(unique(high_dates),unique(low_dates))))[which(table(c(unique(high_dates),unique(low_dates)))>=2)])
   
   
   
   #Some further Assertions
 
   assert_that(
-#    !double_pair_mode_c | length(pair_dates)>=2,             #At least two pairs in doublepair mode?
-#    double_pair_mode_c | length(pair_dates)>=1,             #At least one pair in singlepair mode?
-#    !double_pair_mode_c | any(!pred_dates>max(pair_dates)),  #Pred Dates within the Interval in doublepair mode?
-#    !double_pair_mode_c | any(!pred_dates<min(pair_dates)),   #Pred Dates within the Interval in doublepair mode?
-#    all(input_resolutions %in% c(hightag_c, lowtag_c)) #Resolutions given consistent with hightag and lowtag
+   !double_pair_mode_c | length(pair_dates)>=2,             #At least two pairs in doublepair mode?
+   double_pair_mode_c | length(pair_dates)>=1,             #At least one pair in singlepair mode?
+   !double_pair_mode_c | any(!pred_dates>max(pair_dates)),  #Pred Dates within the Interval in doublepair mode?
+   !double_pair_mode_c | any(!pred_dates<min(pair_dates)),   #Pred Dates within the Interval in doublepair mode?
+   all(input_resolutions %in% c(hightag_c, lowtag_c)) #Resolutions given consistent with hightag and lowtag
   )
   
   
@@ -311,40 +310,41 @@ starfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,
   
   
   ##### C: Call the CPP function #####
-  #And print the used parameters 
-  print("Input Filenames: ")
-  print(input_filenames_c)
-  print("Input Resolutions: ")
-  print(input_resolutions_c)
-  print("Input Dates: ")
-  print(input_dates_c)
-  print("Prediction Filenames: ")
-  print(pred_filenames_c)
-  print("Prediction Dates: ")
-  print(pred_dates_c)
-  # if(double_pair_mode_c){
-  #   print("Predicting between Pairs on Dates:")
-  #   print(paste(date1_c,date3_c))
-  # }else{
-    print("Predicting from Pair on Date:")
-    print(paste(date1_c))
-  # }
-  print("Prediction Area: ")
-  print(pred_area_c)
-  print("Number Classes: ")
-  print(number_classes_c)
-  if (!grepl("^\\s*$", MASKIMG_options_c)){
-    print("MASKIMG Options: ")
-    print(MASKIMG_options_c)
+  if(verbose){
+    #And print the used parameters 
+    print("Input Filenames: ")
+    print(input_filenames_c)
+    print("Input Resolutions: ")
+    print(input_resolutions_c)
+    print("Input Dates: ")
+    print(input_dates_c)
+    print("Prediction Filenames: ")
+    print(pred_filenames_c)
+    print("Prediction Dates: ")
+    print(pred_dates_c)
+     if(double_pair_mode_c){
+       print("Predicting between Pairs on Dates:")
+       print(paste(date1_c,date3_c))
+     }else{
+      print("Predicting from Pair on Date:")
+      print(paste(date1_c))
+     }
+    print("Prediction Area: ")
+    print(pred_area_c)
+    print("Number Classes: ")
+    print(number_classes_c)
+    if (!grepl("^\\s*$", MASKIMG_options_c)){
+      print("MASKIMG Options: ")
+      print(MASKIMG_options_c)
+    }
+    if (!grepl("^\\s*$", MASKRANGE_options_c)){
+      print("MASKRANGE Options: ")
+      print(MASKRANGE_options_c)
+    }
+    if(use_parallelisation_c){
+      print(paste("USING PARALLELISATION WITH ", n_cores_c," CORES"))
+    }
   }
-  if (!grepl("^\\s*$", MASKRANGE_options_c)){
-    print("MASKRANGE Options: ")
-    print(MASKRANGE_options_c)
-  }
-  if(use_parallelisation_c){
-    print(paste("USING PARALLELISATION WITH ", n_cores_c," CORES"))
-  }
-  
   
   #___________________________________________________________________________#
   #Call the cpp fusion function with the checked inputs
@@ -364,7 +364,7 @@ starfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,
                                       use_strict_filtering = use_strict_filtering_c,
                                       use_temp_diff_for_weights = use_temp_diff_for_weights_c,
                                       do_copy_on_zero_diff = do_copy_on_zero_diff_c,
-                                      #double_pair_mode = double_pair_mode_c,
+                                      double_pair_mode = double_pair_mode_c,
                                       number_classes = number_classes_c,
                                       logscale_factor = logscale_factor_c,
                                       spectral_uncertainty = spectral_uncertainty_c,
@@ -372,7 +372,8 @@ starfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,
                                       hightag = hightag_c,
                                       lowtag = lowtag_c,
                                       MASKIMG_options = MASKIMG_options_c,
-                                      MASKRANGE_options = MASKRANGE_options_c
+                                      MASKRANGE_options = MASKRANGE_options_c,
+                                      verbose=verbose
   )
   #___________________________________________________________________________#
   

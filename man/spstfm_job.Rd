@@ -9,7 +9,7 @@ spstfm_job(input_filenames, input_resolutions, input_dates, pred_dates,
   n_training_samples, patch_size, patch_overlap, min_train_iter, max_train_iter,
   hightag, lowtag, MASKIMG_options, MASKRANGE_options, LOADDICT_options,
   SAVEDICT_options, REUSE_options, output_masks, use_nodata_value,
-  use_parallelisation, random_sampling)
+  use_parallelisation, random_sampling, verbose = T)
 }
 \arguments{
 \item{input_filenames}{A string vector containing the filenames of the input images}

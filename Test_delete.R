@@ -1,33 +1,9 @@
-library(dplyr)
-library(ggplot2)
-library(assertthat)
-filenames_high <- list.files("../../Test/Landsat_MODIS_Fusion/Landsat_2015/",pattern = ".tif",full.names = T)
-filenames_low <- list.files("../../Test/Landsat_MODIS_Fusion/MODIS_2015/",pattern = ".tif",full.names = T)
-#drop a couple images for testing purposes
-filenames_low <- filenames_low[-c(84,123,158)]
-
-dates_high <- filenames_high %>%
-  sapply(substr,64,71) %>%
-  as.POSIXct(format="%Y%m%d") %>% 
-  strftime(format = "%j") %>% 
-  as.numeric()
-dates_low <- filenames_low %>% 
-  sapply(substr,52,54) %>% 
-  as.numeric()
-
-dates_pred <- c(50,51,100,107,123,125,126,128,155,158,200,201,202,280,281,282,283,355)
-
-singlepair_mode <- "mixed"
 
 
-
-
-
-
-
+imagefusion_task <- function(...,filenames_high,filenames_low,dates_high,dates_low,dates_pred,singlepair_mode="mixed",method="starfm"){
 
 ####1: Prepare Inputs####
-filenames_pred <- paste("Pred_",dates_pred,".tif",sep = "")  #Make plausible out filenames
+filenames_pred <- paste("../../Pred_",dates_pred,".tif",sep = "")  #Make plausible out filenames
 
 #Make sure that method is plausible
 assert_that(method %in% c("estarfm","fitfc","spstfm","starfm"))
@@ -81,9 +57,9 @@ if(singlepair_mode=="ignore"){
   all <- all %>% 
     mutate(interval_pairs = cut(date,breaks = c(-Inf,pairs$date,Inf),right = T,include.lowest = T)) %>% 
     mutate(interval_ids = cut(date,breaks = c(-Inf,pairs$date,Inf),labels = F,right = T,include.lowest = T)) %>% 
-    mutate(interval_pair1 = apply(cbind(lower = as.numeric( sub("\\((.+),.*", "\\1", interval_pairs) ),
+    mutate(interval_startpair = apply(cbind(lower = as.numeric( sub("\\((.+),.*", "\\1", interval_pairs) ),
                                         upper = as.numeric( sub("[^,]*,([^]]*)\\]", "\\1", interval_pairs))), 1, function(x) min(x[!(is.infinite(x)|is.na(x))]))) %>% 
-    mutate(interval_pair3 = apply(cbind(lower = as.numeric( sub("\\((.+),.*", "\\1", interval_pairs) ),
+    mutate(interval_endpair = apply(cbind(lower = as.numeric( sub("\\((.+),.*", "\\1", interval_pairs) ),
                                         upper = as.numeric( sub("[^,]*,([^]]*)\\]", "\\1", interval_pairs))), 1, function(x) max(x[!(is.infinite(x)|is.na(x))]))) %>% 
     group_by(interval_ids) %>%
     mutate(interval_start = min(date)-1) %>% 
@@ -95,9 +71,9 @@ if(singlepair_mode=="mixed"){
   all <- all %>% 
     mutate(interval_pairs = cut(date,breaks = c(-Inf,pairs$date,Inf),right = T,include.lowest = T)) %>% 
     mutate(interval_ids = cut(date,breaks = c(-Inf,pairs$date,Inf),labels = F,right = T,include.lowest = T)) %>%
-    mutate(interval_pair1 = apply(cbind(lower = as.numeric( sub("\\((.+),.*", "\\1", interval_pairs) ),
+    mutate(interval_startpair = apply(cbind(lower = as.numeric( sub("\\((.+),.*", "\\1", interval_pairs) ),
                                         upper = as.numeric( sub("[^,]*,([^]]*)\\]", "\\1", interval_pairs))), 1, function(x) min(x[!(is.infinite(x)|is.na(x))]))) %>% 
-    mutate(interval_pair3 = apply(cbind(lower = as.numeric( sub("\\((.+),.*", "\\1", interval_pairs) ),
+    mutate(interval_endpair = apply(cbind(lower = as.numeric( sub("\\((.+),.*", "\\1", interval_pairs) ),
                                         upper = as.numeric( sub("[^,]*,([^]]*)\\]", "\\1", interval_pairs))), 1, function(x) max(x[!(is.infinite(x)|is.na(x))]))) %>% 
     
     group_by(interval_ids) %>%
@@ -110,8 +86,8 @@ if(singlepair_mode=="all"){
   all <- all %>% 
     mutate(interval_pairs = as.factor(sapply(date, FUN = function(x) {pairs$date[which.min(abs(pairs$date-x))]}))) %>% 
     mutate(interval_ids = sapply(date, FUN = function(x) {which.min(abs(pairs$date-x))})) %>%
-    mutate(interval_pair1 = interval_pairs) %>% 
-    mutate(interval_pair3 = interval_pairs) %>% 
+    mutate(interval_startpair = interval_pairs) %>% 
+    mutate(interval_endpair = interval_pairs) %>% 
     group_by(interval_ids) %>%
     mutate(interval_start = min(date)-1) %>% 
     mutate(interval_end = max(date)) %>% 
@@ -122,7 +98,8 @@ if(singlepair_mode=="all"){
 
 
 #Output Task overview
-print("=======================TASK OVERVIEW========================")
+cat("\n=======================TASK OVERVIEW========================")
+case_1 <- all$date[all$pred_case==1]
 if(length(case_1)){cat(paste("Detected Dates between pairs:", paste(case_1,collapse = ",")))
   if(singlepair_mode=="all"){cat("\nPerforming Singlepair mode prediction for these dates.")}
   if(singlepair_mode=="mixed"){cat("\nPerforming Doublepair mode prediction for these dates.")}}
@@ -136,26 +113,18 @@ case_4 <- all$date[all$pred_case==4]
 if(length(case_4)){cat(paste("Will not attempt prediction for dates", paste(case_4,collapse = ","),"\nHigh and low resolution input images were found for those dates, making prediction possible, but unnecessary."))}
 case_5 <- all$date[all$pred_case==5]
 if(length(case_5)){cat(paste("Will not attempt prediction for dates", paste(case_5,collapse = ","),"\nOnly a high resolution input image was found for those dates, making prediction impossible but unnecessary."))}
-case_6 <- all$date[all$pred_case==6]
-print("============================================================")
+
+cat("\n============================================================")
 
 
 #Find jobs
-if(singlepair_mode %in% c("mixed","ignore"))
-valid_job_table <- all %>% 
-  group_by(interval_ids,interval_pairs,interval_start,interval_end,interval_npred,interval_pair1,interval_pair3) %>% 
-  filter(sum(interval_npred)>0) %>% 
-  summarise()
-#Find jobs
-if(singlepair_mode == "all")
   valid_job_table <- all %>% 
-  group_by(interval_ids,interval_pairs,interval_start,interval_end,interval_npred,interval_pair1,interval_pair3) %>% 
+  group_by(interval_ids,interval_pairs,interval_start,interval_end,interval_npred,interval_startpair,interval_endpair) %>% 
   filter(sum(interval_npred)>0) %>% 
   summarise()
-
 
 #Plot Overview
-ggplot(all, aes(x=date, y=resolutions,colour=resolutions,shape=predict,size=predict)) + 
+p <- ggplot(all, aes(x=date, y=resolutions,colour=resolutions,shape=predict,size=predict)) + 
   ggtitle("Task Overview")+
   scale_y_discrete(name="",limits=c("FALSE-FALSE","FALSE-TRUE","TRUE-TRUE","TRUE-FALSE"),labels=c("None","Low","Both \n(Pair)","High"))+
   scale_color_discrete(name="Available \nResolutions",labels=c("None","Low","Both \n(Pair)","High"))+
@@ -169,99 +138,128 @@ ggplot(all, aes(x=date, y=resolutions,colour=resolutions,shape=predict,size=pred
 
 
 
-####3: Predictions####
-# 
-# for(i in 1:nrow(valid_job_table)){ #For every job
-#   #Get the pair dates
-#   current_job <- valid_job_table[i,]
-#   current_case_1 <- all[all$interval_ids==current_job$interval_ids & all$pred_case == 1,]
-#   current_case_2 <- all[all$interval_ids==current_job$interval_ids & all$pred_case == 2,]
-#   current_case_3 <- all[all$interval_ids==current_job$interval_ids & all$pred_case == 3,]
-#   current_case_4 <- all[all$interval_ids==current_job$interval_ids & all$pred_case == 4,]
-#   current_case_5 <- all[all$interval_ids==current_job$interval_ids & all$pred_case == 5,]
-#   
-#   
-#   #Process Cases 1
-#   if(nrow(current_case_1)){
-#     start <- current_job$interval_start
-#     startdate <- all[all$date==start,]
-#     end <-  current_job$interval_end
-#     enddate <- all[all$date==end,]
-#     cat(paste("Job ",i,"predicting in doublepair mode for dates", paste(current_case_1$date,collapse = " ")," based on pairs on dates  ", valid_job_table$interval_pairs[i]))
-#     #ESTARFM
-#     if(method=="estarfm"){
-#       ImageFusion::estarfm_job(input_filenames = c(startdate$files_high,
-#                                                    startdate$files_low,
-#                                                    enddate$files_high,
-#                                                    enddate$files_low,
-#                                                    current_case_1$files_low),
-#                                input_resolutions = c("high","low","high","low",rep("low",nrow(current_case_1))),
-#                                input_dates = c(start,start,end,end,current_case_1$date),
-#                                pred_dates = current_case_1$date,
-#                                pred_filenames =  current_case_1$files_pred,
-#                                pred_area = c(400,    400, 100,  100),...
-#       )
-#     }
-#     #FITFC
-#     if(method=="fitfc"){
-#       ImageFusion::fitfc_job(input_filenames = c(startdate$files_high,
-#                                                  startdate$files_low,
-#                                                  enddate$files_high,
-#                                                  enddate$files_low,
-#                                                  current_case_1$files_low),
-#                              input_resolutions = c("high","low","high","low",rep("low",nrow(current_case_1))),
-#                              input_dates = c(start,start,end,end,current_case_1$date),
-#                              pred_dates = current_case_1$date,
-#                              pred_filenames =  current_case_1$files_pred,
-#                              pred_area = c(400,    400, 100,  100),...
-#       )
-#     }
-#     #STARFM
-#     if(method=="starfm"){
-#       ImageFusion::starfm_job(input_filenames = c(startdate$files_high,
-#                                                   startdate$files_low,
-#                                                   enddate$files_high,
-#                                                   enddate$files_low,
-#                                                   current_case_1$files_low),
-#                               input_resolutions = c("high","low","high","low",rep("low",nrow(current_case_1))),
-#                               input_dates = c(start,start,end,end,current_case_1$date),
-#                               pred_dates = current_case_1$date,
-#                               pred_filenames =  current_case_1$files_pred,
-#                               pred_area = c(400,    400, 100,  100),...
-#       )
-#     }
-#     #SPSTFM
-#     if(method=="spstfm"){
-#       ImageFusion::spstfm_job(input_filenames = c(startdate$files_high,
-#                                                   startdate$files_low,
-#                                                   enddate$files_high,
-#                                                   enddate$files_low,
-#                                                   current_case_1$files_low),
-#                               input_resolutions = c("high","low","high","low",rep("low",nrow(current_case_1))),
-#                               input_dates = c(start,start,end,end,current_case_1$date),
-#                               pred_dates = current_case_1$date,
-#                               pred_filenames =  current_case_1$files_pred,
-#                               pred_area = c(400,    400, 100,  100),...
-#       )
-#     }
-#   }
-#   #Process Cases 2
-#   if(nrow(current_case_2)){
-#     # Do a little regex to extract the appropriate date1 from the labels
-#     # Note: This is a little complicated because of the mixed singlepair_mode, where
-#     # we have interval breaks as if in doublepair mode,
-#     # but possibly also have singlepair intervals (where one of the breaks is Inf)
-#     # Here, we are extracting from the interval_pairs column a correct date1
-#     pairs <- (cbind(lower = as.numeric( sub("\\((.+),.*", "\\1", current_job$interval_pairs) ),
-#                  upper = as.numeric( sub("[^,]*,([^]]*)\\]", "\\1", current_job$interval_pairs) )))
-#     
-#     start <- max(pairs[!is.infinite(pairs)],na.rm = T)
-#     
-#     startdate <- all[all$date==start,]
-#     cat(paste("Job ",i,"predicting in doublepair mode for dates", paste(current_case_2$date,collapse = " ")," based on pair on date", start))
-#     
-#   }
-#   
-#   
-# } #End for every job
-#   
+###3: Predictions####
+
+for(i in 1:nrow(valid_job_table)){ #For every job
+  #Get the pair dates
+  current_job <- valid_job_table[i,]
+  current_case_1 <- all[all$interval_ids==current_job$interval_ids & all$pred_case == 1,]
+  current_case_2 <- all[all$interval_ids==current_job$interval_ids & all$pred_case == 2,]
+
+
+  #Process Cases 1
+  if(nrow(current_case_1)){
+    startpair <- current_job$interval_startpair
+    startpair_date <- all[all$date==startpair,]
+    endpair <-  current_job$interval_endpair
+    endpair_date <- all[all$date==endpair,]
+    cat(paste("Job ",i,"predicting in doublepair mode for dates", paste(current_case_1$date,collapse = " ")," based on pairs on dates  ", startpair, endpair))
+    #ESTARFM
+    if(method=="estarfm"){
+      ImageFusion::estarfm_job(input_filenames = c(startpair_date$files_high,
+                                                   startpair_date$files_low,
+                                                   endpair_date$files_high,
+                                                   endpair_date$files_low,
+                                                   current_case_1$files_low),
+                               input_resolutions = c("high","low","high","low",rep("low",nrow(current_case_1))),
+                               input_dates = c(startpair,startpair,endpair,endpair,current_case_1$date),
+                               pred_dates = current_case_1$date,
+                               pred_filenames =  current_case_1$files_pred,...
+      )
+    }#end estarfm
+    #FITFC
+    if(method=="fitfc"){
+      ImageFusion::fitfc_job(input_filenames = c(startpair_date$files_high,
+                                                   startpair_date$files_low,
+                                                   endpair_date$files_high,
+                                                   endpair_date$files_low,
+                                                   current_case_1$files_low),
+                               input_resolutions = c("high","low","high","low",rep("low",nrow(current_case_1))),
+                               input_dates = c(startpair,startpair,endpair,endpair,current_case_1$date),
+                               pred_dates = current_case_1$date,
+                               pred_filenames =  current_case_1$files_pred,...
+      )
+    }#end fitfc
+    #STARFM
+    if(method=="starfm"){
+      ImageFusion::starfm_job(input_filenames = c(startpair_date$files_high,
+                                                   startpair_date$files_low,
+                                                   endpair_date$files_high,
+                                                   endpair_date$files_low,
+                                                   current_case_1$files_low),
+                               input_resolutions = c("high","low","high","low",rep("low",nrow(current_case_1))),
+                               input_dates = c(startpair,startpair,endpair,endpair,current_case_1$date),
+                               pred_dates = current_case_1$date,
+                               pred_filenames =  current_case_1$files_pred,...
+      )
+    }#end starfm
+    #SPSTFM
+    if(method=="spstfm"){
+      ImageFusion::spstfmfm_job(input_filenames = c(startpair_date$files_high,
+                                                   startpair_date$files_low,
+                                                   endpair_date$files_high,
+                                                   endpair_date$files_low,
+                                                   current_case_1$files_low),
+                               input_resolutions = c("high","low","high","low",rep("low",nrow(current_case_1))),
+                               input_dates = c(startpair,startpair,endpair,endpair,current_case_1$date),
+                               pred_dates = current_case_1$date,
+                               pred_filenames =  current_case_1$files_pred,...
+      )
+    }#end spstfm
+  }#end case1
+  #Process Cases 2
+  if(nrow(current_case_2)){
+    
+    startpair <- current_job$interval_startpair
+    startpair_date <- all[all$date==startpair,]
+    cat(paste("Job ",i,"predicting in doublepair mode for dates", paste(current_case_2$date,collapse = " ")," based on pair on date", startpair))
+    
+    #FITFC
+    if(method=="fitfc"){
+      ImageFusion::fitfc_job(input_filenames = c(startpair_date$files_high,
+                                                 startpair_date$files_low,
+                                                 current_case_2$files_low),
+                             input_resolutions = c("high","low",rep("low",nrow(current_case_2))),
+                             input_dates = c(startpair,startpair,current_case_2$date),
+                             pred_dates = current_case_2$date,
+                             pred_filenames =  current_case_2$files_pred,...
+      )
+    }#end fitfc
+    #STARFM
+    if(method=="starfm"){
+      ImageFusion::starfm_job(input_filenames = c(startpair_date$files_high,
+                                                 startpair_date$files_low,
+                                                 current_case_2$files_low),
+                             input_resolutions = c("high","low",rep("low",nrow(current_case_2))),
+                             input_dates = c(startpair,startpair,current_case_2$date),
+                             pred_dates = current_case_2$date,
+                             pred_filenames =  current_case_2$files_pred,...
+      )
+    }#end starfm
+  }#end case2
+
+} #End for every job
+
+####Step 4: Deal with other cases
+
+current_case_3 <- all[all$pred_case == 3,]
+current_case_4 <- all[all$pred_case == 4,]
+current_case_5 <- all[all$pred_case == 5,]
+
+#Process Cases 3
+if(nrow(current_case_3)){
+  cat(paste("\nNo input images could be found for date(s)", paste(current_case_3$date,collapse = " "),". Skipping."))
+}#end case3
+#Process Cases 4
+if(nrow(current_case_4)){
+  cat(paste("\nBoth high and low images were found for date(s)", paste(current_case_4$date,collapse = " "),". Skipping prediction and copying high input to target destination."))
+  file.copy(current_case_4$files_high,current_case_4$files_pred)
+  }#end case4
+#Process Cases 5
+if(nrow(current_case_5)){
+  cat(paste("\nOnly high images were found for date(s)", paste(current_case_5$date,collapse = " "),". Copying high input to target destination."))
+  file.copy(current_case_5$files_high,current_case_5$files_pred)
+}#end case5
+
+return(p)#return the plot
+}#end function body

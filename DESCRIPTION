@@ -8,5 +8,5 @@ Maintainer: Who to complain to <yourfault@somewhere.net>
 Description: More about what it does (maybe more than one line)
 License: What license is it under?
 Imports: Rcpp (>= 1.0.2)
-LinkingTo: Rcpp, RcppArmadillo, raster, rgdal, BH, Rcpp, ROpenCVLite, parallel
+LinkingTo: Rcpp, RcppArmadillo, raster, rgdal, BH, ROpenCVLite, parallel, ggplot2,assertthat
 RoxygenNote: 6.1.1

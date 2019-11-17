@@ -37,6 +37,7 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames,
                              bool output_masks,
                              bool use_nodata_value,
                              bool use_parallelisation,
+                             bool verbose,
                              double uncertainty_factor,
                              double number_classes,
                              double data_range_min,
@@ -290,6 +291,7 @@ void execute_starfm_job_cpp(CharacterVector input_filenames,
                             bool use_temp_diff_for_weights,
                             bool do_copy_on_zero_diff,
                             bool double_pair_mode,
+                            bool verbose,
                             double number_classes,
                             double logscale_factor,
                             double spectral_uncertainty,
@@ -507,11 +509,11 @@ void execute_starfm_job_cpp(CharacterVector input_filenames,
     if(use_parallelisation){
 #ifdef WITH_OMP
       //OPTIONAL START
-      std::cout << "Predicting for date " << pred_dates[i];
+      if(verbose){std::cout << "Predicting for date " << pred_dates[i];}
       if (po.isDoublePairModeConfigured())
-        std::cout << " using both pairs from dates " << date1 << " and " << date3 << "." << std::endl;
+        if(verbose){std::cout << " using both pairs from dates " << date1 << " and " << date3 << "." << std::endl;}
       else {
-        std::cout << " using a single pair from date " << date1 << "." << std::endl;
+        if(verbose){std::cout << " using a single pair from date " << date1 << "." << std::endl;}
       }
       //OPTIONAL END
       psf.predict(pred_dates[i],predMask);
@@ -519,11 +521,11 @@ void execute_starfm_job_cpp(CharacterVector input_filenames,
 #endif /* Otherwise, use the standard fusor object*/
     }else{
       //OPTIONAL START
-      std::cout << "Predicting for date " << pred_dates[i];
+      if(verbose){std::cout << "Predicting for date " << pred_dates[i];}
       if (o.isDoublePairModeConfigured())
-        std::cout << " using both pairs from dates " << date1 << " and " << date3 << "." << std::endl;
+        if(verbose){std::cout << " using both pairs from dates " << date1 << " and " << date3 << "." << std::endl;}
       else {
-        std::cout << " using a single pair from date " << date1 << "." << std::endl;
+        if(verbose){std::cout << " using a single pair from date " << date1 << "." << std::endl;}
       }
       
       //OPTIONAL END
@@ -573,6 +575,7 @@ void execute_fitfc_job_cpp(CharacterVector input_filenames,
                             bool output_masks,
                             bool use_nodata_value,
                             bool use_parallelisation,
+                            bool verbose,
                             double resolution_factor, 
                             const std::string& hightag,  
                             const std::string& lowtag,   
@@ -818,6 +821,7 @@ void execute_spstfm_job_cpp(CharacterVector input_filenames,
                              bool use_nodata_value,
                              bool use_parallelisation,
                              bool random_sampling,
+                             bool verbose,
                              const std::string& hightag,  
                              const std::string& lowtag,   
                              const std::string& MASKIMG_options,
@@ -944,7 +948,7 @@ void execute_spstfm_job_cpp(CharacterVector input_filenames,
       arma::mat dict;
       bool loadOK = dict.load(dictPath);
       if (loadOK) {
-        std::cout << "Using dictionary from " << dictPath << "." << std::endl;
+        if(verbose){std::cout << "Using dictionary from " << dictPath << "." << std::endl;}
         spsf.setDictionary(dict);
       }
       else
@@ -970,7 +974,7 @@ void execute_spstfm_job_cpp(CharacterVector input_filenames,
         arma::mat dict;
         bool loadOK = dict.load(infilename);
         if (loadOK) {
-          std::cout << "Using dictionary from " << infilename << " for channel " << c << "." << std::endl;
+          if(verbose){std::cout << "Using dictionary from " << infilename << " for channel " << c << "." << std::endl;}
           spsf.setDictionary(dict, c);
         }
         else {
@@ -1038,7 +1042,7 @@ void execute_spstfm_job_cpp(CharacterVector input_filenames,
   
   //Step 6: Training
   // train dictionary (if there is one from a previous time series, improve it)
-  std::cout << "Training with dates " << date1 << " and " << date3 << std::endl;
+  if(verbose){std::cout << "Training with dates " << date1 << " and " << date3 << std::endl;}
   if (reuseOpt == "improve")
     o.setDictionaryReuse(imagefusion::SpstfmOptions::ExistingDictionaryHandling::improve);
   else if (reuseOpt == "clear")
@@ -1107,7 +1111,7 @@ void execute_spstfm_job_cpp(CharacterVector input_filenames,
     if (chans == 1) {
       success = spsf.getDictionary().save(dictPath);
       if (success)
-        std::cout << "Saved dictionary to " << dictPath << "." << std::endl;
+        if(verbose){std::cout << "Saved dictionary to " << dictPath << "." << std::endl;}
       else
         std::cerr << "Could not save dictionary to " << dictPath << "." << std::endl;
     }
@@ -1122,12 +1126,12 @@ void execute_spstfm_job_cpp(CharacterVector input_filenames,
         std::string outfilename = outpath.string();
         bool saved = spsf.getDictionary(c).save(outfilename);
         if (saved)
-          std::cout << "Saved dictionary for channel " << c << " to " << outfilename << "." << std::endl;
+          if(verbose){std::cout << "Saved dictionary for channel " << c << " to " << outfilename << "." << std::endl;}
         success &= saved;
       }
       
       if (success)
-        std::cout << "For loading the dictionaries later on, you can still use --load-dict=" << dictPath << "." << std::endl;
+        if(verbose){std::cout << "For loading the dictionaries later on, you can still use --load-dict=" << dictPath << "." << std::endl;}
     }
   }
   
