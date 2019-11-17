@@ -30,7 +30,8 @@
 #' @references Wang, Qunming, and Peter M. Atkinson. "Spatio-temporal fusion for daily Sentinel-2 images." Remote Sensing of Environment 204 (2018): 31-42.
 #' @return Nothing. Output files are written to disk. The Geoinformation for the output images is adopted from the first input pair images.
 #' @export
-#'
+#' @importFrom raster stack
+#' @importFrom assertthat assert_that 
 #' @author Johannes Mast
 #' @details Executes the FITFC Algorithm. If more than one pair is given, will perform prediction for the pred dates twice, once for each of the input pairs.
 #' @examples Sorry, maybe later
@@ -38,8 +39,6 @@
 #' 
 fitfc_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,pred_filenames,pred_area,winsize,date1,date3,n_cores,n_neighbors,hightag,lowtag,MASKIMG_options,MASKRANGE_options,output_masks,use_nodata_value,use_parallelisation,resolution_factor,verbose=T
 ){
-  library(assertthat)
-  library(raster)
   
   ##### A: Check all the Optional Inputs #####
   #These are variables which are optional 
@@ -326,7 +325,8 @@ fitfc_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,p
                                        hightag = hightag_c,
                                        lowtag = lowtag_c,
                                        MASKIMG_options = MASKIMG_options_c,
-                                       MASKRANGE_options = MASKRANGE_options_c
+                                       MASKRANGE_options = MASKRANGE_options_c,
+                                       verbose=verbose,
     )
     
     

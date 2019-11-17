@@ -31,13 +31,14 @@
 #' @param use_nodata_value (Optional) Use the nodata value as invalid range for masking? Default is "true".
 #' @param use_parallelisation (Optional) Use parallelisation when possible? Default is "false".
 #' @param use_strict_filtering (Optional) Use strict filtering, which means that candidate pixels will be accepted only if they have less temporal *and* spectral difference than the central pixel (like in the paper). Default is "false".
-# @param double_pair_mode (Optional) Use two dates \code{date1} and \code{date3} for prediction, instead of just \code{date1} for all predictions? Default is "true" if *all* the pred dates are in between input pairs, and "false" otherwise. Note: It may be desirable to predict in double-pair mode where possible, as in the following example: \code{[(7) 10 12 (13) 14] } , where we may wish to predict 10 and 12 in double pair mode, but can only predict 14 in single-pair mode. Do achieve this it is necessary to split the task into different jobs.
+#' @param double_pair_mode (Optional) Use two dates \code{date1} and \code{date3} for prediction, instead of just \code{date1} for all predictions? Default is "true" if *all* the pred dates are in between input pairs, and "false" otherwise. Note: It may be desirable to predict in double-pair mode where possible, as in the following example: \code{[(7) 10 12 (13) 14] } , where we may wish to predict 10 and 12 in double pair mode, but can only predict 14 in single-pair mode. Do achieve this it is necessary to split the task into different jobs.
 #' @param use_temp_diff_for_weights (Optional) Use temporal difference in the candidates weight (like in the paper)? Default is to use temporal weighting in double pair mode, and to not use it in single pair mode.
 #' @param do_copy_on_zero_diff (Optional) Predict for all pixels, even for pixels with zero temporal or spectral difference (behaviour of the reference implementation). Default is "false".
 #' @references Gao, Feng, et al. "On the blending of the Landsat and MODIS surface reflectance: Predicting daily Landsat surface reflectance." IEEE Transactions on Geoscience and Remote sensing 44.8 (2006): 2207-2218.
 #' @return Nothing. Output files are written to disk. The Geoinformation for the output images is adopted from the first input pair images.
 #' @export
-#'
+#' @importFrom raster stack
+#' @importFrom assertthat assert_that 
 #' @author Johannes Mast
 #' @details Executes the STARFM algorithm to create a number of synthetic high-resolution images from either two pairs (double pair mode) or one pair (single pair mode) of matching high- and low-resolution images. Assumes that the input images already have matching size. See the original paper for details (TO DO: INSERT CHANGES WITH REGARDS TO THE ORIGINAL PAPER). \itemize{
 ##'  \item{  For the weighting (10) states: \eqn{C = S T D}  but we use  \eqn{C = (S+1)(T+1)D}, according to the reference implementation. With \code{logscale_factor}, the weighting formula can be changed to \eqn{C = ln{(Sb+2)}ln{(Tb+1)D}}}
@@ -348,7 +349,7 @@ starfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,
   
   #___________________________________________________________________________#
   #Call the cpp fusion function with the checked inputs
-  ImageFusion::execute_starfm_job_cpp(input_filenames = input_filenames_c,
+  execute_starfm_job_cpp(input_filenames = input_filenames_c,
                                       input_resolutions = input_resolutions_c,
                                       input_dates = input_dates_c,
                                       pred_dates = pred_dates_c,

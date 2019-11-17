@@ -44,6 +44,8 @@
 #' @references Huang, B., & Song, H. (2012). Spatiotemporal reflectance fusion via sparse representation. IEEE Transactions on Geoscience and Remote Sensing, 50(10), 3707-3716.
 #' @return Nothing. Output files are written to disk. The Geoinformation for the output images is adopted from the first input pair images.
 #' @export
+#' @importFrom raster stack
+#' @importFrom assertthat assert_that 
 #'
 #' @author Johannes Mast
 #' @details Executes the SPSTFM algorithm to create a number of synthetic high-resolution images from two pairs of matching high- and low-resolution images.  Assumes that the input images already have matching size. For a detailed explanation how SPSTFM works there is the original paper and the thesis, which yielded this implementation. The latter explains also all available options and shows some test results. However, the default options should give good results.
@@ -54,9 +56,7 @@ spstfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,
                        n_training_samples,patch_size,patch_overlap,min_train_iter,max_train_iter,
                        hightag,lowtag,MASKIMG_options,MASKRANGE_options,LOADDICT_options,SAVEDICT_options,REUSE_options,output_masks,use_nodata_value,use_parallelisation,random_sampling,verbose=T
 ) {
-  library(assertthat)
-  library(raster)
-  
+
   
   ##### A: Check all the Optional Inputs #####
   #These are variables which are optional 
@@ -346,6 +346,7 @@ spstfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,
                                        use_nodata_value = use_nodata_value_c,
                                        use_parallelisation = use_parallelisation_c,
                                         random_sampling = random_sampling_c,
+                                      verbose=verbose,
                                        hightag=hightag_c,
                                        lowtag=lowtag_c,
                                        MASKIMG_options= MASKIMG_options_c,

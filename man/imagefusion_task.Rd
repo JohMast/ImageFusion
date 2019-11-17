@@ -5,7 +5,9 @@
 \title{imagefusion_task}
 \usage{
 imagefusion_task(..., filenames_high, filenames_low, dates_high, dates_low,
-  dates_pred, singlepair_mode = "mixed", method = "starfm", verbose = T)
+  dates_pred, singlepair_mode = "mixed", method = "starfm",
+  spstfm_mode = "none", verbose = T, output_overview = T,
+  out_dir = "Pred_Outputs")
 }
 \arguments{
 \item{...}{}
@@ -33,6 +35,5 @@ A ggplot overview of the tasks.
 imagefusion_task
 }
 \examples{
-
-
+Sorry, maybe later
 }

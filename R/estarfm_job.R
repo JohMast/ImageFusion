@@ -37,7 +37,8 @@
 #' @references Zhu, X., Chen, J., Gao, F., Chen, X., & Masek, J. G. (2010). An enhanced spatial and temporal adaptive reflectance fusion model for complex heterogeneous regions. Remote Sensing of Environment, 114(11), 2610-2623.
 #' @return Nothing. Output files are written to disk. The Geoinformation for the output images is adopted from the first input pair images.
 #' @export
-#'
+#' @importFrom raster stack
+#' @importFrom assertthat assert_that 
 #' @author Johannes Mast
 #' @details Executes the ESTARFM algorithm to create a number of synthetic high-resolution images from two pairs of matching high- and low-resolution images.  Assumes that the input images already have matching size. See the original paper for details (Note: There is a difference to the algorithm as described in the paper though. The regression for $ R $ is now done with all candidates of one window. This complies to the reference implementation, but not to the paper, since there the regression is done only for the candidates that belong to one single coarse pixel. However, the coarse grid is not known at prediction and not necessarily trivial to find out (e. g. in case of higher order interpolation). 
 #' @examples Sorry, maybe later
@@ -45,8 +46,7 @@
 
 estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,pred_filenames,pred_area,winsize,date1,date3,n_cores,data_range_min, data_range_max, uncertainty_factor,number_classes,hightag,lowtag,MASKIMG_options,MASKRANGE_options,use_local_tol,use_quality_weighted_regression,output_masks,use_nodata_value,use_parallelisation,verbose=T
                         ) {
-  library(assertthat)
-  library(raster)
+
   
 
   ##### A: Check all the Optional Inputs #####
@@ -341,7 +341,8 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
                                    hightag=hightag_c,
                                    lowtag=lowtag_c,
                                    MASKIMG_options= MASKIMG_options_c,
-                                   MASKRANGE_options = MASKRANGE_options_c
+                                   MASKRANGE_options = MASKRANGE_options_c,
+                                   verbose=verbose,
                                   )
   #___________________________________________________________________________#
   

@@ -15,14 +15,23 @@
 #' @importFrom assertthat assert_that
 #' @export
 #'
-#' @examples
-#' 
-#' 
-#' 
-imagefusion_task <- function(...,filenames_high,filenames_low,dates_high,dates_low,dates_pred,singlepair_mode="mixed",method="starfm",verbose=T,output_overview=T){
+#' @examples Sorry, maybe later
+
+imagefusion_task <- function(...,filenames_high,filenames_low,dates_high,dates_low,dates_pred,singlepair_mode="mixed",method="starfm",spstfm_mode="none",verbose=T,output_overview=T,out_dir="Pred_Outputs"){
 
 ####1: Prepare Inputs####
-filenames_pred <- paste("../../Pred_",dates_pred,".tif",sep = "")  #Make plausible out filenames
+  
+  #Check output folder
+  if(ifelse(!dir.exists(out_dir), dir.create(out_dir), FALSE)){
+    if(verbose){
+      print(paste("Creating output directory:",out_dir)) ##attemo
+      }#end if verbose
+  }else{#end if dir was created
+    if(verbose){
+      print(paste("Saving to output directory:",out_dir))
+    }#end if verbose
+  }#end else
+filenames_pred <- file.path(out_dir,paste(dates_pred,".tif",sep = ""))  #Make plausible out filenames
 
 #Make sure that method is plausible
 assert_that(method %in% c("estarfm","fitfc","spstfm","starfm"))
@@ -31,9 +40,16 @@ assert_that(method %in% c("estarfm","fitfc","spstfm","starfm"))
 #ignore: Do not even attempt to predict singlepair dates
 #mixed: Use doublepair mode when possible, and singlepair mode otherwise
 #all: Predict all dates in singlepair mode
-
-
 assert_that(singlepair_mode %in% c("ignore","mixed","all"))
+
+#Set spstfm policy
+#none: Do not save dicts and always train from scratch
+#separate: train and output separate dicts for each job
+#iterative: reuse trained dicts on successive jobs and update them iteratively
+assert_that(spstfm_mode %in% c("none","separate","iterative"))
+
+
+
 #mixed and all are only possible in fitfc and starfm
 assert_that(!(singlepair_mode =="mixed" & ( method == "estarfm" | method == "spstfm")))
 assert_that(!(singlepair_mode =="all" & ( method == "estarfm" | method == "spstfm")))
@@ -211,7 +227,18 @@ for(i in 1:nrow(valid_job_table)){ #For every job
     }#end starfm
     #SPSTFM
     if(method=="spstfm"){
-      ImageFusion::spstfmfm_job(input_filenames = c(startpair_date$files_high,
+      if(spstfm_mode=="separate"){
+        SAVEDICT_options = file.path(out_dir,paste0("Spstfm_dict_job",i))
+      }
+      if(spstfm_mode=="iterative"){
+        SAVEDICT_options = ""
+        print("currently not implemented")
+      }
+      if(spstfm_mode=="none"){
+        SAVEDICT_options = ""
+      }
+      
+      ImageFusion::spstfm_job(input_filenames = c(startpair_date$files_high,
                                                    startpair_date$files_low,
                                                    endpair_date$files_high,
                                                    endpair_date$files_low,
@@ -219,7 +246,10 @@ for(i in 1:nrow(valid_job_table)){ #For every job
                                input_resolutions = c("high","low","high","low",rep("low",nrow(current_case_1))),
                                input_dates = c(startpair,startpair,endpair,endpair,current_case_1$date),
                                pred_dates = current_case_1$date,
-                               pred_filenames =  current_case_1$files_pred,verbose=verbose,...
+                               pred_filenames =  current_case_1$files_pred,
+                              SAVEDICT_options = SAVEDICT_options,
+                              verbose=verbose,
+                              ...
       )
     }#end spstfm
   }#end case1
