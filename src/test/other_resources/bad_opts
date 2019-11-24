@@ -1,9 +1,0 @@
-# test
--n=1 -i "bla \" ' #test n= 42
-        -n 1 -n=2\\" # test n = 44
-
-  -n = 2
-  -p 593xxxx24
-
--r '-x=4 -y 6 # test \' "
-   -w 1 -h 2'

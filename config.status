@@ -427,7 +427,7 @@ Copyright (C) 2012 Free Software Foundation, Inc.
 This config.status script is free software; the Free Software Foundation
 gives unlimited permission to copy, distribute and modify it."
 
-ac_pwd='/home/b/Desktop/Dev/ImageFusion'
+ac_pwd='/home/b/Desktop/RWorkspace/ImageFusion'
 srcdir='.'
 test -n "$AWK" || AWK=awk
 # The default lists apply if the user does not specify any file.
@@ -630,7 +630,7 @@ S["HAS_NC_CONFIG"]="yes"
 S["PKG_LIBS"]=" -L/usr/lib -lgdal -lproj    -Wl,-rpath,/usr/lib/x86_64-linux-gnu -Wl,-rpath,/usr/lib/x86_64-linux-gnu/hdf5/serial -L/usr/lib/x86_64-linux-gnu -L/us"\
 "r/lib/x86_64-linux-gnu/hdf5/serial -lnetcdf -lhdf5_hl -lhdf5 -lpthread -lsz -lz -ldl -lm -lcurl   -lcurl"
 S["PKG_CPPFLAGS"]=" -I/usr/include/gdal -I/usr/include -I/usr/include/hdf5/serial  -DR_PACKAGE"
-S["GDAL_DATADIR"]="/usr/share/gdal"
+S["GDAL_DATADIR"]="/usr/share/gdal/2.2"
 S["GDAL_CONFIG"]="/usr/bin/gdal-config"
 S["R_HOME"]="/usr/lib/R"
 S["target_alias"]=""
