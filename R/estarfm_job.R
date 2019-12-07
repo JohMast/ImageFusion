@@ -37,7 +37,7 @@
 #' @references Zhu, X., Chen, J., Gao, F., Chen, X., & Masek, J. G. (2010). An enhanced spatial and temporal adaptive reflectance fusion model for complex heterogeneous regions. Remote Sensing of Environment, 114(11), 2610-2623.
 #' @return Nothing. Output files are written to disk. The Geoinformation for the output images is adopted from the first input pair images.
 #' @export
-#' @importFrom raster stack
+#' @importFrom raster stack dataType
 #' @importFrom assertthat assert_that 
 #' @author Johannes Mast
 #' @details Executes the ESTARFM algorithm to create a number of synthetic high-resolution images from two pairs of matching high- and low-resolution images.  Assumes that the input images already have matching size. See the original paper for details (Note: There is a difference to the algorithm as described in the paper though. The regression for $ R $ is now done with all candidates of one window. This complies to the reference implementation, but not to the paper, since there the regression is done only for the candidates that belong to one single coarse pixel. However, the coarse grid is not known at prediction and not necessarily trivial to find out (e. g. in case of higher order interpolation). 

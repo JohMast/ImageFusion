@@ -1,12 +1,12 @@
 Package: ImageFusion
 Type: Package
-Title: What the package does (short line)
+Title: Fusion of Satellite Images
 Version: 1.0
 Date: 2019-10-12
-Author: Who wrote it
-Maintainer: Who to complain to <yourfault@somewhere.net>
-Description: More about what it does (maybe more than one line)
+Author: Christof Kaufmann, Thorsten Dahms, Jakob Schwalb-Willmann, Johannes Mast
+Maintainer: Johannes Mast <johannes.mast@stud-mail.uni-wuerzburg.de>
+Description: Fusion of Images in Satellite Image Time-Series. Provides Implementation of the Fitfc, Starfm, Estarfm and Spstfm algorithms in c++.
 License: What license is it under?
-Imports: Rcpp (>= 1.0.2)
-LinkingTo: Rcpp, RcppArmadillo, raster, rgdal, BH, ROpenCVLite, parallel, ggplot2,assertthat,foreach
+Imports: Rcpp (>= 1.0.2), RcppArmadillo, BH, raster, rgdal, ROpenCVLite, parallel, ggplot2, assertthat,foreach
+LinkingTo: Rcpp, RcppArmadillo
 RoxygenNote: 7.0.1

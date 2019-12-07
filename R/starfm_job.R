@@ -37,7 +37,7 @@
 #' @references Gao, Feng, et al. "On the blending of the Landsat and MODIS surface reflectance: Predicting daily Landsat surface reflectance." IEEE Transactions on Geoscience and Remote sensing 44.8 (2006): 2207-2218.
 #' @return Nothing. Output files are written to disk. The Geoinformation for the output images is adopted from the first input pair images.
 #' @export
-#' @importFrom raster stack
+#' @importFrom raster stack dataType
 #' @importFrom assertthat assert_that 
 #' @author Johannes Mast
 #' @details Executes the STARFM algorithm to create a number of synthetic high-resolution images from either two pairs (double pair mode) or one pair (single pair mode) of matching high- and low-resolution images. Assumes that the input images already have matching size. See the original paper for details (TO DO: INSERT CHANGES WITH REGARDS TO THE ORIGINAL PAPER). \itemize{

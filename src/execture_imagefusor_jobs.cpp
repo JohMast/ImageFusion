@@ -594,6 +594,7 @@ void execute_fitfc_job_cpp(CharacterVector input_filenames,
   //create a prediction area rectangle
   Rectangle pred_rectangle = Rectangle{pred_area[0],pred_area[1],pred_area[2],pred_area[3]};
   
+  
   // find the gi the first pair high image 
   Rcpp::LogicalVector is_high(input_filenames.size());
   for( int i=0; i<input_filenames.size(); i++){

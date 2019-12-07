@@ -17,12 +17,12 @@
 #'
 #' @examples Sorry, maybe later
 
-imagefusion_task <- function(...,filenames_high,filenames_low,dates_high,dates_low,dates_pred,singlepair_mode="mixed",method="starfm",spstfm_mode="none",verbose=T,output_overview=T,out_dir="Pred_Outputs"){
+imagefusion_task <- function(...,filenames_high,filenames_low,dates_high,dates_low,dates_pred,singlepair_mode="ignore",method="starfm",spstfm_mode="none",verbose=T,output_overview=T,out_dir="Pred_Outputs"){
 
 ####1: Prepare Inputs####
   
   #Check output folder
-  if(ifelse(!dir.exists(out_dir), dir.create(out_dir), FALSE)){
+  if(ifelse(!dir.exists(out_dir), dir.create(out_dir,recursive = T), FALSE)){
     if(verbose){
       print(paste("Creating output directory:",out_dir)) ##attemo
       }#end if verbose
@@ -135,19 +135,19 @@ if(output_overview){
   #Output Task overview
   cat("\n=======================TASK OVERVIEW========================\n")
   case_1 <- all$date[all$pred_case==1]
-  if(length(case_1)){cat(paste("Detected Dates between pairs:", paste(case_1,collapse = ",")))
+  if(length(case_1)){cat(paste("\nDetected Dates between pairs:", paste(case_1,collapse = ",")))
     if(singlepair_mode=="all"){cat("\nPerforming Singlepair mode prediction for these dates.")}
     if(singlepair_mode=="mixed"){cat("\nPerforming Doublepair mode prediction for these dates.")}}
   case_2 <- all$date[all$pred_case==2]
-  if(length(case_2)){cat(paste("Detected Dates outside of pairs:", paste(case_2,collapse = ",")))
+  if(length(case_2)){cat(paste("\nDetected Dates outside of pairs:", paste(case_2,collapse = ",")))
     if(singlepair_mode=="ignore"){cat("\nIgnoring Singlepairs")}
     if(singlepair_mode %in% c("mixed","all")){cat("\nPerforming Singlepair mode prediction for these dates.")}}
   case_3 <- all$date[all$pred_case==3]
-  if(length(case_3)){cat(paste("Cannot attempt prediction for dates:", paste(case_3,collapse = ","),"\nNo input images were found for those dates."))}
+  if(length(case_3)){cat(paste("\nCannot attempt prediction for dates:", paste(case_3,collapse = ","),"\nNo input images were found for those dates."))}
   case_4 <- all$date[all$pred_case==4]
-  if(length(case_4)){cat(paste("Will not attempt prediction for dates", paste(case_4,collapse = ","),"\nHigh and low resolution input images were found for those dates, making prediction possible, but unnecessary."))}
+  if(length(case_4)){cat(paste("\nWill not attempt prediction for dates", paste(case_4,collapse = ","),"\nHigh and low resolution input images were found for those dates, making prediction possible, but unnecessary."))}
   case_5 <- all$date[all$pred_case==5]
-  if(length(case_5)){cat(paste("Will not attempt prediction for dates", paste(case_5,collapse = ","),"\nOnly a high resolution input image was found for those dates, making prediction impossible but unnecessary."))}
+  if(length(case_5)){cat(paste("\nWill not attempt prediction for dates", paste(case_5,collapse = ","),"\nOnly a high resolution input image was found for those dates, making prediction impossible but unnecessary."))}
   cat("\n============================================================\n")
 }
 
@@ -229,13 +229,16 @@ for(i in 1:nrow(valid_job_table)){ #For every job
     if(method=="spstfm"){
       if(spstfm_mode=="separate"){
         SAVEDICT_options = file.path(out_dir,paste0("Spstfm_dict_job",i))
+        print("Not saving dictionary")
       }
       if(spstfm_mode=="iterative"){
-        SAVEDICT_options = ""
-        print("currently not implemented")
+        if(i>1){LOADDICT_options = file.path(out_dir,paste0("Spstfm_dict_job",i-1))
+        print(paste("Building on previously save dictionary: ",LOADDICT_options ))}
+        SAVEDICT_options = file.path(out_dir,paste0("Spstfm_dict_job",i))
       }
       if(spstfm_mode=="none"){
         SAVEDICT_options = ""
+        print("Not saving dictionary")
       }
       
       ImageFusion::spstfm_job(input_filenames = c(startpair_date$files_high,

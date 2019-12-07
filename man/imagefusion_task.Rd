@@ -11,7 +11,7 @@ imagefusion_task(
   dates_high,
   dates_low,
   dates_pred,
-  singlepair_mode = "mixed",
+  singlepair_mode = "ignore",
   method = "starfm",
   spstfm_mode = "none",
   verbose = T,

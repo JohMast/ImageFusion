@@ -277,7 +277,8 @@ fitfc_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,p
                                       hightag = hightag_c,
                                       lowtag = lowtag_c,
                                       MASKIMG_options = MASKIMG_options_c,
-                                      MASKRANGE_options = MASKRANGE_options_c
+                                      MASKRANGE_options = MASKRANGE_options_c,
+                                     verbose=verbose
   )
   }
   #If we are in "doublepair" mode (two pairs specified)
@@ -303,7 +304,8 @@ fitfc_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,p
                                        hightag = hightag_c,
                                        lowtag = lowtag_c,
                                        MASKIMG_options = MASKIMG_options_c,
-                                       MASKRANGE_options = MASKRANGE_options_c
+                                       MASKRANGE_options = MASKRANGE_options_c,
+                                       verbose=verbose
     )
     #modify output names a bit to make them unique for each input pair
     pred_filenames_c3 <- paste(paste(tools::file_path_sans_ext(pred_filenames_c),"from_pair",date3_c,sep="_"),tools::file_ext(pred_filenames_c),sep=".")
@@ -326,7 +328,8 @@ fitfc_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,p
                                        lowtag = lowtag_c,
                                        MASKIMG_options = MASKIMG_options_c,
                                        MASKRANGE_options = MASKRANGE_options_c,
-                                       verbose=verbose
+                                       verbose = verbose
+                                       
     )
     
     
