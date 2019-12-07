@@ -4,10 +4,28 @@
 \alias{fitfc_job}
 \title{fitfc_job}
 \usage{
-fitfc_job(input_filenames, input_resolutions, input_dates, pred_dates,
-  pred_filenames, pred_area, winsize, date1, date3, n_cores, n_neighbors,
-  hightag, lowtag, MASKIMG_options, MASKRANGE_options, output_masks,
-  use_nodata_value, use_parallelisation, resolution_factor, verbose = T)
+fitfc_job(
+  input_filenames,
+  input_resolutions,
+  input_dates,
+  pred_dates,
+  pred_filenames,
+  pred_area,
+  winsize,
+  date1,
+  date3,
+  n_cores,
+  n_neighbors,
+  hightag,
+  lowtag,
+  MASKIMG_options,
+  MASKRANGE_options,
+  output_masks,
+  use_nodata_value,
+  use_parallelisation,
+  resolution_factor,
+  verbose = T
+)
 }
 \arguments{
 \item{input_filenames}{A string vector containing the filenames of the input images}

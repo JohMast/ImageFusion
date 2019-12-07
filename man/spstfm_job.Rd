@@ -4,12 +4,36 @@
 \alias{spstfm_job}
 \title{spstfm_job}
 \usage{
-spstfm_job(input_filenames, input_resolutions, input_dates, pred_dates,
-  pred_filenames, pred_area, winsize, date1, date3, n_cores, dict_size,
-  n_training_samples, patch_size, patch_overlap, min_train_iter, max_train_iter,
-  hightag, lowtag, MASKIMG_options, MASKRANGE_options, LOADDICT_options,
-  SAVEDICT_options, REUSE_options, output_masks, use_nodata_value,
-  use_parallelisation, random_sampling, verbose = T)
+spstfm_job(
+  input_filenames,
+  input_resolutions,
+  input_dates,
+  pred_dates,
+  pred_filenames,
+  pred_area,
+  winsize,
+  date1,
+  date3,
+  n_cores,
+  dict_size,
+  n_training_samples,
+  patch_size,
+  patch_overlap,
+  min_train_iter,
+  max_train_iter,
+  hightag,
+  lowtag,
+  MASKIMG_options,
+  MASKRANGE_options,
+  LOADDICT_options,
+  SAVEDICT_options,
+  REUSE_options,
+  output_masks,
+  use_nodata_value,
+  use_parallelisation,
+  random_sampling,
+  verbose = T
+)
 }
 \arguments{
 \item{input_filenames}{A string vector containing the filenames of the input images}

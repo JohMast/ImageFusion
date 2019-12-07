@@ -342,7 +342,7 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
                                    lowtag=lowtag_c,
                                    MASKIMG_options= MASKIMG_options_c,
                                    MASKRANGE_options = MASKRANGE_options_c,
-                                   verbose=verbose,
+                                   verbose=verbose
                                   )
   #___________________________________________________________________________#
   

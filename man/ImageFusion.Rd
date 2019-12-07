@@ -3,7 +3,6 @@
 \docType{package}
 \name{ImageFusion}
 \alias{ImageFusion}
-\alias{ImageFusion-package}
 \title{Imagefusion: A package for fusion of images}
 \description{
 The foo package provides three categories of important functions:

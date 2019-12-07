@@ -4,12 +4,32 @@
 \alias{estarfm_job}
 \title{estarfm_job}
 \usage{
-estarfm_job(input_filenames, input_resolutions, input_dates, pred_dates,
-  pred_filenames, pred_area, winsize, date1, date3, n_cores, data_range_min,
-  data_range_max, uncertainty_factor, number_classes, hightag, lowtag,
-  MASKIMG_options, MASKRANGE_options, use_local_tol,
-  use_quality_weighted_regression, output_masks, use_nodata_value,
-  use_parallelisation, verbose = T)
+estarfm_job(
+  input_filenames,
+  input_resolutions,
+  input_dates,
+  pred_dates,
+  pred_filenames,
+  pred_area,
+  winsize,
+  date1,
+  date3,
+  n_cores,
+  data_range_min,
+  data_range_max,
+  uncertainty_factor,
+  number_classes,
+  hightag,
+  lowtag,
+  MASKIMG_options,
+  MASKRANGE_options,
+  use_local_tol,
+  use_quality_weighted_regression,
+  output_masks,
+  use_nodata_value,
+  use_parallelisation,
+  verbose = T
+)
 }
 \arguments{
 \item{input_filenames}{A string vector containing the filenames of the input images}

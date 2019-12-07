@@ -1,10 +1,12 @@
-library(magrittr)
-setwd("../TestGround/")
-if(!dir.exists("TestOutputs")){dir.create("TestOutputs")}
-
 pkgbuild::compile_dll()
 
 roxygen2::roxygenise()
+
+library(magrittr)
+setwd("../Testground/")
+if(!dir.exists("TestOutputs")){dir.create("TestOutputs")}
+
+
 
 
 
@@ -42,6 +44,18 @@ ImageFusion::imagefusion_task(filenames_high = filenames_high,
                               dates_low = dates_low,
                               dates_pred = dates_pred,
                               method="starfm",
+                              singlepair_mode = "ignore",
+                              out_dir = file.path("TestOutputs","ignore"),
+                              pred_area = c(400,    400, 25,  25),
+                              verbose = T,
+                              output_overview = T)
+
+ImageFusion::imagefusion_task(filenames_high = filenames_high,
+                              filenames_low = filenames_low,
+                              dates_high = dates_high,
+                              dates_low = dates_low,
+                              dates_pred = dates_pred,
+                              method="estarfm",
                               singlepair_mode = "ignore",
                               out_dir = file.path("TestOutputs","ignore"),
                               pred_area = c(400,    400, 25,  25),

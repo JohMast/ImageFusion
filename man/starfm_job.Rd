@@ -4,12 +4,34 @@
 \alias{starfm_job}
 \title{starfm_job}
 \usage{
-starfm_job(input_filenames, input_resolutions, input_dates, pred_dates,
-  pred_filenames, pred_area, winsize, date1, date3, n_cores, logscale_factor,
-  spectral_uncertainty, temporal_uncertainty, number_classes, hightag, lowtag,
-  MASKIMG_options, MASKRANGE_options, output_masks, use_nodata_value,
-  use_parallelisation, use_strict_filtering, double_pair_mode,
-  use_temp_diff_for_weights, do_copy_on_zero_diff, verbose = T)
+starfm_job(
+  input_filenames,
+  input_resolutions,
+  input_dates,
+  pred_dates,
+  pred_filenames,
+  pred_area,
+  winsize,
+  date1,
+  date3,
+  n_cores,
+  logscale_factor,
+  spectral_uncertainty,
+  temporal_uncertainty,
+  number_classes,
+  hightag,
+  lowtag,
+  MASKIMG_options,
+  MASKRANGE_options,
+  output_masks,
+  use_nodata_value,
+  use_parallelisation,
+  use_strict_filtering,
+  double_pair_mode,
+  use_temp_diff_for_weights,
+  do_copy_on_zero_diff,
+  verbose = T
+)
 }
 \arguments{
 \item{input_filenames}{A string vector containing the filenames of the input images}

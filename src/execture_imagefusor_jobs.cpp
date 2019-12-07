@@ -17,7 +17,7 @@ using  std::vector;
 
 //TO DO:
 //ADD VERBOSE OPTION
-//CLEAN UP CODE INTO SENSIBLE CHAPTERS
+
 
 //===========================================estarfm=================================
 //' @export

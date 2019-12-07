@@ -4,10 +4,20 @@
 \alias{imagefusion_task}
 \title{imagefusion_task}
 \usage{
-imagefusion_task(..., filenames_high, filenames_low, dates_high, dates_low,
-  dates_pred, singlepair_mode = "mixed", method = "starfm",
-  spstfm_mode = "none", verbose = T, output_overview = T,
-  out_dir = "Pred_Outputs")
+imagefusion_task(
+  ...,
+  filenames_high,
+  filenames_low,
+  dates_high,
+  dates_low,
+  dates_pred,
+  singlepair_mode = "mixed",
+  method = "starfm",
+  spstfm_mode = "none",
+  verbose = T,
+  output_overview = T,
+  out_dir = "Pred_Outputs"
+)
 }
 \arguments{
 \item{...}{}
