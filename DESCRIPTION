@@ -10,3 +10,5 @@ License: What license is it under?
 Imports: Rcpp (>= 1.0.2), RcppArmadillo, BH, raster, rgdal, ROpenCVLite, parallel, ggplot2, assertthat,foreach
 LinkingTo: Rcpp, RcppArmadillo
 RoxygenNote: 7.0.1
+SystemRequirements: libgdal-dev libboost-all-dev
+NeedsCompilation: yes
