@@ -9,6 +9,7 @@ Description: Fusion of Images in Satellite Image Time-Series. Provides Implement
 License: What license is it under?
 Imports: Rcpp (>= 1.0.2), RcppArmadillo, BH, raster, rgdal, ROpenCVLite, parallel, ggplot2, assertthat,foreach
 LinkingTo: Rcpp, RcppArmadillo
+Depends: R (>= 3.6)
 RoxygenNote: 7.0.1
-SystemRequirements: libgdal-dev libboost-all-dev
+SystemRequirements: libgdal-dev libboost-all-dev cxx11, libproj
 NeedsCompilation: yes
