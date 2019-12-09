@@ -11,5 +11,5 @@ Imports: Rcpp (>= 1.0.2), RcppArmadillo, BH, raster, rgdal, ROpenCVLite, paralle
 LinkingTo: Rcpp, RcppArmadillo
 Depends: R (>= 3.6)
 RoxygenNote: 7.0.1
-SystemRequirements: libgdal-dev libboost-all-dev cxx11, libproj
+SystemRequirements: libgdal-dev libboost-all-dev cxx11, libproj,  OpenCV: libopencv-dev (Debian, Ubuntu) or opencv-devel (Fedora)
 NeedsCompilation: yes
