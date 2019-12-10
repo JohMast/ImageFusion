@@ -14,36 +14,70 @@ imagefusion_task(
   singlepair_mode = "ignore",
   method = "starfm",
   spstfm_mode = "none",
+  high_date_prediction_mode = "ignore",
   verbose = T,
   output_overview = T,
   out_dir = "Pred_Outputs"
 )
 }
 \arguments{
-\item{...}{}
+\item{...}{Further arguments specific to the chosen \code{method}. See the documentation of the methods for a detailed description.}
 
-\item{filenames_high}{}
+\item{filenames_high}{A character vector of the filenames of the high resolution input images.}
 
-\item{filenames_low}{}
+\item{filenames_low}{A character vector of the filenames of the low resolution input images.}
 
-\item{dates_high}{}
+\item{dates_high}{An integer vector of the dates associated with the \code{filenames_high}. Must match \code{filenames_high} in length and order.}
 
-\item{dates_low}{}
+\item{dates_low}{An integer vector of the dates associated with the \code{filenames_low}. Must match \code{filenames_low} in length and order.}
 
-\item{dates_pred}{}
+\item{dates_pred}{An integer vector dates for which an output should be generated.}
 
-\item{singlepair_mode}{}
+\item{method}{(Optional) The algorithm which is used for the fusion. \itemize{
+\item{starfm: STARFM stands for spatial and temporal adaptive reflectance fusion model. It requires a relatively low amount of computation time for prediction. See \link[ImageFusion]{starfm_job}.}
+\item{estarfm: ESTARFM stands for enhanced spatial and temporal adaptive reflectance fusion model so it claims to be an enhanced STARFM. It can yield better results in some situations. See \link[ImageFusion]{estarfm_job}.}
+\item{fitfc: Fit-FC is a three-step method consisting of regression model fitting (RM fitting), spatial filtering (SF) and residual compensation (RC). It requires a relatively low amount of computation time for prediction. See \link[ImageFusion]{fitfc_job}. This is the default algorithm.}
+\item{spstfm: SPSTFM is a dictionary learning based algorithm, which is computationally expensive in training and application, but can give good quality predictions. See \link[ImageFusion]{spstfm_job}.}
+}}
 
-\item{method}{}
+\item{spstfm_mode}{(Optional) If the spstfm \code{method} was chosen: Write and reuse dictionaries? \itemize{
+\item{none: No dictionary will be saved. This is the default.}
+\item{separate: Separate dictionaries will be saved for each job. }
+\item{iterative: Dictionaries will be iteratively improved by each job, reusing the previously saved dictionary. }
+}}
 
-\item{verbose}{}
+\item{high_date_prediction_mode}{(Optional) How to proceed for predictions on those dates which have high resolution images available? \itemize{
+\item{ignore: Output nothing for those dates. This is the default.}
+\item{copy: Directly copy the high resolution input images to the output path.}
+\item{force: Use the chosen algorithm to predicts the high resolution input images on themselves. This takes additional computation time, but ensures that the outputs are consistent with the genuinely predicted outputs.}
+}}
+
+\item{verbose}{(Optional) Output intermediate progress reports? Default is "true".}
+
+\item{output_overview}{(Optional) Should a summary of the task be printed to console, and a \link[ggplot2]{ggplot} overview be returned? Default is "true".}
+
+\item{out_dir}{(Optional) A directory in which the predicted images will be saved. Will be created if it does not exist. Default: "/Pred_Outputs"}
 }
 \value{
-A ggplot overview of the tasks.
+A ggplot overview of the tasks (If \code{output_overview} is "true")
 }
 \description{
-imagefusion_task
+The main function of the  \link[ImageFusion] package, intended for the fusion of images based on a time-series of inputs. It splits the task into a number of self-contained \emph{jobs} between two dates with a high&low pair.
 }
+\section{Required Arguments}{
+NA
+}
+
+\section{Optional Arguments}{
+NA
+}
+
 \examples{
 Sorry, maybe later
+}
+\seealso{
+
+}
+\author{
+Johannes Mast
 }

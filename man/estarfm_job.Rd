@@ -100,6 +100,13 @@ Sorry, maybe later
 \references{
 Zhu, X., Chen, J., Gao, F., Chen, X., & Masek, J. G. (2010). An enhanced spatial and temporal adaptive reflectance fusion model for complex heterogeneous regions. Remote Sensing of Environment, 114(11), 2610-2623.
 }
+\seealso{
+Other {fusion_algorithms}: 
+\code{\link{fitfc_job}()},
+\code{\link{spstfm_job}()},
+\code{\link{starfm_job}()}
+}
 \author{
 Johannes Mast
 }
+\concept{{fusion_algorithms}}

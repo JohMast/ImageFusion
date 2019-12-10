@@ -114,6 +114,13 @@ Sorry, maybe later
 \references{
 Huang, B., & Song, H. (2012). Spatiotemporal reflectance fusion via sparse representation. IEEE Transactions on Geoscience and Remote Sensing, 50(10), 3707-3716.
 }
+\seealso{
+Other {fusion_algorithms}: 
+\code{\link{estarfm_job}()},
+\code{\link{fitfc_job}()},
+\code{\link{starfm_job}()}
+}
 \author{
 Johannes Mast
 }
+\concept{{fusion_algorithms}}

@@ -1,20 +1,40 @@
 #' imagefusion_task
-#'
-#' @param ... 
-#' @param filenames_high 
-#' @param filenames_low 
-#' @param dates_high 
-#' @param dates_low 
-#' @param dates_pred 
-#' @param singlepair_mode 
-#' @param method 
-#' @param verbose 
-#'
-#' @return A ggplot overview of the tasks.
+#' @description The main function of the ImageFusion Package, intended for the fusion of images based on a time-series of inputs. It splits the task into a number of self-contained \emph{jobs} between two dates with a high&low pair.
+#' @param filenames_high A character vector of the filenames of the high resolution input images.
+#' @param filenames_low A character vector of the filenames of the low resolution input images.
+#' @param dates_high An integer vector of the dates associated with the \code{filenames_high}. Must match \code{filenames_high} in length and order.
+#' @param dates_low An integer vector of the dates associated with the \code{filenames_low}. Must match \code{filenames_low} in length and order.
+#' @param dates_pred An integer vector dates for which an output should be generated.
+#' @param singlepair_mode  (Optional) How should singlepair predictions (those \code{dates_pred}, which do not lie between two dates with a high&low pair) be handled? \itemize{
+#' \item{ignore: No prediction will be performed for those dates. This is the default.}
+#' \item{mixed: Use doublepair mode where possible, and singlepair mode otherwise (only supported for \code{method} fitfc and starfm)}
+#' \item{all: Predict all dates in singlepair mode (only supported for \code{method} fitfc and starfm)}
+#' @param method  (Optional) The algorithm which is used for the fusion. \itemize{
+#' \item{starfm: STARFM stands for spatial and temporal adaptive reflectance fusion model. It requires a relatively low amount of computation time for prediction. See \link[ImageFusion]{starfm_job}.}
+#' \item{estarfm: ESTARFM stands for enhanced spatial and temporal adaptive reflectance fusion model so it claims to be an enhanced STARFM. It can yield better results in some situations. See \link[ImageFusion]{estarfm_job}.}
+#' \item{fitfc: Fit-FC is a three-step method consisting of regression model fitting (RM fitting), spatial filtering (SF) and residual compensation (RC). It requires a relatively low amount of computation time for prediction. See \link[ImageFusion]{fitfc_job}. This is the default algorithm.}
+#' \item{spstfm: SPSTFM is a dictionary learning based algorithm, which is computationally expensive in training and application, but can give good quality predictions. See \link[ImageFusion]{spstfm_job}.}
+#' } 
+#' @param verbose  (Optional) Output intermediate progress reports? Default is "true".
+#' @param spstfm_mode  (Optional) If the spstfm \code{method} was chosen: Write and reuse dictionaries? \itemize{
+#' \item{none: No dictionary will be saved. This is the default.}
+#' \item{separate: Separate dictionaries will be saved for each job. }
+#' \item{iterative: Dictionaries will be iteratively improved by each job, reusing the previously saved dictionary. }
+#' }
+#' @param high_date_prediction_mode  (Optional) How to proceed for predictions on those dates which have high resolution images available? \itemize{
+#' \item{ignore: Output nothing for those dates. This is the default.}
+#' \item{copy: Directly copy the high resolution input images to the output path.}
+#' \item{force: Use the chosen algorithm to predicts the high resolution input images on themselves. This takes additional computation time, but ensures that the outputs are consistent with the genuinely predicted outputs.}
+#' }
+#' @param output_overview (Optional) Should a summary of the task be printed to console, and a \link[ggplot2]{ggplot} overview be returned? Default is "true".
+#' @param out_dir (Optional) A directory in which the predicted images will be saved. Will be created if it does not exist. Default: "/Pred_Outputs"
+#' @param ... Further arguments specific to the chosen \code{method}. See the documentation of the methods for a detailed description.
+#' @return A ggplot overview of the tasks (If \code{output_overview} is "true")
 #' @import assertthat ggplot2 magrittr dplyr
 #' @importFrom assertthat assert_that
 #' @export
-#'
+#' @author Johannes Mast
+#' @seealso 
 #' @examples Sorry, maybe later
 
 imagefusion_task <- function(...,filenames_high,filenames_low,dates_high,dates_low,dates_pred,singlepair_mode="ignore",method="starfm",spstfm_mode="none",high_date_prediction_mode="ignore",verbose=T,output_overview=T,out_dir="Pred_Outputs"){

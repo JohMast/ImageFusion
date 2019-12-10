@@ -109,12 +109,17 @@ Executes the STARFM algorithm to create a number of synthetic high-resolution im
 }
 \examples{
 Sorry, maybe later
-
-
 }
 \references{
 Gao, Feng, et al. "On the blending of the Landsat and MODIS surface reflectance: Predicting daily Landsat surface reflectance." IEEE Transactions on Geoscience and Remote sensing 44.8 (2006): 2207-2218.
 }
+\seealso{
+Other {fusion_algorithms}: 
+\code{\link{estarfm_job}()},
+\code{\link{fitfc_job}()},
+\code{\link{spstfm_job}()}
+}
 \author{
 Johannes Mast
 }
+\concept{{fusion_algorithms}}

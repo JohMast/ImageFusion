@@ -35,7 +35,7 @@
 #' @author Johannes Mast
 #' @details Executes the FITFC Algorithm. If more than one pair is given, will perform prediction for the pred dates twice, once for each of the input pairs.
 #' @examples Sorry, maybe later
-#' 
+#' @family {fusion_algorithms}
 #' 
 fitfc_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,pred_filenames,pred_area,winsize,date1,date3,n_cores,n_neighbors,hightag,lowtag,MASKIMG_options,MASKRANGE_options,output_masks,use_nodata_value,use_parallelisation,resolution_factor,verbose=T
 ){

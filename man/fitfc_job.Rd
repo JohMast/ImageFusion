@@ -82,12 +82,17 @@ Executes the FITFC Algorithm. If more than one pair is given, will perform predi
 }
 \examples{
 Sorry, maybe later
-
-
 }
 \references{
 Wang, Qunming, and Peter M. Atkinson. "Spatio-temporal fusion for daily Sentinel-2 images." Remote Sensing of Environment 204 (2018): 31-42.
 }
+\seealso{
+Other {fusion_algorithms}: 
+\code{\link{estarfm_job}()},
+\code{\link{spstfm_job}()},
+\code{\link{starfm_job}()}
+}
 \author{
 Johannes Mast
 }
+\concept{{fusion_algorithms}}
