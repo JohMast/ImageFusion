@@ -32,7 +32,7 @@ dates_pred <- c(50,51,100,107,123,125,126,128,155,158,200,201,202,280,281,282,28
 
 ####Test basic functionality###
 
-?ImageFusion::estarfm_job()
+
 ?ImageFusion::starfm_job()
 
 ?ImageFusion::spstfm_job
@@ -115,6 +115,60 @@ ImageFusion::imagefusion_task(filenames_high = filenames_high,
 
 
 ####Test estarfm ####
+?ImageFusion::estarfm_job()
+#estarfm with some additional arguments
+ImageFusion::imagefusion_task(filenames_high = filenames_high,
+                              filenames_low = filenames_low,
+                              dates_high = dates_high,
+                              dates_low = dates_low,
+                              dates_pred = dates_pred,
+                              method="estarfm",
+                              out_dir = file.path(outdir,"estarfm","arguments"),
+                              pred_area = c(400,    400, 25,  25),
+                              use_local_tol=T,
+                              verbose = T,
+                              output_overview = T)
+
+#estarfm with masking additional arguments
+ImageFusion::imagefusion_task(filenames_high = filenames_high,
+                              filenames_low = filenames_low,
+                              dates_high = dates_high,
+                              dates_low = dates_low,
+                              dates_pred = dates_pred,
+                              method="estarfm",
+                              out_dir = file.path(outdir,"estarfm","masking"),
+                              pred_area = c(400,    400, 50,  50),
+                              MASKRANGE_options="--mask-low-res-invalid-ranges=(125,175)  --mask-high-res-invalid-ranges=[225,275]",
+                              verbose = T,
+                              output_overview = T,high_date_prediction_mode = "ignore")
+
+#estarfm with copying high additional arguments
+ImageFusion::imagefusion_task(filenames_high = filenames_high,
+                              filenames_low = filenames_low,
+                              dates_high = dates_high,
+                              dates_low = dates_low,
+                              dates_pred = dates_pred,
+                              method="estarfm",
+                              out_dir = file.path(outdir,"estarfm","copy"),
+                              pred_area = c(400,    400, 50,  50),
+                              MASKRANGE_options="--mask-low-res-invalid-ranges=(125,175)  --mask-high-res-invalid-ranges=[225,275]",
+                              verbose = T,
+                              output_overview = T,high_date_prediction_mode = "copy"
+                              )
+#estarfm with force high additional arguments
+ImageFusion::imagefusion_task(filenames_high = filenames_high,
+                              filenames_low = filenames_low,
+                              dates_high = dates_high,
+                              dates_low = dates_low,
+                              dates_pred = dates_pred,
+                              method="estarfm",
+                              out_dir = file.path(outdir,"estarfm","force"),
+                              pred_area = c(400,    400, 50,  50),
+                              MASKRANGE_options="--mask-low-res-invalid-ranges=(125,175)  --mask-high-res-invalid-ranges=[225,275]",
+                              verbose = T,
+                              output_overview = T,high_date_prediction_mode = "force"
+)
+
 ####test starfm ####
 ImageFusion::imagefusion_task(filenames_high = filenames_high,
                               filenames_low = filenames_low,

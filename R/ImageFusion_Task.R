@@ -17,7 +17,7 @@
 #'
 #' @examples Sorry, maybe later
 
-imagefusion_task <- function(...,filenames_high,filenames_low,dates_high,dates_low,dates_pred,singlepair_mode="ignore",method="starfm",spstfm_mode="none",verbose=T,output_overview=T,out_dir="Pred_Outputs"){
+imagefusion_task <- function(...,filenames_high,filenames_low,dates_high,dates_low,dates_pred,singlepair_mode="ignore",method="starfm",spstfm_mode="none",high_date_prediction_mode="ignore",verbose=T,output_overview=T,out_dir="Pred_Outputs"){
 
 ####1: Prepare Inputs####
   
@@ -35,7 +35,8 @@ filenames_pred <- file.path(out_dir,paste(dates_pred,".tif",sep = ""))  #Make pl
 
 #Make sure that method is plausible
 assert_that(method %in% c("estarfm","fitfc","spstfm","starfm"))
-
+#Make sure that high_date_prediction_mode is plausible
+assert_that(high_date_prediction_mode %in% c("ignore","copy","force"))
 #Set singlepair policy
 #ignore: Do not even attempt to predict singlepair dates
 #mixed: Use doublepair mode when possible, and singlepair mode otherwise
@@ -145,9 +146,9 @@ if(output_overview){
   case_3 <- all$date[all$pred_case==3]
   if(length(case_3)){cat(paste("\nCannot attempt prediction for dates:", paste(case_3,collapse = ","),"\nNo input images were found for those dates."))}
   case_4 <- all$date[all$pred_case==4]
-  if(length(case_4)){cat(paste("\nWill not attempt prediction for dates", paste(case_4,collapse = ","),"\nHigh and low resolution input images were found for those dates, making prediction possible, but unnecessary."))}
+  if(length(case_4)){cat(paste("\nWill",high_date_prediction_mode,"prediction for dates", paste(case_4,collapse = ","),"\nHigh and low resolution input images were found for those dates, making prediction possible, but unnecessary."))}
   case_5 <- all$date[all$pred_case==5]
-  if(length(case_5)){cat(paste("\nWill not attempt prediction for dates", paste(case_5,collapse = ","),"\nOnly a high resolution input image was found for those dates, making prediction impossible but unnecessary."))}
+  if(length(case_5)){cat(paste("\nWill",high_date_prediction_mode,"prediction for dates", paste(case_5,collapse = ","),"\nOnly a high resolution input image was found for those dates, making prediction impossible but unnecessary."))}
   cat("\n============================================================\n")
 }
 
@@ -232,12 +233,15 @@ for(i in 1:nrow(valid_job_table)){ #For every job
         print("Not saving dictionary")
       }
       if(spstfm_mode=="iterative"){
-        if(i>1){LOADDICT_options = file.path(out_dir,paste0("Spstfm_dict_job",i-1))
-        print(paste("Building on previously save dictionary: ",LOADDICT_options ))}
-        SAVEDICT_options = file.path(out_dir,paste0("Spstfm_dict_job",i))
+        if(i>1){
+          LOADDICT_options = file.path(out_dir,paste0("Spstfm_dict_job",i-1))
+          print(paste("Building on previously save dictionary: ",LOADDICT_options ))}
+          REUSE_options="improve"
+          SAVEDICT_options = file.path(out_dir,paste0("Spstfm_dict_job",i))
       }
       if(spstfm_mode=="none"){
         SAVEDICT_options = ""
+        REUSE_options="use"
         print("Not saving dictionary")
       }
       
@@ -251,6 +255,7 @@ for(i in 1:nrow(valid_job_table)){ #For every job
                                pred_dates = current_case_1$date,
                                pred_filenames =  current_case_1$files_pred,
                               SAVEDICT_options = SAVEDICT_options,
+                              REUSE_options = REUSE_options,
                               verbose=verbose,
                               ...
       )
@@ -301,13 +306,39 @@ if(nrow(current_case_3)){
 }#end case3
 #Process Cases 4
 if(nrow(current_case_4)){
-  if(verbose){cat(paste("\nBoth high and low images were found for date(s)", paste(current_case_4$date,collapse = " "),". Skipping prediction and copying high input to target destination."))}
-  file.copy(current_case_4$files_high,current_case_4$files_pred)
+  if(verbose){cat(paste("\nBoth high and low images were found for date(s)", paste(current_case_4$date,collapse = " ")))}
+  if(high_date_prediction_mode=="ignore"){
+    if(verbose){cat("\nIgnoring these dates")}
+    }
+  if(high_date_prediction_mode=="copy"){
+    if(verbose){cat("\ncopying input files to target destination")}
+    file.copy(current_case_4$files_high,current_case_4$files_pred)
+    }
+  if(high_date_prediction_mode=="force"){
+    if(verbose){cat("\npredicting on self for those dates")}
+    for(i in 1:nrow(current_case_4)){
+      self_predict(src_im = current_case_4$files_high[i],dst_im = current_case_4$files_pred[i],method=method,...)
+      }
+    }
+  
   }#end case4
 #Process Cases 5
 if(nrow(current_case_5)){
-  if(verbose){cat(paste("\nOnly high images were found for date(s)", paste(current_case_5$date,collapse = " "),". Copying high input to target destination."))}
-  file.copy(current_case_5$files_high,current_case_5$files_pred)
+  if(verbose){cat(paste("\nBoth high and low images were found for date(s)", paste(current_case_5$date,collapse = " ")))}
+  if(high_date_prediction_mode=="ignore"){
+    if(verbose){cat("\nIgnoring these dates")}
+  }
+  if(high_date_prediction_mode=="copy"){
+    if(verbose){cat("\ncopying input files to target destination")}
+    file.copy(current_case_5$files_high,current_case_5$files_pred)
+  }
+  if(high_date_prediction_mode=="force"){
+    if(verbose){cat("\npredicting on self for those dates")}
+    for(i in 1:nrow(current_case_5)){
+      self_predict(src_im = current_case_5$files_high[i],dst_im = current_case_5$files_pred[i],method=method,...)
+    }
+  }
+  
 }#end case5
 
 if(output_overview){return(p)}else{return(0)}
