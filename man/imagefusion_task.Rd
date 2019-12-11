@@ -2,7 +2,7 @@
 % Please edit documentation in R/ImageFusion_Task.R
 \name{imagefusion_task}
 \alias{imagefusion_task}
-\title{imagefusion_task}
+\title{Perform time-series image fusion}
 \usage{
 imagefusion_task(
   ...,
@@ -33,11 +33,16 @@ imagefusion_task(
 
 \item{dates_pred}{An integer vector dates for which an output should be generated.}
 
+\item{singlepair_mode}{(Optional) How should singlepair predictions (those \code{dates_pred}, which do not lie between two dates with a high&low pair) be handled? \itemize{
+\item{ignore: No prediction will be performed for those dates. This is the default.}
+\item{mixed: Use doublepair mode where possible, and singlepair mode otherwise (only supported for \code{method} fitfc and starfm)}
+\item{all: Predict all dates in singlepair mode (only supported for \code{method} fitfc and starfm)}}}
+
 \item{method}{(Optional) The algorithm which is used for the fusion. \itemize{
-\item{starfm: STARFM stands for spatial and temporal adaptive reflectance fusion model. It requires a relatively low amount of computation time for prediction. See \link[ImageFusion]{starfm_job}.}
-\item{estarfm: ESTARFM stands for enhanced spatial and temporal adaptive reflectance fusion model so it claims to be an enhanced STARFM. It can yield better results in some situations. See \link[ImageFusion]{estarfm_job}.}
-\item{fitfc: Fit-FC is a three-step method consisting of regression model fitting (RM fitting), spatial filtering (SF) and residual compensation (RC). It requires a relatively low amount of computation time for prediction. See \link[ImageFusion]{fitfc_job}. This is the default algorithm.}
-\item{spstfm: SPSTFM is a dictionary learning based algorithm, which is computationally expensive in training and application, but can give good quality predictions. See \link[ImageFusion]{spstfm_job}.}
+\item{starfm: STARFM stands for spatial and temporal adaptive reflectance fusion model. It requires a relatively low amount of computation time for prediction. Supports singlepair and doublepair modes. See \link[ImageFusion]{starfm_job}.}
+\item{estarfm: ESTARFM stands for enhanced spatial and temporal adaptive reflectance fusion model so it claims to be an enhanced STARFM. It can yield better results in some situations. Only supports doublepair mode. See \link[ImageFusion]{estarfm_job}.}
+\item{fitfc: Fit-FC is a three-step method consisting of regression model fitting (RM fitting), spatial filtering (SF) and residual compensation (RC). It requires a relatively low amount of computation time for prediction. Supports singlepair or a pseudo-doublepair mode(For predictions between two pair dates, predictions will be done twice, once for each of the pair dates). See \link[ImageFusion]{fitfc_job}. This is the default algorithm.}
+\item{spstfm: SPSTFM is a dictionary learning based algorithm, which is computationally expensive in training and application, but can give good quality predictions. Only supports doublepair mode. See \link[ImageFusion]{spstfm_job}.}
 }}
 
 \item{spstfm_mode}{(Optional) If the spstfm \code{method} was chosen: Write and reuse dictionaries? \itemize{
@@ -62,16 +67,11 @@ imagefusion_task(
 A ggplot overview of the tasks (If \code{output_overview} is "true")
 }
 \description{
-The main function of the  \link[ImageFusion] package, intended for the fusion of images based on a time-series of inputs. It splits the task into a number of self-contained \emph{jobs} between two dates with a high&low pair.
+The main function of the ImageFusion Package, intended for the fusion of images based on a time-series of inputs.
 }
-\section{Required Arguments}{
-NA
+\details{
+The function firstly seeks among the inputs for pair dates, which are dates for which have both a high resolution image and a low resolution image are available. It then splits the task into a number of self-contained \emph{jobs} which handle the fusion between these pair dates using the paired images as anchors. These jobs can also be called directly via their respective functions, see \code{method}.
 }
-
-\section{Optional Arguments}{
-NA
-}
-
 \examples{
 Sorry, maybe later
 }
