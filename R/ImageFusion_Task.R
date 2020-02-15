@@ -8,7 +8,7 @@
 #' @param singlepair_mode  (Optional) How should singlepair predictions (those \code{dates_pred}, which do not lie between two dates with a high&low pair) be handled? \itemize{
 #' \item{ignore: No prediction will be performed for those dates. This is the default.}
 #' \item{mixed: Use doublepair mode where possible, and singlepair mode otherwise (only supported for \code{method} fitfc and starfm)}
-#' \item{all: Predict all dates in singlepair mode (only supported for \code{method} fitfc and starfm)}}
+#' \item{all: Predict all dates in singlepair mode, using the lower pair date if between pairs (only supported for \code{method} fitfc and starfm)}}
 #' @param method  (Optional) The algorithm which is used for the fusion. \itemize{
 #' \item{starfm: STARFM stands for spatial and temporal adaptive reflectance fusion model. It requires a relatively low amount of computation time for prediction. Supports singlepair and doublepair modes. See \link[ImageFusion]{starfm_job}.}
 #' \item{estarfm: ESTARFM stands for enhanced spatial and temporal adaptive reflectance fusion model so it claims to be an enhanced STARFM. It can yield better results in some situations. Only supports doublepair mode. See \link[ImageFusion]{estarfm_job}.}
@@ -90,7 +90,7 @@ pairs <- inner_join(x = high_df,y = low_df, by = "date")%>% arrange(date)
 low_only <- anti_join(x = low_df,y = high_df, by = "date")%>% arrange(date)
 low_outliers <- low_only[low_only$date>max(pairs$date) | low_only$date<min(pairs$date),]%>% arrange(date)
 
-#join them into different tables #2DO: CHeck later, which of these are actually required
+#join them into a table
 all <- full_join(x = high_df,y = low_df,by=c("date")) %>%
   full_join(y = pred_df,by=c("date")) %>% 
   arrange(date) %>% 
@@ -140,6 +140,8 @@ if(singlepair_mode=="mixed"){
   
 }
 if(singlepair_mode=="all"){
+  #In this case, we set all double predictions to singlepair predictions (nominal. They would be treated as singlepair anyway)
+  all$pred_case[all$pred_case==1] <- 2 
   all <- all %>% 
     mutate(interval_pairs = as.factor(sapply(date, FUN = function(x) {pairs$date[which.min(abs(pairs$date-x))]}))) %>% 
     mutate(interval_ids = sapply(date, FUN = function(x) {which.min(abs(pairs$date-x))})) %>%
@@ -198,6 +200,11 @@ p <- ggplot(all, aes(x=date, y=resolutions,colour=resolutions,shape=predict,size
 for(i in 1:nrow(valid_job_table)){ #For every job
   #Get the pair dates
   current_job <- valid_job_table[i,]
+  #COnvert dates from factor to numeric to avoid shenanigans
+  current_job$interval_startpair <- as.numeric(as.character(current_job$interval_startpair))
+  current_job$interval_endpair <- as.numeric(as.character(current_job$interval_endpair))
+  current_job$interval_pairs <- as.numeric(as.character(current_job$interval_pairs))
+  
   current_case_1 <- all[all$interval_ids==current_job$interval_ids & all$pred_case == 1,]
   current_case_2 <- all[all$interval_ids==current_job$interval_ids & all$pred_case == 2,]
   
@@ -285,7 +292,7 @@ for(i in 1:nrow(valid_job_table)){ #For every job
   #Process Cases 2
   if(nrow(current_case_2)){
     
-    startpair <- current_job$interval_startpair
+    startpair <- as.numeric(as.character(current_job$interval_startpair))
     startpair_date <- all[all$date==startpair,]
     if(verbose){cat(paste("Job ",i,"predicting in singlepair mode for dates", paste(current_case_2$date,collapse = " ")," based on pair on date", startpair))}
     
