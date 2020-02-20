@@ -8,7 +8,7 @@
 #' @param singlepair_mode  (Optional) How should singlepair predictions (those \code{dates_pred}, which do not lie between two dates with a high&low pair) be handled? \itemize{
 #' \item{ignore: No prediction will be performed for those dates. This is the default.}
 #' \item{mixed: Use doublepair mode where possible, and singlepair mode otherwise (only supported for \code{method} fitfc and starfm)}
-#' \item{all: Predict all dates in singlepair mode, using the lower pair date if between pairs (only supported for \code{method} fitfc and starfm)}}
+#' \item{all: Predict all dates in singlepair mode, using the closest pair date if between pairs (only supported for \code{method} fitfc and starfm)}}
 #' @param method  (Optional) The algorithm which is used for the fusion. \itemize{
 #' \item{starfm: STARFM stands for spatial and temporal adaptive reflectance fusion model. It requires a relatively low amount of computation time for prediction. Supports singlepair and doublepair modes. See \link[ImageFusion]{starfm_job}.}
 #' \item{estarfm: ESTARFM stands for enhanced spatial and temporal adaptive reflectance fusion model so it claims to be an enhanced STARFM. It can yield better results in some situations. Only supports doublepair mode. See \link[ImageFusion]{estarfm_job}.}
@@ -167,11 +167,11 @@ if(output_overview){
     if(singlepair_mode=="ignore"){cat("\nIgnoring Singlepairs")}
     if(singlepair_mode %in% c("mixed","all")){cat("\nPerforming Singlepair mode prediction for these dates.")}}
   case_3 <- all$date[all$pred_case==3]
-  if(length(case_3)){cat(paste("\nCannot attempt prediction for dates:", paste(case_3,collapse = ","),"\nNo input images were found for those dates."))}
+  if(length(case_3)){cat(paste("\nCannot attempt prediction for dates:", paste(case_3,collapse = ","),"\n(No input images were found for those dates.)"))}
   case_4 <- all$date[all$pred_case==4]
-  if(length(case_4)){cat(paste("\nWill",high_date_prediction_mode,"prediction for dates", paste(case_4,collapse = ","),"\nHigh and low resolution input images were found for those dates, making prediction possible, but unnecessary."))}
+  if(length(case_4)){cat(paste("\nWill",high_date_prediction_mode,"prediction for dates", paste(case_4,collapse = ","),"\n(High and low resolution input images were found for those dates, making prediction possible, but unnecessary.)"))}
   case_5 <- all$date[all$pred_case==5]
-  if(length(case_5)){cat(paste("\nWill",high_date_prediction_mode,"prediction for dates", paste(case_5,collapse = ","),"\nOnly a high resolution input image was found for those dates, making prediction impossible but unnecessary."))}
+  if(length(case_5)){cat(paste("\nWill",high_date_prediction_mode,"prediction for dates", paste(case_5,collapse = ","),"\n(Only a high resolution input image was found for those dates, making prediction impossible but unnecessary.)"))}
   cat("\n============================================================\n")
 }
 
@@ -197,6 +197,9 @@ p <- ggplot(all, aes(x=date, y=resolutions,colour=resolutions,shape=predict,size
 
 
 ###3: Predictions (Cases 1 and 2) ####
+if(verbose){cat(paste("\n------------------------------------------\n","Starting the task, consisting of ",nrow(valid_job_table)," job(s)","\n------------------------------------------\n"))}
+
+
 for(i in 1:nrow(valid_job_table)){ #For every job
   #Get the pair dates
   current_job <- valid_job_table[i,]
@@ -214,7 +217,7 @@ for(i in 1:nrow(valid_job_table)){ #For every job
     startpair_date <- all[all$date==startpair,]
     endpair <-  current_job$interval_endpair
     endpair_date <- all[all$date==endpair,]
-    if(verbose){cat(paste("Job ",i,"predicting in doublepair mode for dates", paste(current_case_1$date,collapse = " ")," based on pairs on dates  ", startpair, endpair))}
+    if(verbose){cat(paste("\n------------------------------------------\n","Job ",i,"predicting in doublepair mode for dates", paste(current_case_1$date,collapse = " ")," based on pairs on dates  ", startpair, " and ",endpair,"\n "))}
     #ESTARFM
     if(method=="estarfm"){
       ImageFusion::estarfm_job(input_filenames = c(startpair_date$files_high,
@@ -294,8 +297,8 @@ for(i in 1:nrow(valid_job_table)){ #For every job
     
     startpair <- as.numeric(as.character(current_job$interval_startpair))
     startpair_date <- all[all$date==startpair,]
-    if(verbose){cat(paste("Job ",i,"predicting in singlepair mode for dates", paste(current_case_2$date,collapse = " ")," based on pair on date", startpair))}
-    
+    if(verbose){cat(paste("\n------------------------------------------\n","Job ",i,"predicting in singlepair mode for dates", paste(current_case_2$date,collapse = " ")," based on pair on date", startpair,"\n"))}
+    cat()
     #FITFC
     if(method=="fitfc"){
       ImageFusion::fitfc_job(input_filenames = c(startpair_date$files_high,

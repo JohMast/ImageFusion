@@ -239,10 +239,12 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames,
     //If we have a parallelised fusor object, use that
     if(use_parallelisation){
 #ifdef WITH_OMP
+      if(verbose){std::cout <<"Predicting for date"<< pred_dates[i]<< " using both pairs from dates " << date1 << " and " << date3 << "." << std::endl;}
       pesf.predict(pred_dates[i],predMask);
       pesf.outputImage().write(pred_filename);
 #endif /* Otherwise, use the standard fusor object*/
     }else{
+      if(verbose){std::cout <<"Predicting for date"<< pred_dates[i]<< " using both pairs from dates " << date1 << " and " << date3 << "." << std::endl;}
       esf.predict(pred_dates[i],predMask);  
       esf.outputImage().write(pred_filename);
     }
@@ -773,10 +775,14 @@ void execute_fitfc_job_cpp(CharacterVector input_filenames,
     //If we have a parallelised fusor object, use that
     if(use_parallelisation){
 #ifdef WITH_OMP
+      if(verbose){std::cout << "Predicting for date " << pred_dates[i];}
+      if(verbose){std::cout << " using pair from date " << date1<< std::endl;}
       pffc.predict(pred_dates[i],predMask);
       pffc.outputImage().write(pred_filename);
 #endif /* Otherwise, use the standard fusor object*/
     }else{
+      if(verbose){std::cout << "Predicting for date " << pred_dates[i];}
+      if(verbose){std::cout << " using pair from date " << date1<< std::endl;}
       ffc.predict(pred_dates[i],predMask);  
       ffc.outputImage().write(pred_filename);
     }
@@ -1084,6 +1090,7 @@ void execute_spstfm_job_cpp(CharacterVector input_filenames,
     if (predValidSets.hasLow)
       //Adjust the mask by also applying those ranges.
       predMask = helpers::processSetMask(std::move(predMask), mri->get(lowtag, pred_dates[i]), predValidSets.low);
+    if(verbose){std::cout <<"Predicting for date"<< pred_dates[i]<< " using both pairs from dates " << date1 << " and " << date3 << "." << std::endl;}
     
     spsf.predict(pred_dates[i],predMask);  
     spsf.outputImage().write(pred_filename);

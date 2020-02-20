@@ -27,18 +27,18 @@ dates_low <- filenames_low %>%
   as.numeric()%>% 
   "+"(1000)
 
-dates_pred <- c(50,51,100,107,123,125,126,128,155,158,200,201,202,280,281,282,283,355)%>% 
+dates_pred <- c(50,51,100,107,123,125,126,128,135,155,158,200,201,202,280,281,282,283,355)%>% 
   "+"(1000)
 
 ####Test basic functionality###
 
 
-?ImageFusion::starfm_job()
-
+?ImageFusion::starfm_job
 ?ImageFusion::spstfm_job
 
 ####Test fitfc ####
 #Basic fitfc
+#uses doublepair mode as default, meaning that even though the outliers could be predicted, they will not
 ?ImageFusion::fitfc_job()
 fitfc_1 <- ImageFusion::imagefusion_task(filenames_high = filenames_high,
                               filenames_low = filenames_low,
@@ -49,7 +49,7 @@ fitfc_1 <- ImageFusion::imagefusion_task(filenames_high = filenames_high,
                               out_dir = file.path(outdir,"fitfc","basic"),
                               verbose = T,
                               output_overview = T)
-#fitfc with some additional arguments
+#fitfc with some additional arguments, like restriction to pred_area (much faster)
 fitfc_2 <- ImageFusion::imagefusion_task(filenames_high = filenames_high,
                               filenames_low = filenames_low,
                               dates_high = dates_high,
@@ -83,7 +83,7 @@ fitfc_4 <- ImageFusion::imagefusion_task(filenames_high = filenames_high,
                               singlepair_mode = "mixed",
                               out_dir = file.path(outdir,"fitfc","mixed"),
                               pred_area = c(400,    400, 25,  25),
-                              verbose = F,
+                              verbose = T,
                               output_overview = T)
 #fitfc with singlepair all
 fitfc_5 <- ImageFusion::imagefusion_task(filenames_high = filenames_high,
@@ -95,29 +95,13 @@ fitfc_5 <- ImageFusion::imagefusion_task(filenames_high = filenames_high,
                               singlepair_mode = "all",
                               out_dir = file.path(outdir,"fitfc","all"),
                               pred_area = c(400,    400, 25,  25),
-                              verbose = F,
-                              output_overview = T)
-
-
-
-ImageFusion::imagefusion_task(filenames_high = filenames_high,
-                              filenames_low = filenames_low,
-                              dates_high = dates_high,
-                              dates_low = dates_low,
-                              dates_pred = dates_pred,
-                              method="fitfc",
-                              out_dir = file.path(outdir,"fitfc","arguments"),
-                              pred_area = c(400,    400, 25,  25),
-                              n_neighbors=5,
                               verbose = T,
                               output_overview = T)
-
-
 
 ####Test estarfm ####
 ?ImageFusion::estarfm_job()
 #estarfm with some additional arguments
-ImageFusion::imagefusion_task(filenames_high = filenames_high,
+estarfm_1 <- ImageFusion::imagefusion_task(filenames_high = filenames_high,
                               filenames_low = filenames_low,
                               dates_high = dates_high,
                               dates_low = dates_low,
@@ -130,7 +114,7 @@ ImageFusion::imagefusion_task(filenames_high = filenames_high,
                               output_overview = T)
 
 #estarfm with masking additional arguments
-ImageFusion::imagefusion_task(filenames_high = filenames_high,
+estarfm_2 <- ImageFusion::imagefusion_task(filenames_high = filenames_high,
                               filenames_low = filenames_low,
                               dates_high = dates_high,
                               dates_low = dates_low,
@@ -143,7 +127,7 @@ ImageFusion::imagefusion_task(filenames_high = filenames_high,
                               output_overview = T,high_date_prediction_mode = "ignore")
 
 #estarfm with copying high additional arguments
-ImageFusion::imagefusion_task(filenames_high = filenames_high,
+estarfm_3 <- ImageFusion::imagefusion_task(filenames_high = filenames_high,
                               filenames_low = filenames_low,
                               dates_high = dates_high,
                               dates_low = dates_low,
@@ -156,7 +140,7 @@ ImageFusion::imagefusion_task(filenames_high = filenames_high,
                               output_overview = T,high_date_prediction_mode = "copy"
                               )
 #estarfm with force high additional arguments
-ImageFusion::imagefusion_task(filenames_high = filenames_high,
+estarfm_4 <- ImageFusion::imagefusion_task(filenames_high = filenames_high,
                               filenames_low = filenames_low,
                               dates_high = dates_high,
                               dates_low = dates_low,
@@ -168,8 +152,34 @@ ImageFusion::imagefusion_task(filenames_high = filenames_high,
                               verbose = T,
                               output_overview = T,high_date_prediction_mode = "force"
 )
+#estarfm with masking and large image
+estarfm_5 <- ImageFusion::imagefusion_task(filenames_high = filenames_high,
+                                           filenames_low = filenames_low,
+                                           dates_high = dates_high,
+                                           dates_low = dates_low,
+                                           dates_pred = 1126,
+                                           method="estarfm",
+                                           out_dir = file.path(outdir,"estarfm","large_mask"),
+                                           MASKRANGE_options="--mask-low-res-valid-ranges=(0,1000)",
+                                           verbose = T,
+                                           output_overview = T,high_date_prediction_mode = "ignore")
+
+#estarfm without masking and large image
+estarfm_6 <- ImageFusion::imagefusion_task(filenames_high = filenames_high,
+                                           filenames_low = filenames_low,
+                                           dates_high = dates_high,
+                                           dates_low = dates_low,
+                                           dates_pred = 1126,
+                                           method="estarfm",
+                                           out_dir = file.path(outdir,"estarfm","large_nomask"),
+                                           verbose = T,
+                                           output_overview = T,high_date_prediction_mode = "ignore")
+
+ImageFusion::execute_estarfm_job_cpp()
+
 
 ####test starfm ####
+#test basic starfm, ignoring outliers
 ImageFusion::imagefusion_task(filenames_high = filenames_high,
                               filenames_low = filenames_low,
                               dates_high = dates_high,
@@ -177,43 +187,44 @@ ImageFusion::imagefusion_task(filenames_high = filenames_high,
                               dates_pred = dates_pred,
                               method="starfm",
                               singlepair_mode = "ignore",
-                              out_dir = file.path("TestOutputs","starfm","ignore"),
-                              pred_area = c(400,    400, 25,  25),
+                              out_dir = file.path(outdir,"starfm","ignore"),
                               verbose = T,
                               output_overview = T)
 
+#test basic starfm, mixed outliers
 ImageFusion::imagefusion_task(filenames_high = filenames_high,
                               filenames_low = filenames_low,
                               dates_high = dates_high,
                               dates_low = dates_low,
                               dates_pred = dates_pred,
                               method="starfm",
-                              singlepair_mode = "ignore",
-                              out_dir = file.path("TestOutputs","starfm","ignore"),
-                              pred_area = c(400,    400, 25,  25),
+                              singlepair_mode = "mixed",
+                              out_dir = file.path(outdir,"starfm","mixed"),
                               verbose = T,
                               output_overview = T)
-
+#test starfm maskranges
 ImageFusion::imagefusion_task(filenames_high = filenames_high,
                               filenames_low = filenames_low,
                               dates_high = dates_high,
                               dates_low = dates_low,
                               dates_pred = dates_pred,
-                              method="estarfm",
-                              singlepair_mode = "ignore",
-                              out_dir = file.path("TestOutputs","ignore"),
-                              pred_area = c(400,    400, 25,  25),
+                              method="starfm",
+                              singlepair_mode = "mixed",
+                              out_dir = file.path(outdir,"starfm","maskrange"),
+                              MASKRANGE_options="--mask-low-res-valid-ranges=(0,10000)",
+                              pred_area = c(2,    2, 200,  200),
                               verbose = T,
                               output_overview = T)
 
+####test starfm ####
+#test basic spstfm, ignoring outliers
 ImageFusion::imagefusion_task(filenames_high = filenames_high,
                               filenames_low = filenames_low,
                               dates_high = dates_high,
                               dates_low = dates_low,
                               dates_pred = dates_pred,
-                              method="estarfm",
+                              method="spstfm",
                               singlepair_mode = "ignore",
-                              out_dir = file.path("TestOutputs","ignore"),
-                              pred_area = c(400,    400, 25,  25),
+                              out_dir = file.path(outdir,"spstfm","ignore"),
                               verbose = T,
                               output_overview = T)
