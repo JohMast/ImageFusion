@@ -36,7 +36,7 @@ imagefusion_task(
 \item{singlepair_mode}{(Optional) How should singlepair predictions (those \code{dates_pred}, which do not lie between two dates with a high&low pair) be handled? \itemize{
 \item{ignore: No prediction will be performed for those dates. This is the default.}
 \item{mixed: Use doublepair mode where possible, and singlepair mode otherwise (only supported for \code{method} fitfc and starfm)}
-\item{all: Predict all dates in singlepair mode (only supported for \code{method} fitfc and starfm)}}}
+\item{all: Predict all dates in singlepair mode, using the lower pair date if between pairs (only supported for \code{method} fitfc and starfm)}}}
 
 \item{method}{(Optional) The algorithm which is used for the fusion. \itemize{
 \item{starfm: STARFM stands for spatial and temporal adaptive reflectance fusion model. It requires a relatively low amount of computation time for prediction. Supports singlepair and doublepair modes. See \link[ImageFusion]{starfm_job}.}

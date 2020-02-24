@@ -7,9 +7,9 @@ Author: Christof Kaufmann, Thorsten Dahms, Jakob Schwalb-Willmann, Johannes Mast
 Maintainer: Johannes Mast <johannes.mast@stud-mail.uni-wuerzburg.de>
 Description: Fusion of Images in Satellite Image Time-Series. Provides Implementation of the Fitfc, Starfm, Estarfm and Spstfm algorithms in c++.
 License: What license is it under?
-Imports: Rcpp (>= 1.0.2), RcppArmadillo, BH, raster, rgdal, ROpenCVLite, parallel, ggplot2, assertthat,foreach
-LinkingTo: Rcpp, RcppArmadillo
+Imports: Rcpp (>= 1.0.2), RcppArmadillo, raster, rgdal, ROpenCVLite, parallel, ggplot2, assertthat,foreach
+LinkingTo: Rcpp, RcppArmadillo, BH
 Depends: R (>= 3.6)
 RoxygenNote: 7.0.1
-SystemRequirements: libgdal-dev libboost-all-dev cxx11, libproj,  OpenCV: libopencv-dev (Debian, Ubuntu) or opencv-devel (Fedora)
+SystemRequirements: libgdal-dev libboost-all-dev cxx11, libproj
 NeedsCompilation: yes

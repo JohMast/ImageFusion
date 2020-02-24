@@ -216,15 +216,36 @@ ImageFusion::imagefusion_task(filenames_high = filenames_high,
                               verbose = T,
                               output_overview = T)
 
-####test starfm ####
-#test basic spstfm, ignoring outliers
+####test spstfm ####
+#test basic spstfm for one date, no saving
 ImageFusion::imagefusion_task(filenames_high = filenames_high,
                               filenames_low = filenames_low,
                               dates_high = dates_high,
                               dates_low = dates_low,
-                              dates_pred = dates_pred,
+                              dates_pred = 1126,
                               method="spstfm",
-                              singlepair_mode = "ignore",
-                              out_dir = file.path(outdir,"spstfm","ignore"),
+                              out_dir = file.path(outdir,"spstfm","nosave"),spstfm_mode = "none",
+                              verbose = T,
+                              output_overview = T)
+
+#test basic spstfm for one date, no saving
+ImageFusion::imagefusion_task(filenames_high = filenames_high,
+                              filenames_low = filenames_low,
+                              dates_high = dates_high,
+                              dates_low = dates_low,
+                              dates_pred = 1126,
+                              method="spstfm",
+                              out_dir = file.path(outdir,"spstfm","ignore"),spstfm_mode = "iterative",
+                              verbose = T,
+                              output_overview = T)
+
+#test basic spstfm for one date, no saving
+ImageFusion::imagefusion_task(filenames_high = filenames_high,
+                              filenames_low = filenames_low,
+                              dates_high = dates_high,
+                              dates_low = dates_low,
+                              dates_pred = c(1125,1126),
+                              method="spstfm",
+                              out_dir = file.path(outdir,"spstfm","ignore"),spstfm_mode = "",REUSE_options="use",
                               verbose = T,
                               output_overview = T)
