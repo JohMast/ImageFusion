@@ -206,7 +206,7 @@ for(i in 1:nrow(valid_job_table)){ #For every job
   #COnvert dates from factor to numeric to avoid shenanigans
   current_job$interval_startpair <- as.numeric(as.character(current_job$interval_startpair))
   current_job$interval_endpair <- as.numeric(as.character(current_job$interval_endpair))
-  current_job$interval_pairs <- as.numeric(as.character(current_job$interval_pairs))
+  #current_job$interval_pairs <- as.numeric(as.character(current_job$interval_pairs))
   
   current_case_1 <- all[all$interval_ids==current_job$interval_ids & all$pred_case == 1,]
   current_case_2 <- all[all$interval_ids==current_job$interval_ids & all$pred_case == 2,]
