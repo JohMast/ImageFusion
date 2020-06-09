@@ -1,29 +1,31 @@
 #pkgbuild::compile_dll()
 #7053eb080acfbcad49d3dcad661c7eba4ac9ac93
 #roxygen2::roxygenise()
-
+library(rgdal)
 library(magrittr)
 #setwd("../Testground/")
-outdir <- "../Testground/TestOutputs"
+outdir <- "../TesOut"
 if(!dir.exists(outdir)){dir.create(outdir)}
 
 
 
 
 
-filenames_high <- list.files("../Testground/TestImages/Landsat_MODIS_Fusion/Landsat_2015/",pattern = ".tif",full.names = T)
-filenames_low <- list.files("../Testground/TestImages/Landsat_MODIS_Fusion/MODIS_2015/",pattern = ".tif",full.names = T)
+filenames_high <- list.files("../RabbiTS/Data/Landsat_MODIS_Fusion/Landsat_2015/",pattern = ".tif",full.names = T)
+filenames_low <- list.files("../RabbiTS/Data/Landsat_MODIS_Fusion/MODIS_2015/",pattern = ".tif",full.names = T)
 #drop a couple images for testing purposes
 filenames_low <- filenames_low[-c(84,123,158)]
 
 dates_high <- filenames_high %>%
-  sapply(substr,78,85) %>%
+  basename() %>% 
+  sapply(substr,18,25) %>%
   as.POSIXct(format="%Y%m%d") %>% 
   strftime(format = "%j") %>% 
   as.numeric()%>% 
   "+"(1000)
 dates_low <- filenames_low %>% 
-  sapply(substr,66,68) %>% 
+  basename() %>% 
+  sapply(substr,8,10) %>% 
   as.numeric()%>% 
   "+"(1000)
 
@@ -249,3 +251,4 @@ ImageFusion::imagefusion_task(filenames_high = filenames_high,
                               out_dir = file.path(outdir,"spstfm","ignore"),spstfm_mode = "",REUSE_options="use",
                               verbose = T,
                               output_overview = T)
+

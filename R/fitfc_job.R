@@ -1,5 +1,4 @@
-
-#' fitfc_job
+#' Execute a single self-contained self-contained time-series imagefusion job using FITFC
 #' @description A wrapper function for \code{execute_fitfc_job_cpp}. Intended to execute a single job, that is a number of predictions based on the same input pair(s). It ensures that all of the arguments passed are of the correct type and creates sensible defaults. 
 #'
 #' @param input_filenames  A string vector containing the filenames of the input images
@@ -32,7 +31,8 @@
 #' @export
 #' @importFrom raster stack
 #' @importFrom assertthat assert_that 
-#' @author Johannes Mast
+#' @author Christof Kaufmann (C++)
+#' @author Johannes Mast (R)
 #' @details Executes the FITFC Algorithm. If more than one pair is given, will perform prediction for the pred dates twice, once for each of the input pairs.
 #' @examples Sorry, maybe later
 #' @family {fusion_algorithms}

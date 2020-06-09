@@ -1,7 +1,4 @@
-
-
-
-#' estarfm_job
+#' Execute a single self-contained time-series imagefusion job using ESTARFM
 #' @description A wrapper function for \code{execute_estarfm_job_cpp}. Intended to execute a single job, that is a number of predictions based on the same input pairs. It ensures that all of the arguments passed are of the correct type and creates sensible defaults. 
 #'
 #' @param input_filenames A string vector containing the filenames of the input images
@@ -39,7 +36,8 @@
 #' @export
 #' @importFrom raster stack dataType
 #' @importFrom assertthat assert_that 
-#' @author Johannes Mast
+#' @author Christof Kaufmann (C++)
+#' @author Johannes Mast (R)
 #' @details Executes the ESTARFM algorithm to create a number of synthetic high-resolution images from two pairs of matching high- and low-resolution images.  Assumes that the input images already have matching size. See the original paper for details (Note: There is a difference to the algorithm as described in the paper though. The regression for R is now done with all candidates of one window. This complies to the reference implementation, but not to the paper, since there the regression is done only for the candidates that belong to one single coarse pixel. However, the coarse grid is not known at prediction and not necessarily trivial to find out (e. g. in case of higher order interpolation). 
 #' @examples Sorry, maybe later
 #' @family {fusion_algorithms}

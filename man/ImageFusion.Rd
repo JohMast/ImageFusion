@@ -4,12 +4,25 @@
 \name{ImageFusion}
 \alias{ImageFusion}
 \title{Imagefusion: A package for fusion of images}
-\description{
-The foo package provides three categories of important functions:
-foo, bar and baz.
-}
-\section{Foo functions}{
+\section{Outline}{
 
-The foo functions ...
+\code{ImageFusion} provides implementations of the following time-series fusion algorithms:
+\itemize{
+\item ESTARFM
+\item FITFC
+\item SPSTFM
+\item STARFM
+} 
+More algorithms will be added over time.
 }
 
+\section{Implementation}{
+
+The algorithms are implemented in C++ via 'GDAL', 'opencv' and 'Boost' and work from input images on disk without prior loading into R.
+}
+
+\author{
+Christof Kaufmann (C++)
+
+Johannes Mast (R)
+}

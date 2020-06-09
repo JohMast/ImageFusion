@@ -1,7 +1,4 @@
-
-
-
-#' spstfm_job
+#' Execute a single self-contained self-contained time-series imagefusion job using SPSTFM.
 #' @description A wrapper function for \code{execute_spstfm_job_cpp}. Intended to execute a single job, that is a number of predictions based on the same input pairs. It ensures that all of the arguments passed are of the correct type and creates sensible defaults. 
 #'
 #' @param input_filenames A string vector containing the filenames of the input images
@@ -47,7 +44,8 @@
 #' @importFrom raster stack
 #' @importFrom assertthat assert_that 
 #'
-#' @author Johannes Mast
+#' @author Christof Kaufmann (C++)
+#' @author Johannes Mast (R)
 #' @details Executes the SPSTFM algorithm to create a number of synthetic high-resolution images from two pairs of matching high- and low-resolution images.  Assumes that the input images already have matching size. For a detailed explanation how SPSTFM works there is the original paper and the thesis, which yielded this implementation. The latter explains also all available options and shows some test results. However, the default options should give good results.
 #' @examples Sorry, maybe later
 #' @family {fusion_algorithms}

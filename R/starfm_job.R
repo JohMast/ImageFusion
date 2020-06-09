@@ -1,5 +1,4 @@
-
-#' starfm_job
+#' Execute a single self-contained self-contained time-series imagefusion job using STARFM
 #' @description A wrapper function for \code{execute_starfm_job_cpp}. Intended to execute a single job, that is a number of predictions based on the same input pair(s). It ensures that all of the arguments passed are of the correct type and creates sensible defaults. 
 #'
 #' @param input_filenames  A string vector containing the filenames of the input images
@@ -39,7 +38,8 @@
 #' @export
 #' @importFrom raster stack dataType
 #' @importFrom assertthat assert_that 
-#' @author Johannes Mast
+#' @author Christof Kaufmann (C++)
+#' @author Johannes Mast (R)
 #' @details Executes the STARFM algorithm to create a number of synthetic high-resolution images from either two pairs (double pair mode) or one pair (single pair mode) of matching high- and low-resolution images. Assumes that the input images already have matching size. See the original paper for details (TO DO: INSERT CHANGES WITH REGARDS TO THE ORIGINAL PAPER). \itemize{
 ##'  \item{  For the weighting (10) states: \eqn{C = S T D}  but we use  \eqn{C = (S+1)(T+1)D}, according to the reference implementation. With \code{logscale_factor}, the weighting formula can be changed to \eqn{C = ln{(Sb+2)}ln{(Tb+1)D}}}
 ##'  \item{ In addition to the temporal uncertainty \eqn{\sigma_t} (see \code{temporal_uncertainty}) and the spectral uncertainty\eqn{ \sigma_s} (see \code{spectral_uncertainty}) there will be used a *combined uncertainty* \eqn{\sigma_c := \sqrt{\sigma_t^2 + \sigma_s^2} }. This will be used in the candidate weighting: If \eqn{(S + 1) \, (T + 1) < \sigma_c }, then \eqn{C = 1 } instead of the formula above.}

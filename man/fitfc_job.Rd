@@ -93,6 +93,8 @@ Other {fusion_algorithms}:
 \code{\link{starfm_job}()}
 }
 \author{
-Johannes Mast
+Christof Kaufmann (C++)
+
+Johannes Mast (R)
 }
 \concept{{fusion_algorithms}}
