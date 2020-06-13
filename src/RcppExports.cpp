@@ -138,23 +138,12 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
-// rcpp_hello_world
-List rcpp_hello_world();
-RcppExport SEXP _ImageFusion_rcpp_hello_world() {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    rcpp_result_gen = Rcpp::wrap(rcpp_hello_world());
-    return rcpp_result_gen;
-END_RCPP
-}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_ImageFusion_execute_estarfm_job_cpp", (DL_FUNC) &_ImageFusion_execute_estarfm_job_cpp, 24},
     {"_ImageFusion_execute_starfm_job_cpp", (DL_FUNC) &_ImageFusion_execute_starfm_job_cpp, 26},
     {"_ImageFusion_execute_fitfc_job_cpp", (DL_FUNC) &_ImageFusion_execute_fitfc_job_cpp, 19},
     {"_ImageFusion_execute_spstfm_job_cpp", (DL_FUNC) &_ImageFusion_execute_spstfm_job_cpp, 27},
-    {"_ImageFusion_rcpp_hello_world", (DL_FUNC) &_ImageFusion_rcpp_hello_world, 0},
     {NULL, NULL, 0}
 };
 

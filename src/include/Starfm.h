@@ -275,6 +275,7 @@ protected:
     /**
      * @brief Get area where pixels are read
      * @param fullImgSize size of the source image. This is used as bounds.
+     * @param predArea is the prediction area used. It must be valid (not just all-zero).
      *
      * The sample area is the area from which pixels are read. That is the prediction area with the
      * window size around, but limited by the image bounds.

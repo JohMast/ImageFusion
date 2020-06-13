@@ -12,8 +12,6 @@
 #include <type_traits>
 #include <functional>
 
-#include <boost/config.hpp>
-
 namespace imagefusion {
 
 /**

@@ -74,7 +74,7 @@ void FitFCFusor::checkInputImages(ConstImage const& mask, int date2) const {
                                             " * " + strL2 + " " + to_string(imgs->get(opt.getLowResTag(),     date2).type())         + "\n"));
 
     if (getBaseType(lowType) != getBaseType(highType))
-        IF_THROW_EXCEPTION(image_type_error("The base data types for the high resolution image (" + to_string(getBaseType(lowType)) +
+        IF_THROW_EXCEPTION(image_type_error("The base data types for the high resolution images (" + to_string(getBaseType(highType)) +
                                             ") and the low resolution images (" + to_string(getBaseType(lowType)) + ") are different."));
 
     if (getChannels(lowType) != getChannels(highType))

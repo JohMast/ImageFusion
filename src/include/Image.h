@@ -20,6 +20,13 @@ class GDALDataset;
 namespace imagefusion {
 
 class Image;
+class ConstImage;
+
+template<typename T>
+using enable_if_not_image_and_not_arithmetic = typename std::enable_if<!std::is_base_of<ConstImage, T>::value && !std::is_arithmetic<T>::value, int>::type;
+
+template<typename T>
+using enable_if_arithmetic = typename std::enable_if<std::is_arithmetic<T>::value, int>::type;
 
 enum class ColorMapping {
     /**
@@ -457,7 +464,7 @@ enum class ColorMapping {
      * where \f$ n \f$ is the maximum of the result image data range (see getImageRangeMat()).
      *  * For floating point and signed integer result images \f$ s = 2 \f$ and
      *    \f$ o = 0 \f$. So \f$ Y \in [-n, n] \f$.
-     *  * For unsigned intger result images \f$ s = 4 \f$ and \f$ o = 0.5 \f$.
+     *  * For unsigned integer result images \f$ s = 4 \f$ and \f$ o = 0.5 \f$.
      *    So \f$ Y \in [0, n] \f$ with round(n/2) being the zero offset.
      *
      * In
@@ -707,7 +714,7 @@ public:
      * Move an image to construct a new one. Do not use the moved image afterwards! It is not in a
      * valid state, when it is moved away (it is an empty Image without size).
      *
-     * The efficiency depends on OpenCV. Currently, it might involve some flat copies (shared
+     * The efficiency depends on OpenCV. Currently, it might involve some shallow copies (shared
      * copies).
      */
     ConstImage(ConstImage&& i) noexcept;
@@ -991,15 +998,17 @@ public:
     /**
      * @brief Make a shared copy of an image
      *
-     * A shared copy is a flat copy of an image. So the memory which holds the pixel values is
+     * A shared copy is a shallow copy of an image. So the memory which holds the pixel values is
      * shared between the original and the copy. However, other values, like size or offset, are
      * independent. So a shared copy can be cropped without influencing the original image.
      * Changing a pixel value in the (maybe cropped) original image will also change the
      * corresponding pixel value in the shared copy. For a non-const shared copy, modifying a pixel
      * value in the shared copy will also change the corresponding value in the original image.
      * Making a shared copy from a const image will only return a ConstImage.
-     *
      * Making a shared copy is a very lightweight operation.
+     *
+     * To make a modifiable shared copy from a non-const `Image a` you have to use a constructor:
+     * `Image b{a.sharedCopy()};` or if `b` already exists: `b = Image{a.sharedCopy()};`
      *
      * @return the shared copy.
      *
@@ -1167,6 +1176,9 @@ public:
      * This performs the operation \f$ | A - B | \f$, which does not change the type. Move
      * semantics are supported to reuse memory.
      *
+     * Broadcasting from single-channel image to multi-channel image is supported, so you can use
+     * one single-channel image and one multi-channel image.
+     *
      * @return resulting image with the same type
      */
     Image absdiff(Image&& B) const&;
@@ -1190,12 +1202,327 @@ public:
 
 
     /**
+     * @brief Get the elementwise minimum of two images
+     *
+     * @param B is the second image, the invoking image is the first one ("A")
+     *
+     * @param mask locations that can be changed. The other locations will be taken from the
+     * invoking image A. The mask can be single- or multi-channel. Leave empty to use no mask.
+     *
+     * This performs the the operation \f$ \min(A, B) \f$ independently for each element where the
+     * mask is valid (or everywhere when not using a mask). For the locations where the mask is
+     * invalid the value of \$ A \$ is used.
+     *
+     * Broadcasting from single-channel image to multi-channel image is supported, so you can use
+     * one single-channel image and one multi-channel image.
+     *
+     * Move semantics are supported to reuse memory if possible. If the mask is empty and no
+     * broadcasting is required move semantics are no problem. When there is a mask it only works
+     * for the invoking image and only if that does not have to be expanded to multi-channel.
+     *
+     * @note This operation does not support the use of NaNs. The result is undefined (either nan
+     * or the other value). Infinity (positive and negative) does work properly.
+     *
+     * @return resulting image with the same type.
+     */
+    Image minimum(Image&& B, ConstImage const& mask = {}) const&;
+    /// \copydoc minimum()
+    Image minimum(ConstImage const& B, ConstImage const& mask = {}) const&;
+
+
+    /**
+     * @brief Get the elementwise minimum of an Image with a pixel
+     *
+     * @tparam Array is a container type, such as `std::vector`, `std::array` or similar. There must be
+     * a begin(pix) and a end(pix) function.
+     *
+     * @param pix are the pixel values to compare with. These can be one value for each channel or
+     * one value for all channels.
+     *
+     * @param mask is a single-channel or multi-channel mask. Only at locations where the mask is
+     * not 0, pix is compared with the invoking image to get the minimum. The remaining locations
+     * get the values of the invoking image. `mask` must have Type::uint8 base type.
+     *
+     * This method yields the elementwise minimum of the invoking image, called `A` in the
+     * following, and pix, called `p` in the following, at the valid locations of the mask. Other
+     * locations keep the value of `A`.
+     *
+     * R-Value semantics are supported. Therefore the operation can be done in two ways: with a
+     * copy of the image or inplace of a moved Image. The corresponding code for the copy would be:
+     * `Image B = A.minimum(p, M);` to represent
+     *
+     * 1. \f$ B \leftarrow copy(A) \f$
+     * 1. \f$ B[M] = min(B[M], p) \f$,
+     * where B is the new image, which will be returned,
+     *       A is the invoking image,
+     *       M is the `mask` and
+     *       p are the `pix` values.
+     *
+     * The moving code can be used like:
+     * `Image B = std::move(A).add(p, M);` to represent
+     *
+     * 1. \f$ A[M] += p \f$,
+     * 1. \f$ B \leftarrow A \f$
+     *
+     * or like:
+     * `A = std::move(A).minimum(p, M);` to represent
+     *
+     * 1. \f$ A[M] += p \f$
+     *
+     * @returns a new image or the modified image
+     */
+    template<typename Array, enable_if_not_image_and_not_arithmetic<Array> = 0>
+    Image minimum(Array const& pix, ConstImage const& mask = ConstImage{}) const&;
+
+    /**
+     * @brief Get the elementwise minimum of an Image with a pixel
+     *
+     * @tparam Number is an arithmetic type, such as `int`, `double` or similar.
+     *
+     * @param pix is the pixel value to compare with. It will be added to each channel.
+     *
+     * @param mask is a single-channel or multi-channel mask. Only at locations where the mask is
+     * not 0, pix is compared with the invoking image to get the minimum. The remaining locations
+     * get the values of the invoking image. `mask` must have Type::uint8 base type.
+     *
+     * This method yields the elementwise minimum of the invoking image, called `A` in the
+     * following, and pix, called `p` in the following, at the valid locations of the mask. Other
+     * locations keep the value of `A`.
+     *
+     * R-Value semantics are supported. Therefore the operation can be done in two ways: with a
+     * copy of the image or inplace of a moved Image. The corresponding code for the copy would be:
+     * `Image B = A.minimum(p, M);` to represent
+     *
+     * 1. \f$ B \leftarrow copy(A) \f$
+     * 1. \f$ B[M] = min(B[M], p) \f$,
+     * where B is the new image, which will be returned,
+     *       A is the invoking image,
+     *       M is the `mask` and
+     *       p are the `pix` values.
+     *
+     * The moving code can be used like:
+     * `Image B = std::move(A).add(p, M);` to represent
+     *
+     * 1. \f$ A[M] += p \f$,
+     * 1. \f$ B \leftarrow A \f$
+     *
+     * or like:
+     * `A = std::move(A).minimum(p, M);` to represent
+     *
+     * 1. \f$ A[M] += p \f$
+     *
+     * @returns a new image or the modified image
+     */
+    template<typename Number, enable_if_arithmetic<Number> = 0>
+    Image minimum(Number const& pix, ConstImage const& mask = ConstImage{}) const&;
+
+    /**
+     * @brief Get the elementwise minimum of an Image with a pixel
+     *
+     * @param pix are the pixel values to compare with. These can be one value for each channel or
+     * one value for all channels.
+     *
+     * @param mask is a single-channel or multi-channel mask. Only at locations where the mask is
+     * not 0, pix is compared with the invoking image to get the minimum. The remaining locations
+     * get the values of the invoking image. `mask` must have Type::uint8 base type.
+     *
+     * This method yields the elementwise minimum of the invoking image, called `A` in the
+     * following, and pix, called `p` in the following, at the valid locations of the mask. Other
+     * locations keep the value of `A`.
+     *
+     * R-Value semantics are supported. Therefore the operation can be done in two ways: with a
+     * copy of the image or inplace of a moved Image. The corresponding code for the copy would be:
+     * `Image B = A.minimum(p, M);` to represent
+     *
+     * 1. \f$ B \leftarrow copy(A) \f$
+     * 1. \f$ B[M] = min(B[M], p) \f$,
+     * where B is the new image, which will be returned,
+     *       A is the invoking image,
+     *       M is the `mask` and
+     *       p are the `pix` values.
+     *
+     * The moving code can be used like:
+     * `Image B = std::move(A).add(p, M);` to represent
+     *
+     * 1. \f$ A[M] += p \f$,
+     * 1. \f$ B \leftarrow A \f$
+     *
+     * or like:
+     * `A = std::move(A).minimum(p, M);` to represent
+     *
+     * 1. \f$ A[M] += p \f$
+     *
+     * @returns a new image or the modified image
+     */
+    Image minimum(std::vector<double> const& pix, ConstImage const& mask = ConstImage{}) const&;
+
+
+    /**
+     * @brief Get the elementwise maximum of two images
+     *
+     * @param B is the second image, the invoking image is the first one ("A")
+     *
+     * @param mask locations that can be changed. The other locations will be taken from the
+     * invoking image A. The mask can be single- or multi-channel. Leave empty to use no mask.
+     *
+     * This performs the the operation \f$ \max(A, B) \f$ independently for each element where the
+     * mask is valid (or everywhere when not using a mask). For the locations where the mask is
+     * invalid the value of \$ A \$ is used.
+     *
+     * Broadcasting from single-channel image to multi-channel image is supported, so you can use
+     * one single-channel image and one multi-channel image.
+     *
+     * Move semantics are supported to reuse memory if possible. If the mask is empty and no
+     * broadcasting is required move semantics are no problem. When there is a mask it only works
+     * for the invoking image and only if that does not have to be expanded to multi-channel.
+     *
+     * @note This operation does not support the use of NaNs. The result is undefined (either nan
+     * or the other value). Infinity (positive and negative) does work properly.
+     *
+     * @return resulting image with the same type.
+     */
+    Image maximum(Image&& B, ConstImage const& mask = {}) const&;
+    /// \copydoc maximum()
+    Image maximum(ConstImage const& B, ConstImage const& mask = {}) const&;
+
+
+    /**
+     * @brief Get the elementwise maximum of an Image with a pixel
+     *
+     * @tparam Array is a container type, such as `std::vector`, `std::array` or similar. There must be
+     * a begin(pix) and a end(pix) function.
+     *
+     * @param pix are the pixel values to compare with. These can be one value for each channel or
+     * one value for all channels.
+     *
+     * @param mask is a single-channel or multi-channel mask. Only at locations where the mask is
+     * not 0, pix is compared with the invoking image to get the maximum. The remaining locations
+     * get the values of the invoking image. `mask` must have Type::uint8 base type.
+     *
+     * This method yields the elementwise maximum of the invoking image, called `A` in the
+     * following, and pix, called `p` in the following, at the valid locations of the mask. Other
+     * locations keep the value of `A`.
+     *
+     * R-Value semantics are supported. Therefore the operation can be done in two ways: with a
+     * copy of the image or inplace of a moved Image. The corresponding code for the copy would be:
+     * `Image B = A.maximum(p, M);` to represent
+     *
+     * 1. \f$ B \leftarrow copy(A) \f$
+     * 1. \f$ B[M] = max(B[M], p) \f$,
+     * where B is the new image, which will be returned,
+     *       A is the invoking image,
+     *       M is the `mask` and
+     *       p are the `pix` values.
+     *
+     * The moving code can be used like:
+     * `Image B = std::move(A).add(p, M);` to represent
+     *
+     * 1. \f$ A[M] += p \f$,
+     * 1. \f$ B \leftarrow A \f$
+     *
+     * or like:
+     * `A = std::move(A).maximum(p, M);` to represent
+     *
+     * 1. \f$ A[M] += p \f$
+     *
+     * @returns a new image or the modified image
+     */
+    template<typename Array, enable_if_not_image_and_not_arithmetic<Array> = 0>
+    Image maximum(Array const& pix, ConstImage const& mask = ConstImage{}) const&;
+
+    /**
+     * @brief Get the elementwise maximum of an Image with a pixel
+     *
+     * @tparam Number is an arithmetic type, such as `int`, `double` or similar.
+     *
+     * @param pix is the pixel value to compare with. It will be added to each channel.
+     *
+     * @param mask is a single-channel or multi-channel mask. Only at locations where the mask is
+     * not 0, pix is compared with the invoking image to get the maximum. The remaining locations
+     * get the values of the invoking image. `mask` must have Type::uint8 base type.
+     *
+     * This method yields the elementwise maximum of the invoking image, called `A` in the
+     * following, and pix, called `p` in the following, at the valid locations of the mask. Other
+     * locations keep the value of `A`.
+     *
+     * R-Value semantics are supported. Therefore the operation can be done in two ways: with a
+     * copy of the image or inplace of a moved Image. The corresponding code for the copy would be:
+     * `Image B = A.maximum(p, M);` to represent
+     *
+     * 1. \f$ B \leftarrow copy(A) \f$
+     * 1. \f$ B[M] = max(B[M], p) \f$,
+     * where B is the new image, which will be returned,
+     *       A is the invoking image,
+     *       M is the `mask` and
+     *       p are the `pix` values.
+     *
+     * The moving code can be used like:
+     * `Image B = std::move(A).add(p, M);` to represent
+     *
+     * 1. \f$ A[M] += p \f$,
+     * 1. \f$ B \leftarrow A \f$
+     *
+     * or like:
+     * `A = std::move(A).maximum(p, M);` to represent
+     *
+     * 1. \f$ A[M] += p \f$
+     *
+     * @returns a new image or the modified image
+     */
+    template<typename Number, enable_if_arithmetic<Number> = 0>
+    Image maximum(Number const& pix, ConstImage const& mask = ConstImage{}) const&;
+
+    /**
+     * @brief Get the elementwise maximum of an Image with a pixel
+     *
+     * @param pix are the pixel values to compare with. These can be one value for each channel or
+     * one value for all channels.
+     *
+     * @param mask is a single-channel or multi-channel mask. Only at locations where the mask is
+     * not 0, pix is compared with the invoking image to get the maximum. The remaining locations
+     * get the values of the invoking image. `mask` must have Type::uint8 base type.
+     *
+     * This method yields the elementwise maximum of the invoking image, called `A` in the
+     * following, and pix, called `p` in the following, at the valid locations of the mask. Other
+     * locations keep the value of `A`.
+     *
+     * R-Value semantics are supported. Therefore the operation can be done in two ways: with a
+     * copy of the image or inplace of a moved Image. The corresponding code for the copy would be:
+     * `Image B = A.maximum(p, M);` to represent
+     *
+     * 1. \f$ B \leftarrow copy(A) \f$
+     * 1. \f$ B[M] = max(B[M], p) \f$,
+     * where B is the new image, which will be returned,
+     *       A is the invoking image,
+     *       M is the `mask` and
+     *       p are the `pix` values.
+     *
+     * The moving code can be used like:
+     * `Image B = std::move(A).add(p, M);` to represent
+     *
+     * 1. \f$ A[M] += p \f$,
+     * 1. \f$ B \leftarrow A \f$
+     *
+     * or like:
+     * `A = std::move(A).maximum(p, M);` to represent
+     *
+     * 1. \f$ A[M] += p \f$
+     *
+     * @returns a new image or the modified image
+     */
+    Image maximum(std::vector<double> const& pix, ConstImage const& mask = ConstImage{}) const&;
+
+
+    /**
      * @brief Add an image pixelwise
      * @param B is the image to add to the calling Image A.
      *
      * This performs the addition \f$ A + B \f$. In case of integer base type images the operation
      * is done in int32 and saturates afterwards to the original type. Move semantics are supported
      * to reuse memory.
+     *
+     * Broadcasting from single-channel image to multi-channel image is supported, so you can use
+     * one single-channel image and one multi-channel image.
      *
      * @return resulting image with the same type.
      */
@@ -1216,12 +1543,102 @@ public:
      * is done in int32 and saturates to the result type afterwards. Note, A and B may have
      * different base types.
      *
+     * Broadcasting from single-channel image to multi-channel image is supported, so you can use
+     * one single-channel image and one multi-channel image.
+     *
      * This method does not profit from move semantics, since changing the data type for the
      * resulting image requires new memory.
      *
      * @return resulting image with the specified type.
      */
     Image add(ConstImage const& B, Type resultType) const;
+
+    /**
+     * @brief Add a pixel to the whole image
+     *
+     * @tparam Array is a container type, such as `std::vector`, `std::array` or similar. There must be
+     * a begin(pix) and a end(pix) function.
+     *
+     * @param pix are the pixel values to add. These can be one value for each channel or one value for
+     * all channels.
+     *
+     * @param mask is a single-channel or multi-channel mask. Only at locations where the mask is
+     * not 0, pix is added. `mask` must have Type::uint8 base type.
+     *
+     * @param resultType is the base type of the resulting image.
+     *
+     * This method adds pix to a copy of the invoking image at the places where mask evaluates as
+     * true. This can be represented like
+     *
+     * 1. \f$ B \leftarrow copy(A) \f$
+     * 1. \f$ B[M] += p \f$,
+     * where B is the new image, which will be returned,
+     *       A is the invoking image,
+     *       M is the `mask` and
+     *       p are the `pix` values.
+     *
+     * The corresponding code would be: `Image B = A.add(p, M);`
+     *
+     * @returns a new image being the sum of the invoking image with the pix values
+     */
+    template<typename Array, enable_if_not_image_and_not_arithmetic<Array> = 0>
+    Image add(Array const& pix, ConstImage const& mask = ConstImage{}, Type resultType = Type::invalid) const&;
+
+    /**
+     * @brief Add a value to the whole image
+     *
+     * @tparam Number is an arithmetic type, such as `int`, `double` or similar.
+     *
+     * @param pix is the pixel value to add. It will be added to each channel.
+     *
+     * @param mask is a single-channel or multi-channel mask. Only at locations where the mask is
+     * not 0, pix is added. `mask` must have Type::uint8 base type.
+     *
+     * @param resultType is the base type of the resulting image.
+     *
+     * This method adds pix to a copy of the invoking image at the places where mask evaluates as
+     * true. This can be represented like
+     *
+     * 1. \f$ B \leftarrow copy(A) \f$
+     * 1. \f$ B[M] += p \f$,
+     * where B is the new image, which will be returned,
+     *       A is the invoking image,
+     *       M is the `mask` and
+     *       p is the `pix` value.
+     *
+     * The corresponding code would be: `Image B = A.add(p, M);`
+     *
+     * @returns a new image being the sum of the invoking image with the pix values
+     */
+    template<typename Number, enable_if_arithmetic<Number> = 0>
+    Image add(Number const& pix, ConstImage const& mask = ConstImage{}, Type resultType = Type::invalid) const&;
+
+    /**
+     * @brief Add a pixel to the whole image
+     *
+     * @param pix are the pixel values to add. These can be one value for each channel or one value for
+     * all channels.
+     *
+     * @param mask is a single-channel or multi-channel mask. Only at locations where the mask is
+     * not 0, pix is added. `mask` must have Type::uint8 base type.
+     *
+     * @param resultType is the base type of the resulting image.
+     *
+     * This method adds pix to a copy of the invoking image at the places where mask evaluates as
+     * true. This can be represented like
+     *
+     * 1. \f$ B \leftarrow copy(A) \f$
+     * 1. \f$ B[M] += p \f$,
+     * where B is the new image, which will be returned,
+     *       A is the invoking image,
+     *       M is the `mask` and
+     *       p are the `pix` values.
+     *
+     * The corresponding code would be: `Image B = A.add(p, M);`
+     *
+     * @returns a new image being the sum of the invoking image with the pix values
+     */
+    Image add(std::vector<double> const& pix, ConstImage const& mask = ConstImage{}, Type resultType = Type::invalid) const&;
 
 
     /**
@@ -1231,6 +1648,9 @@ public:
      * This performs the subtraction \f$ A - B \f$. In case of integer base type images the
      * operation is done in int32 and saturates afterwards to the original type. Move semantics are
      * supported to reuse memory.
+     *
+     * Broadcasting from single-channel image to multi-channel image is supported, so you can use
+     * one single-channel image and one multi-channel image.
      *
      * @return resulting image with the same type.
      */
@@ -1251,6 +1671,9 @@ public:
      * operation is done in int32 and saturates to the result type afterwards. Note, A and B may
      * have different base types.
      *
+     * Broadcasting from single-channel image to multi-channel image is supported, so you can use
+     * one single-channel image and one multi-channel image.
+     *
      * This method does not profit from move semantics, since changing the data type for the
      * resulting image requires new memory.
      *
@@ -1260,12 +1683,103 @@ public:
 
 
     /**
+     * @brief Subtract a pixel from the whole image
+     *
+     * @tparam Array is a container type, such as `std::vector`, `std::array` or similar. There must be
+     * a begin(pix) and a end(pix) function.
+     *
+     * @param pix are the pixel values to subtract. These can be one value for each channel or one value for
+     * all channels.
+     *
+     * @param mask is a single-channel or multi-channel mask. Only at locations where the mask is
+     * not 0, pix is subtracted. `mask` must have Type::uint8 base type.
+     *
+     * @param resultType is the base type of the resulting image.
+     *
+     * This method subtracts pix from a copy of the invoking image at the places where mask evaluates as
+     * true. This can be represented like
+     *
+     * 1. \f$ B \leftarrow copy(A) \f$
+     * 1. \f$ B[M] -= p \f$,
+     * where B is the new image, which will be returned,
+     *       A is the invoking image,
+     *       M is the `mask` and
+     *       p are the `pix` values.
+     *
+     * The corresponding code would be: `Image B = A.subtract(p, M);`
+     *
+     * @returns a new image being the difference of the invoking image and the pix values
+     */
+    template<typename Array, enable_if_not_image_and_not_arithmetic<Array> = 0>
+    Image subtract(Array const& pix, ConstImage const& mask = ConstImage{}, Type resultType = Type::invalid) const&;
+
+    /**
+     * @brief Subtract a value from the whole image
+     *
+     * @tparam Number is an arithmetic type, such as `int`, `double` or similar.
+     *
+     * @param pix is the pixel value to subtract. It will be subtracted from each channel.
+     *
+     * @param mask is a single-channel or multi-channel mask. Only at locations where the mask is
+     * not 0, pix is subtracted. `mask` must have Type::uint8 base type.
+     *
+     * @param resultType is the base type of the resulting image.
+     *
+     * This method subtracts pix from a copy of the invoking image at the places where mask evaluates as
+     * true. This can be represented like
+     *
+     * 1. \f$ B \leftarrow copy(A) \f$
+     * 1. \f$ B[M] -= p \f$,
+     * where B is the new image, which will be returned,
+     *       A is the invoking image,
+     *       M is the `mask` and
+     *       p is the `pix` value.
+     *
+     * The corresponding code would be: `Image B = A.subtract(p, M);`
+     *
+     * @returns a new image being the difference of the invoking image with the pix values
+     */
+    template<typename Number, enable_if_arithmetic<Number> = 0>
+    Image subtract(Number const& pix, ConstImage const& mask = ConstImage{}, Type resultType = Type::invalid) const&;
+
+    /**
+     * @brief Subtract a pixel from the whole image
+     *
+     * @param pix are the pixel values to subtract. These can be one value for each channel or one value for
+     * all channels.
+     *
+     * @param mask is a single-channel or multi-channel mask. Only at locations where the mask is
+     * not 0, pix is subtracted. `mask` must have Type::uint8 base type.
+     *
+     * @param resultType is the base type of the resulting image.
+     *
+     * This method subtracts pix from a copy of the invoking image at the places where mask evaluates as
+     * true. This can be represented like
+     *
+     * 1. \f$ B \leftarrow copy(A) \f$
+     * 1. \f$ B[M] -= p \f$,
+     * where B is the new image, which will be returned,
+     *       A is the invoking image,
+     *       M is the `mask` and
+     *       p are the `pix` values.
+     *
+     * The corresponding code would be: `Image B = A.subtract(p, M);`
+     *
+     * @returns a new image being the difference of the invoking image with the pix values
+     */
+    Image subtract(std::vector<double> const& pix, ConstImage const& mask = ConstImage{}, Type resultType = Type::invalid) const&;
+
+
+    /**
      * @brief Multiply an image pixelwise
      * @param B is the image to multiply with the calling Image A.
      *
      * This performs the elementwise multiplication \f$ A \cdot B \f$. In case of integer base type
      * images the operation is done in int32 and saturates afterwards to the original type. Move
      * semantics are supported to reuse memory.
+     *
+     * Broadcasting from single-channel image to multi-channel image is supported, so you can use
+     * one single-channel image and one multi-channel image.
      *
      * @return resulting image with the same type.
      */
@@ -1285,6 +1799,9 @@ public:
      * This performs the elementwise multiplication \f$ A \cdot B \f$. In case of integer base type
      * images the operation is done in int32 and saturates to the result type afterwards.
      *
+     * Broadcasting from single-channel image to multi-channel image is supported, so you can use
+     * one single-channel image and one multi-channel image.
+     *
      * This method does not profit from move semantics, since changing the data type for the
      * resulting image requires new memory.
      *
@@ -1294,17 +1811,111 @@ public:
 
 
     /**
+     * @brief Multiply a pixel with the whole image
+     *
+     * @tparam Array is a container type, such as `std::vector`, `std::array` or similar. There must be
+     * a begin(pix) and a end(pix) function.
+     *
+     * @param pix are the pixel values to multiply. These can be one value for each channel or one value for
+     * all channels.
+     *
+     * @param mask is a single-channel or multi-channel mask. Only at locations where the mask is
+     * not 0, pix is multiplied. `mask` must have Type::uint8 base type.
+     *
+     * @param resultType is the base type of the resulting image.
+     *
+     * This method multiplies pix with a copy of the invoking image at the places where mask evaluates as
+     * true. This can be represented like
+     *
+     * 1. \f$ B \leftarrow copy(A) \f$
+     * 1. \f$ B[M] *= p \f$,
+     * where B is the new image, which will be returned,
+     *       A is the invoking image,
+     *       M is the `mask` and
+     *       p are the `pix` values.
+     *
+     * The corresponding code would be: `Image B = A.multiply(p, M);`
+     *
+     * @returns a new image being the product of the invoking image with the pix values
+     */
+    template<typename Array, enable_if_not_image_and_not_arithmetic<Array> = 0>
+    Image multiply(Array const& pix, ConstImage const& mask = ConstImage{}, Type resultType = Type::invalid) const&;
+
+    /**
+     * @brief Multiply a value with the whole image
+     *
+     * @tparam Number is an arithmetic type, such as `int`, `double` or similar.
+     *
+     * @param pix is the pixel value to multiply. It will be multiplied to each channel.
+     *
+     * @param mask is a single-channel or multi-channel mask. Only at locations where the mask is
+     * not 0, pix is multiplied. `mask` must have Type::uint8 base type.
+     *
+     * @param resultType is the base type of the resulting image.
+     *
+     * This method multiplies pix with a copy of the invoking image at the places where mask evaluates as
+     * true. This can be represented like
+     *
+     * 1. \f$ B \leftarrow copy(A) \f$
+     * 1. \f$ B[M] *= p \f$,
+     * where B is the new image, which will be returned,
+     *       A is the invoking image,
+     *       M is the `mask` and
+     *       p is the `pix` value.
+     *
+     * The corresponding code would be: `Image B = A.multiply(p, M);`
+     *
+     * @returns a new image being the product of the invoking image with the pix values
+     */
+    template<typename Number, enable_if_arithmetic<Number> = 0>
+    Image multiply(Number const& pix, ConstImage const& mask = ConstImage{}, Type resultType = Type::invalid) const&;
+
+    /**
+     * @brief Multiply a pixel with the whole image
+     *
+     * @param pix are the pixel values to multiply. These can be one value for each channel or one value for
+     * all channels.
+     *
+     * @param mask is a single-channel or multi-channel mask. Only at locations where the mask is
+     * not 0, pix is multiplied. `mask` must have Type::uint8 base type.
+     *
+     * @param resultType is the base type of the resulting image.
+     *
+     * This method multiplies pix with a copy of the invoking image at the places where mask evaluates as
+     * true. This can be represented like
+     *
+     * 1. \f$ B \leftarrow copy(A) \f$
+     * 1. \f$ B[M] *= p \f$,
+     * where B is the new image, which will be returned,
+     *       A is the invoking image,
+     *       M is the `mask` and
+     *       p are the `pix` values.
+     *
+     * The corresponding code would be: `Image B = A.multiply(p, M);`
+     *
+     * @returns a new image being the product of the invoking image with the pix values
+     */
+    Image multiply(std::vector<double> const& pix, ConstImage const& mask = ConstImage{}, Type resultType = Type::invalid) const&;
+
+
+    /**
      * @brief Divide an image elementwise
-     * @param B is the image representing the divisor, with the calling Image A beeing the dividend.
+     * @param B is the image representing the divisor, with the calling Image A beeing the numerator.
      *
      * This performs the elementwise division \f$ \dfrac A B \f$, but with special arithmetics:
-     *   * dividing by 0 gives 0, i. e. \f$ \frac x 0 := 0 \f$
+     *   * dividing by 0 yields 0 for integer images, i. e. \f$ \frac x 0 := 0 \f$. For floating
+     *     point this has not special handling and gives -inf, nan or inf.
      *   * otherwise floating point arithmetic is used (also for integer operands) and for integer
-     *     result types this is followed by a round with tie-break to even. Examples:
-     *       * for integer or floating points operands and floating point result: \f$ \frac 3 2 = 1.5 \f$ and  \f$ \frac 5 2 = 2.5 \f$
-     *       * for integer or floating points operands and integer result: \f$ \frac 3 2 = 2 = \frac 5 2 \f$
+     *     images this is followed by a round with tie-break to even. Examples:
+     *       * for floating point images:
+     *         \f$ \frac 3 2 = 1.5 \f$ and \f$ \frac 5 2 = 2.5 \f$
+     *       * for integer images:
+     *         \f$ \left[ \frac 3 2 \right] = 2 = \left[ \frac 5 2 \right] \f$
      *
      * Move semantics are supported to reuse memory.
+     *
+     * Broadcasting from single-channel image to multi-channel image is supported, so you can use
+     * one single-channel image and one multi-channel image.
      *
      * @return resulting image with the same type.
      */
@@ -1315,19 +1926,28 @@ public:
 
     /**
      * @brief Divide an image elementwise
-     * @param B is the image representing the divisor, with the calling Image A beeing the dividend.
+     * @param B is the image representing the divisor, with the calling Image A beeing the numerator.
      *
      * @param resultType is the full type of result image, like Type::float32x3 when two
      * Type::uint8x3 are used. If the result type should be the same as the operands, use the other
      * divide-methods, which support move semantics.
      *
      * This performs the elementwise division \f$ \dfrac A B \f$, but with special arithmetics:
-     *   * dividing by 0 gives 0, i. e. \f$ \frac x 0 := 0 \f$
+     *   * dividing by 0 yields 0 for integer images, i. e. \f$ \frac x 0 := 0 \f$. For floating
+     *     point this has not special handling and gives -inf, nan or inf.
      *   * otherwise floating point arithmetic is used (also for integer
      *     operands) and for integer result types this is followed by a round
      *     with tie-break to even. Examples:
-     *       * for integer or floating points operands and floating point result: \f$ \frac 3 2 = 1.5 \f$ and  \f$ \frac 5 2 = 2.5 \f$
-     *       * for integer or floating points operands and integer result: \f$ \frac 3 2 = 2 = \frac 5 2 \f$
+     *       * for floating point result:
+     *         \f$ \frac 3 2 = 1.5 \f$ and \f$ \frac 5 2 = 2.5 \f$
+     *       * for integer result:
+     *         \f$ \left[ \frac 3 2 \right] = 2 = \left[ \frac 5 2 \right] \f$
+     *   * when requesting an integer type and using floating point images the rounding of -inf,
+     *     nan and inf currently (OpenCV 4.2) all result in the numeric minimum of the integer
+     *     type.
+     *
+     * Broadcasting from single-channel image to multi-channel image is supported, so you can use
+     * one single-channel image and one multi-channel image.
      *
      * This method does not profit from move semantics, since changing the data type for the
      * resulting image requires new memory.
@@ -1335,6 +1955,94 @@ public:
      * @return resulting image with the specified type.
      */
     Image divide(ConstImage const& B, Type resultType) const;
+
+
+    /**
+     * @brief Divide the whole image by a pixel
+     *
+     * @tparam Array is a container type, such as `std::vector`, `std::array` or similar. There must be
+     * a begin(pix) and a end(pix) function.
+     *
+     * @param pix are the pixel values to divide by. These can be one value for each channel or one value for
+     * all channels.
+     *
+     * @param mask is a single-channel or multi-channel mask. Only at locations where the mask is
+     * not 0, the image is divided by pix. `mask` must have Type::uint8 base type.
+     *
+     * @param resultType is the base type of the resulting image.
+     *
+     * This method divides a copy of the invoking image by pix at the places where mask evaluates as
+     * true. This can be represented like
+     *
+     * 1. \f$ B \leftarrow copy(A) \f$
+     * 1. \f$ B[M] /= p \f$,
+     * where B is the new image, which will be returned,
+     *       A is the invoking image,
+     *       M is the `mask` and
+     *       p are the `pix` values.
+     *
+     * The corresponding code would be: `Image B = A.divide(p, M);`
+     *
+     * @returns a new image being the quotient of the invoking image with the pix values
+     */
+    template<typename Array, enable_if_not_image_and_not_arithmetic<Array> = 0>
+    Image divide(Array const& pix, ConstImage const& mask = ConstImage{}, Type resultType = Type::invalid) const&;
+
+    /**
+     * @brief Divide the whole image by a value
+     *
+     * @tparam Number is an arithmetic type, such as `int`, `double` or similar.
+     *
+     * @param pix is the pixel value to divide by. It will be divideed to each channel.
+     *
+     * @param mask is a single-channel or multi-channel mask. Only at locations where the mask is
+     * not 0, the image is divided by pix. `mask` must have Type::uint8 base type.
+     *
+     * @param resultType is the base type of the resulting image.
+     *
+     * This method divides a copy of the invoking image by pix at the places where mask evaluates as
+     * true. This can be represented like
+     *
+     * 1. \f$ B \leftarrow copy(A) \f$
+     * 1. \f$ B[M] /= p \f$,
+     * where B is the new image, which will be returned,
+     *       A is the invoking image,
+     *       M is the `mask` and
+     *       p is the `pix` value.
+     *
+     * The corresponding code would be: `Image B = A.divide(p, M);`
+     *
+     * @returns a new image being the quotient of the invoking image with the pix values
+     */
+    template<typename Number, enable_if_arithmetic<Number> = 0>
+    Image divide(Number const& pix, ConstImage const& mask = ConstImage{}, Type resultType = Type::invalid) const&;
+
+    /**
+     * @brief Divide the whole image by a pixel
+     *
+     * @param pix are the pixel values to divide by. These can be one value for each channel or one value for
+     * all channels.
+     *
+     * @param mask is a single-channel or multi-channel mask. Only at locations where the mask is
+     * not 0, the image is divided by pix. `mask` must have Type::uint8 base type.
+     *
+     * @param resultType is the base type of the resulting image.
+     *
+     * This method divides a copy of the invoking image by pix at the places where mask evaluates as
+     * true. This can be represented like
+     *
+     * 1. \f$ B \leftarrow copy(A) \f$
+     * 1. \f$ B[M] /= p \f$,
+     * where B is the new image, which will be returned,
+     *       A is the invoking image,
+     *       M is the `mask` and
+     *       p are the `pix` values.
+     *
+     * The corresponding code would be: `Image B = A.divide(p, M);`
+     *
+     * @returns a new image being the quotient of the invoking image with the pix values
+     */
+    Image divide(std::vector<double> const& pix, ConstImage const& mask = ConstImage{}, Type resultType = Type::invalid) const&;
 
 
     /**
@@ -1433,7 +2141,7 @@ public:
      *
      * @param sampleCorrection specifies whether the standard deviation should be done from the
      * population (`sampleCorrection == false`), which is the default OpenCV behaviour or estimated
-     * with the sample corrections (`sampleCorrection == false`). See equations below.
+     * with the sample corrections (`sampleCorrection == true`). See equations below.
      *
      * Note, the standard deviation is by default the population's standard deviation (like in
      * OpenCV), i. e.
@@ -1503,12 +2211,12 @@ public:
      * @image html gray_values_images.png
      * will give with
      * @code
-     * auto mask = img.createSingleChannelMaskFromRange({Interval::closed(25, 175)});
+     * Image mask = img.createSingleChannelMaskFromRange({Interval::closed(25, 175)});
      * @endcode
      * @image html gray_values_single_mask_from_range_conjunction.png
      * and with
      * @code
-     * auto mask = img.createSingleChannelMaskFromRange({Interval::closed(25, 175)}, false);
+     * Image mask = img.createSingleChannelMaskFromRange({Interval::closed(25, 175)}, false);
      * @endcode
      * @image html gray_values_single_mask_from_range_disjunction.png
      * See createMultiChannelMaskFromRange() for a visualization of the intermediate result.
@@ -1893,7 +2601,7 @@ public:
      * @brief Get full pixel iterator on the first element
      *
      * @tparam T - array data type. For example for an Image with full type `Type::uint16x3` the
-     * type `T` must be `std::array<uint16_t,3>`.
+     * type `T` must be `cv::Vec<uint16_t,3>`.
      *
      * This iterator iterates through an image using full pixels.
      *
@@ -1901,13 +2609,13 @@ public:
      * @code
      * using std::swap;
      * Image img{5, 6, Type::uint16x3};
-     * for (auto it = img.begin<std::array<uint16_t,3>>(), it_end = img.end<std::array<uint16_t,3>>(); it != it_end; ++it)
+     * for (auto it = img.begin<cv::Vec<uint16_t,3>>(), it_end = img.end<cv::Vec<uint16_t,3>>(); it != it_end; ++it)
      *     swap((*it)[0], (*it)[2]);
      * @endcode
      * This works also for cropped images, since the iterator regards the size and offset. However,
      * note that the @ref ConstPixelIterator<T> has only read access, since it comes from a const
      * Image. So, for @ref ConstPixelIterator<T> the dereference operator returns a `T const&` and
-     * for @ref PixelIterator<T> it returns `T&`, which is `std::array<uint16_t,3>` in the example.
+     * for @ref PixelIterator<T> it returns `T&`, which is `cv::Vec<uint16_t,3>` in the example.
      *
      * Note, for masks, which always have the base type `Type::uint8`, also use an `uint8_t` array
      * for `T`. Never use a `bool` array for `T`! This would result in undefined behaviour, since
@@ -1922,7 +2630,7 @@ public:
      * @brief Get full pixel iterator past the end
      *
      * @tparam T - array data type. For example for an Image with full type `Type::uint16x3` the
-     * type `T` must be `std::array<uint16_t,3>`.
+     * type `T` must be `cv::Vec<uint16_t,3>`.
      *
      * This iterator iterates through an image using full pixels.
      *
@@ -1930,13 +2638,13 @@ public:
      * @code
      * using std::swap;
      * Image img{5, 6, Type::uint16x3};
-     * for (auto it = img.begin<std::array<uint16_t,3>>(), it_end = img.end<std::array<uint16_t,3>>(); it != it_end; ++it)
+     * for (auto it = img.begin<cv::Vec<uint16_t,3>>(), it_end = img.end<cv::Vec<uint16_t,3>>(); it != it_end; ++it)
      *     swap((*it)[0], (*it)[2]);
      * @endcode
      * This works also for cropped images, since the iterator regards the size and offset. However,
      * note that the @ref ConstPixelIterator<T> has only read access, since it comes from a const
      * Image. So, for @ref ConstPixelIterator<T> the dereference operator returns a `T const&` and
-     * for @ref PixelIterator<T> it returns `T&`, which is `std::array<uint16_t,3>` in the example.
+     * for @ref PixelIterator<T> it returns `T&`, which is `cv::Vec<uint16_t,3>` in the example.
      *
      * Note, for masks, which always have the base type `Type::uint8`, also use an `uint8_t` array
      * for `T`. Never use a `bool` array for `T`! This would result in undefined behaviour, since
@@ -1952,7 +2660,7 @@ public:
      * @brief Direct access on full pixel
      *
      * @tparam T - array data type. For example for an Image with full type `Type::uint16x3` the
-     * type `T` must be `std::array<uint16_t,3>`.
+     * type `T` must be `std::array<uint16_t,3>` or  `cv::Vec<uint16_t,3>`.
      *
      * @param x coordinate (column).
      * @param y coordinate (row).
@@ -2036,7 +2744,7 @@ public:
 
     /**
      * @brief Convert whole image to a different type
-     * @param t is the type to convert the image to.
+     * @param t is the base type to convert the image to. The channels do not change.
      *
      * Converting a type to a larger type does not scale the values. So, to maintain the brightness
      * of an uint8 image in a uint16 image, you have to multiply the image manually.
@@ -2427,13 +3135,14 @@ public:
     /**
      * @brief Set all values in an image to a specified value
      *
-     * @param val is the value to set the pixels
+     * @param val is the value to set the pixels.
      *
      * @param mask is either a single-channel mask to mask all channels equally or a multi-channel
      * mask with the same number of channels to apply a separate mask for each channel. By default
      * there is no mask, which means that the whole image is set to `val`.
      *
-     * `val` is a `double` parameter, since it can also handle integer up to 32 bit.
+     * `val` is a `double` parameter, since it can also handle integer up to 32 bit. You can also
+     * use std::numeric_limits<double>::infinity(), since it will be saturated to the image type.
      *
      * @throws image_type_error if the mask has not an `uint8` base type or the number of channels
      * of the mask is neither 1 nor matches the number of channels of the image.
@@ -2469,25 +3178,430 @@ public:
 
     /// \copydoc ConstImage::absdiff()
     Image absdiff(ConstImage const& B)&&;
-    /// \copydoc ConstImage::absdiff()
-    Image absdiff(Image&& B)&&;
     using ConstImage::absdiff;
 
+    /// \copydoc ConstImage::minimum()
+    Image minimum(ConstImage const& B, ConstImage const& mask = {})&&;
+    using ConstImage::minimum;
+
+    /// \copydoc ConstImage::minimum(Array const&, ConstImage const&)const&
+    template<typename Array, enable_if_not_image_and_not_arithmetic<Array> = 0>
+    Image minimum(Array const& pix, ConstImage const& mask = ConstImage{})&&;
+
+    /// \copydoc ConstImage::minimum(Number const&, ConstImage const&)const&
+    template<typename Number, enable_if_arithmetic<Number> = 0>
+    Image minimum(Number const& pix, ConstImage const& mask = ConstImage{})&&;
+
+    /// \copydoc ConstImage::minimum(std::vector<double> const& pix, ConstImage const& mask)const&
+    Image minimum(std::vector<double> const& pix, ConstImage const& mask = ConstImage{})&&;
+
+
+    /// \copydoc ConstImage::maximum()
+    Image maximum(ConstImage const& B, ConstImage const& mask = {})&&;
+    using ConstImage::maximum;
+
+    /// \copydoc ConstImage::maximum(Array const&, ConstImage const&)const&
+    template<typename Array, enable_if_not_image_and_not_arithmetic<Array> = 0>
+    Image maximum(Array const& pix, ConstImage const& mask = ConstImage{})&&;
+
+    /// \copydoc ConstImage::maximum(Number const&, ConstImage const&)const&
+    template<typename Number, enable_if_arithmetic<Number> = 0>
+    Image maximum(Number const& pix, ConstImage const& mask = ConstImage{})&&;
+
+    /// \copydoc ConstImage::maximum(std::vector<double> const& pix, ConstImage const& mask)const&
+    Image maximum(std::vector<double> const& pix, ConstImage const& mask = ConstImage{})&&;
+
     /// \copydoc ConstImage::add()
-    Image add(Image const& B)&&;
+    Image add(ConstImage const& B)&&;
     using ConstImage::add;
 
+    /**
+     * @brief Add a pixel to the whole image
+     *
+     * @tparam Array is a container type, such as `std::vector`, `std::array` or similar. There must be
+     * a `begin(pix)` and a `end(pix)` function.
+     *
+     * @param pix the pixel values to add. These can be one value for each channel or one value for
+     * all channels.
+     *
+     * @param mask is a single-channel or multi-channel mask. Only at locations where the mask is
+     * not 0, pix is added. `mask` must have Type::uint8 base type.
+     *
+     * This method adds pix to the invoking image at the places where mask evaluates as
+     * true. This can be represented like
+     *
+     * 1. \f$ A[M] += p \f$,
+     * 1. \f$ B \leftarrow A \f$
+     * where B is the new name for the invoking image, which will be returned,
+     *       A is the invoking image,
+     *       M is the `mask` and
+     *       p are the `pix` values.
+     *
+     * The corresponding code would be: `Image B = std::move(A).add(p, M);` or to represent
+     *
+     * 1. \f$ A[M] += p \f$
+     *
+     * use: `A = std::move(A).add(p, M);`
+     *
+     * @returns the modified invoking image.
+     */
+    template<typename Array, enable_if_not_image_and_not_arithmetic<Array> = 0>
+    Image add(Array const& pix, ConstImage const& mask = ConstImage{})&&;
+
+    /**
+     * @brief Add a value to the whole image
+     *
+     * @tparam Number is an arithmetic type, such as `int`, `double` or similar.
+     *
+     * @param pix is the pixel value to add. It will be added to each channel.
+     *
+     * @param mask is a single-channel or multi-channel mask. Only at locations where the mask is
+     * not 0, pix is added. `mask` must have Type::uint8 base type.
+     *
+     * This method adds pix to the invoking image at the places where mask evaluates as
+     * true. This can be represented like
+     *
+     * 1. \f$ A[M] += p \f$,
+     * 1. \f$ B \leftarrow A \f$
+     * where B is the new name for the invoking image, which will be returned,
+     *       A is the invoking image,
+     *       M is the `mask` and
+     *       p is the `pix` value.
+     *
+     * The corresponding code would be: `Image B = std::move(A).add(p, M);` or to represent
+     *
+     * 1. \f$ A[M] += p \f$
+     *
+     * use: `A = std::move(A).add(p, M);`
+     *
+     * @returns the modified invoking image.
+     */
+    template<typename Number, enable_if_arithmetic<Number> = 0>
+    Image add(Number const& pix, ConstImage const& mask = ConstImage{})&&;
+
+    /**
+     * @brief Add a pixel to the whole image
+     *
+     * @param pix the pixel values to add. These can be one value for each channel or one value for
+     * all channels.
+     *
+     * @param mask is a single-channel or multi-channel mask. Only at locations where the mask is
+     * not 0, pix is added. `mask` must have Type::uint8 base type.
+     *
+     * This method adds pix to the invoking image at the places where mask evaluates as
+     * true. This can be represented like
+     *
+     * 1. \f$ A[M] += p \f$,
+     * 1. \f$ B \leftarrow A \f$
+     * where B is the new name for the invoking image, which will be returned,
+     *       A is the invoking image,
+     *       M is the `mask` and
+     *       p are the `pix` values.
+     *
+     * The corresponding code would be: `Image B = std::move(A).add(p, M);` or to represent
+     *
+     * 1. \f$ A[M] += p \f$
+     *
+     * use: `A = std::move(A).add(p, M);`
+     *
+     * @returns the modified invoking image.
+     */
+    Image add(std::vector<double> const& pix, ConstImage const& mask = ConstImage{})&&;
+
+
     /// \copydoc ConstImage::subtract()
-    Image subtract(Image const& B)&&;
+    Image subtract(ConstImage const& B)&&;
     using ConstImage::subtract;
 
+    /**
+     * @brief Subtract a pixel from the whole image
+     *
+     * @tparam Array is a container type, such as `std::vector`, `std::array` or similar. There must be
+     * a `begin(pix)` and a `end(pix)` function.
+     *
+     * @param pix the pixel values to subtract. These can be one value for each channel or one value for
+     * all channels.
+     *
+     * @param mask is a single-channel or multi-channel mask. Only at locations where the mask is
+     * not 0, pix is subtracted. `mask` must have Type::uint8 base type.
+     *
+     * This method subtracts pix to the invoking image at the places where mask evaluates as
+     * true. This can be represented like
+     *
+     * 1. \f$ A[M] -= p \f$,
+     * 1. \f$ B \leftarrow A \f$
+     * where B is the new name for the invoking image, which will be returned,
+     *       A is the invoking image,
+     *       M is the `mask` and
+     *       p are the `pix` values.
+     *
+     * The corresponding code would be: `Image B = std::move(A).subtract(p, M);` or to represent
+     *
+     * 1. \f$ A[M] -= p \f$
+     *
+     * use: `A = std::move(A).subtract(p, M);`
+     *
+     * @returns the modified invoking image.
+     */
+    template<typename Array, enable_if_not_image_and_not_arithmetic<Array> = 0>
+    Image subtract(Array const& pix, ConstImage const& mask = ConstImage{})&&;
+
+    /**
+     * @brief Subtract a value from the whole image
+     *
+     * @tparam Number is an arithmetic type, such as `int`, `double` or similar.
+     *
+     * @param pix is the pixel value to subtract. It will be subtracted to each channel.
+     *
+     * @param mask is a single-channel or multi-channel mask. Only at locations where the mask is
+     * not 0, pix is subtracted. `mask` must have Type::uint8 base type.
+     *
+     * This method subtracts pix to the invoking image at the places where mask evaluates as
+     * true. This can be represented like
+     *
+     * 1. \f$ A[M] -= p \f$,
+     * 1. \f$ B \leftarrow A \f$
+     * where B is the new name for the invoking image, which will be returned,
+     *       A is the invoking image,
+     *       M is the `mask` and
+     *       p is the `pix` value.
+     *
+     * The corresponding code would be: `Image B = std::move(A).subtract(p, M);` or to represent
+     *
+     * 1. \f$ A[M] -= p \f$
+     *
+     * use: `A = std::move(A).subtract(p, M);`
+     *
+     * @returns the modified invoking image.
+     */
+    template<typename Number, enable_if_arithmetic<Number> = 0>
+    Image subtract(Number const& pix, ConstImage const& mask = ConstImage{})&&;
+
+    /**
+     * @brief Subtract a pixel from the whole image
+     *
+     * @param pix the pixel values to subtract. These can be one value for each channel or one value for
+     * all channels.
+     *
+     * @param mask is a single-channel or multi-channel mask. Only at locations where the mask is
+     * not 0, pix is subtracted. `mask` must have Type::uint8 base type.
+     *
+     * This method subtracts pix to the invoking image at the places where mask evaluates as
+     * true. This can be represented like
+     *
+     * 1. \f$ A[M] -= p \f$,
+     * 1. \f$ B \leftarrow A \f$
+     * where B is the new name for the invoking image, which will be returned,
+     *       A is the invoking image,
+     *       M is the `mask` and
+     *       p are the `pix` values.
+     *
+     * The corresponding code would be: `Image B = std::move(A).subtract(p, M);` or to represent
+     *
+     * 1. \f$ A[M] -= p \f$
+     *
+     * use: `A = std::move(A).subtract(p, M);`
+     *
+     * @returns the modified invoking image.
+     */
+    Image subtract(std::vector<double> const& pix, ConstImage const& mask = ConstImage{})&&;
+
+
     /// \copydoc ConstImage::multiply()
-    Image multiply(Image const& B)&&;
+    Image multiply(ConstImage const& B)&&;
     using ConstImage::multiply;
 
+    /**
+     * @brief Multiply a pixel with the whole image
+     *
+     * @tparam Array is a container type, such as `std::vector`, `std::array` or similar. There must be
+     * a `begin(pix)` and a `end(pix)` function.
+     *
+     * @param pix the pixel values to multiply. These can be one value for each channel or one value for
+     * all channels.
+     *
+     * @param mask is a single-channel or multi-channel mask. Only at locations where the mask is
+     * not 0, pix is multiplied. `mask` must have Type::uint8 base type.
+     *
+     * This method multiplies pix with the invoking image at the places where mask evaluates as
+     * true. This can be represented like
+     *
+     * 1. \f$ A[M] *= p \f$,
+     * 1. \f$ B \leftarrow A \f$
+     * where B is the new name for the invoking image, which will be returned,
+     *       A is the invoking image,
+     *       M is the `mask` and
+     *       p are the `pix` values.
+     *
+     * The corresponding code would be: `Image B = std::move(A).multiply(p, M);` or to represent
+     *
+     * 1. \f$ A[M] *= p \f$
+     *
+     * use: `A = std::move(A).multiply(p, M);`
+     *
+     * @returns the modified invoking image.
+     */
+    template<typename Array, enable_if_not_image_and_not_arithmetic<Array> = 0>
+    Image multiply(Array const& pix, ConstImage const& mask = ConstImage{})&&;
+
+    /**
+     * @brief Multiply a pixel with the whole image
+     *
+     * @tparam Number is an arithmetic type, such as `int`, `double` or similar.
+     *
+     * @param pix is the pixel value to multiply. It will be multiplied to each channel.
+     *
+     * @param mask is a single-channel or multi-channel mask. Only at locations where the mask is
+     * not 0, pix is multiplied. `mask` must have Type::uint8 base type.
+     *
+     * This method multiplies pix with the invoking image at the places where mask evaluates as
+     * true. This can be represented like
+     *
+     * 1. \f$ A[M] *= p \f$,
+     * 1. \f$ B \leftarrow A \f$
+     * where B is the new name for the invoking image, which will be returned,
+     *       A is the invoking image,
+     *       M is the `mask` and
+     *       p is the `pix` value.
+     *
+     * The corresponding code would be: `Image B = std::move(A).multiply(p, M);` or to represent
+     *
+     * 1. \f$ A[M] *= p \f$
+     *
+     * use: `A = std::move(A).multiply(p, M);`
+     *
+     * @returns the modified invoking image.
+     */
+    template<typename Number, enable_if_arithmetic<Number> = 0>
+    Image multiply(Number const& pix, ConstImage const& mask = ConstImage{})&&;
+
+    /**
+     * @brief Multiply a pixel with the whole image
+     *
+     * @param pix the pixel values to multiply. These can be one value for each channel or one value for
+     * all channels.
+     *
+     * @param mask is a single-channel or multi-channel mask. Only at locations where the mask is
+     * not 0, pix is multiplied. `mask` must have Type::uint8 base type.
+     *
+     * This method multiplies pix with the invoking image at the places where mask evaluates as
+     * true. This can be represented like
+     *
+     * 1. \f$ A[M] *= p \f$,
+     * 1. \f$ B \leftarrow A \f$
+     * where B is the new name for the invoking image, which will be returned,
+     *       A is the invoking image,
+     *       M is the `mask` and
+     *       p are the `pix` values.
+     *
+     * The corresponding code would be: `Image B = std::move(A).multiply(p, M);` or to represent
+     *
+     * 1. \f$ A[M] *= p \f$
+     *
+     * use: `A = std::move(A).multiply(p, M);`
+     *
+     * @returns the modified invoking image.
+     */
+    Image multiply(std::vector<double> const& pix, ConstImage const& mask = ConstImage{})&&;
+
+
     /// \copydoc ConstImage::divide()
-    Image divide(Image const& B)&&;
+    Image divide(ConstImage const& B)&&;
     using ConstImage::divide;
+
+    /**
+     * @brief Divide the whole image by a pixel
+     *
+     * @tparam Array is a container type, such as `std::vector`, `std::array` or similar. There must be
+     * a `begin(pix)` and a `end(pix)` function.
+     *
+     * @param pix the pixel values to divide by. These can be one value for each channel or one value for
+     * all channels.
+     *
+     * @param mask is a single-channel or multi-channel mask. Only at locations where the mask is
+     * not 0, the image is divided by pix. `mask` must have Type::uint8 base type.
+     *
+     * This method divides the invoking image by pix at the places where mask evaluates as
+     * true. This can be represented like
+     *
+     * 1. \f$ A[M] /= p \f$,
+     * 1. \f$ B \leftarrow A \f$
+     * where B is the new name for the invoking image, which will be returned,
+     *       A is the invoking image,
+     *       M is the `mask` and
+     *       p are the `pix` values.
+     *
+     * The corresponding code would be: `Image B = std::move(A).divide(p, M);` or to represent
+     *
+     * 1. \f$ A[M] /= p \f$
+     *
+     * use: `A = std::move(A).divide(p, M);`
+     *
+     * @returns the modified invoking image.
+     */
+    template<typename Array, enable_if_not_image_and_not_arithmetic<Array> = 0>
+    Image divide(Array const& pix, ConstImage const& mask = ConstImage{})&&;
+
+    /**
+     * @brief Divide the whole image by a value
+     *
+     * @tparam Number is an arithmetic type, such as `int`, `double` or similar.
+     *
+     * @param pix is the pixel value to divide by. Each channel will be divided by it.
+     *
+     * @param mask is a single-channel or multi-channel mask. Only at locations where the mask is
+     * not 0, the image is divided by pix. `mask` must have Type::uint8 base type.
+     *
+     * This method divides the invoking image by pix at the places where mask evaluates as
+     * true. This can be represented like
+     *
+     * 1. \f$ A[M] /= p \f$,
+     * 1. \f$ B \leftarrow A \f$
+     * where B is the new name for the invoking image, which will be returned,
+     *       A is the invoking image,
+     *       M is the `mask` and
+     *       p is the `pix` value.
+     *
+     * The corresponding code would be: `Image B = std::move(A).divide(p, M);` or to represent
+     *
+     * 1. \f$ A[M] /= p \f$
+     *
+     * use: `A = std::move(A).divide(p, M);`
+     *
+     * @returns the modified invoking image.
+     */
+    template<typename Number, enable_if_arithmetic<Number> = 0>
+    Image divide(Number const& pix, ConstImage const& mask = ConstImage{})&&;
+
+    /**
+     * @brief Divide the whole image by a pixel
+     *
+     * @param pix the pixel values to divide by. These can be one value for each channel or one value for
+     * all channels.
+     *
+     * @param mask is a single-channel or multi-channel mask. Only at locations where the mask is
+     * not 0, the image is divided by pix. `mask` must have Type::uint8 base type.
+     *
+     * This method divides the invoking image by pix at the places where mask evaluates as
+     * true. This can be represented like
+     *
+     * 1. \f$ A[M] /= p \f$,
+     * 1. \f$ B \leftarrow A \f$
+     * where B is the new name for the invoking image, which will be returned,
+     *       A is the invoking image,
+     *       M is the `mask` and
+     *       p are the `pix` values.
+     *
+     * The corresponding code would be: `Image B = std::move(A).divide(p, M);` or to represent
+     *
+     * 1. \f$ A[M] /= p \f$
+     *
+     * use: `A = std::move(A).divide(p, M);`
+     *
+     * @returns the modified invoking image.
+     */
+    Image divide(std::vector<double> const& pix, ConstImage const& mask = ConstImage{})&&;
+
 
     /// \copydoc ConstImage::bitwise_and()
     Image bitwise_and(ConstImage const& B)&&;
@@ -2572,6 +3686,107 @@ public:
     friend void swap(Image& i1, Image& i2) noexcept;
 };
 
+
+/**
+ * @brief General inplace point operation
+ * @tparam OP is the type of the operation `op`. It can be e. g. the type of a lambda function
+ * @param i is the image on which the operation should be applied.
+ * @param mask is a single- or multi-channel mask image, but can also empty.
+ *
+ * @param op is the operation to execute. It must have the call signature `op(auto& val, int x, int
+ * y, int c)`, where `val` is the pixel value of the image. The operation will be called for each
+ * location (`x`, `y`) and channel `c`.
+ *
+ * This functor represents a general inplace point operation like e. g. a multiplication with a
+ * fixed number or even with another image. It can modify the image `i`. Here is an example to
+ * multiply the image with 5 with saturation arithmetic (saturate in case of overflow/underflow):
+ * ```
+ * // image to be modified
+ * Image img = ...;
+ *
+ * // mask to be used
+ * Image mask; // may be empty like this one
+ *
+ * // define operation to be applied
+ * auto op = [] (auto& v, int x, int y, int c) {
+ *     using type = std::remove_reference_t<decltype(v)>;
+ *     v = cv::saturate_cast<type>(v * 5);
+ * };
+ *
+ * // call the operation
+ * CallBaseTypeFunctor::run(InplacePointOperationFunctor{img, mask, op}, img.type());
+ * ```
+ * Note: You could directly use `img = std::move(img).multiply(5);` instead to multiply the image
+ * inplace with 5.
+ *
+ * The operation can also use the capture part to access other resources, like a vector or an
+ * image. Here is an example to add two images of the same type:
+ * ```
+ * // image to be modified
+ * Image img1 = ...;
+ *
+ * // second image to
+ * Image img2 = ...;
+ *
+ * // mask to be used
+ * Image mask; // may be empty like this one
+ *
+ * // define operation to be applied
+ * auto op = [&img2] (auto& v, int x, int y, int c) {
+ *     using type = std::remove_reference_t<decltype(v)>;
+ *     v = cv::saturate_cast<type>(v + img2.at<type>(x, y, c));
+ * };
+ *
+ * // call the operation
+ * CallBaseTypeFunctor::run(InplacePointOperationFunctor{img1, mask, op}, img1.type());
+ * ```
+ * Note: You could directly use `img1 = std::move(img1).add(img2);` instead to add the second
+ * image.
+ *
+ * The `std::remove_reference_t` is important for `cv::saturate_cast`, since it returns always 0
+ * for reference types. So, e. g. `cv::saturation_cast<uint8_t>(300)` gives 255, but
+ * `cv::saturation_cast<uint8_t&>(300)` gives 0. And since the argument `v` is deduced with `auto&`
+ * it is a reference type.
+ */
+template<typename OP>
+struct InplacePointOperationFunctor {
+    Image& i;
+    ConstImage const& mask;
+    OP const& op;
+    InplacePointOperationFunctor(Image& i, ConstImage const& mask, OP const& op) : i{i}, mask{mask}, op{op} { }
+
+    template<Type t>
+    void operator()() {
+        static_assert(getChannels(t) == 1, "This functor only accepts base type to reduce code size.");
+        using type = typename DataType<t>::base_type;
+        int w = i.width();
+        int h = i.height();
+        unsigned int chans = i.channels();
+        if (mask.empty()) {
+            for (int y = 0; y < h; ++y)
+                for (int x = 0; x < w; ++x)
+                    for (unsigned int c = 0; c < chans; ++c)
+                        op(i.at<type>(x, y, c), x, y, c);
+        }
+        else if (mask.channels() == 1) {
+            for (int y = 0; y < h; ++y)
+                for (int x = 0; x < w; ++x)
+                    if (mask.at<uint8_t>(x, y))
+                        for (unsigned int c = 0; c < chans; ++c)
+                            op(i.at<type>(x, y, c), x, y, c);
+        }
+        else if (mask.channels() == chans) {
+            for (int y = 0; y < h; ++y)
+                for (int x = 0; x < w; ++x)
+                    for (unsigned int c = 0; c < chans; ++c)
+                        if (mask.at<uint8_t>(x, y, c))
+                            op(i.at<type>(x, y, c), x, y, c);
+        }
+        else
+            IF_THROW_EXCEPTION(logic_error("Mask has a bad number of channels."));
+
+    }
+};
 
 
 
@@ -2893,6 +4108,181 @@ inline void Image::setValueAt(unsigned int x, unsigned int y, unsigned int chann
 inline void Image::setBoolAt(unsigned int x, unsigned int y, unsigned int channel, bool val) {
     at<uint8_t>(x,y,channel) = val ? 255 : 0;
 }
+
+
+template<typename Array, enable_if_not_image_and_not_arithmetic<Array>>
+inline Image ConstImage::minimum(Array const& pix, ConstImage const& mask) const& {
+    using std::begin;
+    using std::end;
+    std::vector<double> pix_d(begin(pix), end(pix));
+    return minimum(pix_d, mask.img);
+}
+
+template<typename Array, enable_if_not_image_and_not_arithmetic<Array>>
+inline Image Image::minimum(Array const& pix, ConstImage const& mask)&& {
+    using std::begin;
+    using std::end;
+    std::vector<double> pix_d(begin(pix), end(pix));
+    return std::move(*this).minimum(pix_d, mask.img);
+}
+
+template<typename Number, enable_if_arithmetic<Number>>
+inline Image ConstImage::minimum(Number const& pix, ConstImage const& mask) const& {
+    std::vector<double> pix_d{static_cast<double>(pix)};
+    return minimum(pix_d, mask.img);
+}
+
+template<typename Number, enable_if_arithmetic<Number>>
+inline Image Image::minimum(Number const& pix, ConstImage const& mask)&& {
+    std::vector<double> pix_d{static_cast<double>(pix)};
+    return std::move(*this).minimum(pix_d, mask.img);
+}
+
+
+template<typename Array, enable_if_not_image_and_not_arithmetic<Array>>
+inline Image ConstImage::maximum(Array const& pix, ConstImage const& mask) const& {
+    using std::begin;
+    using std::end;
+    std::vector<double> pix_d(begin(pix), end(pix));
+    return maximum(pix_d, mask.img);
+}
+
+template<typename Array, enable_if_not_image_and_not_arithmetic<Array>>
+inline Image Image::maximum(Array const& pix, ConstImage const& mask)&& {
+    using std::begin;
+    using std::end;
+    std::vector<double> pix_d(begin(pix), end(pix));
+    return std::move(*this).maximum(pix_d, mask.img);
+}
+
+template<typename Number, enable_if_arithmetic<Number>>
+inline Image ConstImage::maximum(Number const& pix, ConstImage const& mask) const& {
+    std::vector<double> pix_d{static_cast<double>(pix)};
+    return maximum(pix_d, mask.img);
+}
+
+template<typename Number, enable_if_arithmetic<Number>>
+inline Image Image::maximum(Number const& pix, ConstImage const& mask)&& {
+    std::vector<double> pix_d{static_cast<double>(pix)};
+    return std::move(*this).maximum(pix_d, mask.img);
+}
+
+
+template<typename Array, enable_if_not_image_and_not_arithmetic<Array>>
+inline Image ConstImage::add(Array const& pix, ConstImage const& mask, Type resultType) const& {
+    using std::begin;
+    using std::end;
+    std::vector<double> pix_d(begin(pix), end(pix));
+    return add(pix_d, mask.img, resultType);
+}
+
+template<typename Array, enable_if_not_image_and_not_arithmetic<Array>>
+inline Image Image::add(Array const& pix, ConstImage const& mask)&& {
+    using std::begin;
+    using std::end;
+    std::vector<double> pix_d(begin(pix), end(pix));
+    return std::move(*this).add(pix_d, mask.img);
+}
+
+template<typename Number, enable_if_arithmetic<Number>>
+inline Image ConstImage::add(Number const& pix, ConstImage const& mask, Type resultType) const& {
+    std::vector<double> pix_d{static_cast<double>(pix)};
+    return add(pix_d, mask.img, resultType);
+}
+
+template<typename Number, enable_if_arithmetic<Number>>
+inline Image Image::add(Number const& pix, ConstImage const& mask)&& {
+    std::vector<double> pix_d{static_cast<double>(pix)};
+    return std::move(*this).add(pix_d, mask.img);
+}
+
+
+template<typename Array, enable_if_not_image_and_not_arithmetic<Array>>
+inline Image ConstImage::subtract(Array const& pix, ConstImage const& mask, Type resultType) const& {
+    using std::begin;
+    using std::end;
+    std::vector<double> pix_d(begin(pix), end(pix));
+    return subtract(pix_d, mask.img, resultType);
+}
+
+template<typename Array, enable_if_not_image_and_not_arithmetic<Array>>
+inline Image Image::subtract(Array const& pix, ConstImage const& mask)&& {
+    using std::begin;
+    using std::end;
+    std::vector<double> pix_d(begin(pix), end(pix));
+    return std::move(*this).subtract(pix_d, mask.img);
+}
+
+template<typename Number, enable_if_arithmetic<Number>>
+inline Image ConstImage::subtract(Number const& pix, ConstImage const& mask, Type resultType) const& {
+    std::vector<double> pix_d{static_cast<double>(pix)};
+    return subtract(pix_d, mask.img, resultType);
+}
+
+template<typename Number, enable_if_arithmetic<Number>>
+inline Image Image::subtract(Number const& pix, ConstImage const& mask)&& {
+    std::vector<double> pix_d{static_cast<double>(pix)};
+    return std::move(*this).subtract(pix_d, mask.img);
+}
+
+
+template<typename Array, enable_if_not_image_and_not_arithmetic<Array>>
+inline Image ConstImage::multiply(Array const& pix, ConstImage const& mask, Type resultType) const& {
+    using std::begin;
+    using std::end;
+    std::vector<double> pix_d(begin(pix), end(pix));
+    return multiply(pix_d, mask.img, resultType);
+}
+
+template<typename Array, enable_if_not_image_and_not_arithmetic<Array>>
+inline Image Image::multiply(Array const& pix, ConstImage const& mask)&& {
+    using std::begin;
+    using std::end;
+    std::vector<double> pix_d(begin(pix), end(pix));
+    return std::move(*this).multiply(pix_d, mask.img);
+}
+
+template<typename Number, enable_if_arithmetic<Number>>
+inline Image ConstImage::multiply(Number const& pix, ConstImage const& mask, Type resultType) const& {
+    std::vector<double> pix_d{static_cast<double>(pix)};
+    return multiply(pix_d, mask.img, resultType);
+}
+
+template<typename Number, enable_if_arithmetic<Number>>
+inline Image Image::multiply(Number const& pix, ConstImage const& mask)&& {
+    std::vector<double> pix_d{static_cast<double>(pix)};
+    return std::move(*this).multiply(pix_d, mask.img);
+}
+
+
+template<typename Array, enable_if_not_image_and_not_arithmetic<Array>>
+inline Image ConstImage::divide(Array const& pix, ConstImage const& mask, Type resultType) const& {
+    using std::begin;
+    using std::end;
+    std::vector<double> pix_d(begin(pix), end(pix));
+    return divide(pix_d, mask.img, resultType);
+}
+
+template<typename Array, enable_if_not_image_and_not_arithmetic<Array>>
+inline Image Image::divide(Array const& pix, ConstImage const& mask)&& {
+    using std::begin;
+    using std::end;
+    std::vector<double> pix_d(begin(pix), end(pix));
+    return std::move(*this).divide(pix_d, mask.img);
+}
+
+template<typename Number, enable_if_arithmetic<Number>>
+inline Image ConstImage::divide(Number const& pix, ConstImage const& mask, Type resultType) const& {
+    std::vector<double> pix_d{static_cast<double>(pix)};
+    return divide(pix_d, mask.img, resultType);
+}
+
+template<typename Number, enable_if_arithmetic<Number>>
+inline Image Image::divide(Number const& pix, ConstImage const& mask)&& {
+    std::vector<double> pix_d{static_cast<double>(pix)};
+    return std::move(*this).divide(pix_d, mask.img);
+}
+
 
 
 

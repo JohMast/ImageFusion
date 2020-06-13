@@ -24,7 +24,7 @@ namespace fitfc_impl_detail {
  * @brief The RegressionMapper computes the regression model and the residual
  * @param opt are the Fit-FC options. Used to get the window size via
  * @ref FitFCOptions::getWinSize() "getWinSize()" and the number of threads
- * @ref FitFCOptions::getNumberThreads() "getNumberThreads()" to use.
+ * @ref FitFCOptions::getNumberThreads() const "getNumberThreads()" to use.
  *
  * @param h1 is the high resolution image at date 1. This will be used for x.
  * @param l1 is the low resolution image at date 1. This will be used for x.
@@ -368,6 +368,7 @@ protected:
     /**
      * @brief Get area where pixels are read
      * @param fullImgSize size of the source image. This is used as bounds.
+     * @param predArea is the prediction area used. It must be valid (not just all-zero).
      *
      * The sample area is the area from which pixels are read. That is the prediction area with the
      * full window size on each side around, but limited by the image bounds.

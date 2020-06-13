@@ -243,7 +243,7 @@ public:
      * Finds all dates with which an element is associated in the specified resolution. The dates
      * are sorted.
      *
-     * @return all dates as vector.
+     * @return all dates as sorted vector.
      */
     std::vector<int> getDates(std::string const& res) const;
 
@@ -319,7 +319,7 @@ public:
      * affect the original images and vice versa. As usual with shared copies of images cropping is
      * independent.
      *
-     * This is comparible to a flat copy and similarly cheap.
+     * This is comparible to a shallow copy and similarly cheap.
      *
      * @return a new collection filled with shared copies of the original images.
      */
@@ -537,17 +537,18 @@ inline void MultiResCollection<T>::remove(std::string const& res) {
 template<class T>
 inline void MultiResCollection<T>::remove(int date) {
     for (auto res_map_it = collection.begin(), res_map_it_end = collection.end();
-         res_map_it != res_map_it_end; ++res_map_it)
+         res_map_it != res_map_it_end;)
     {
         date_map_t& res_map = res_map_it->second;
         auto it = res_map.find(date);
-        if (it != res_map.end()) {
+        if (it != res_map.end())
             res_map.erase(it);
 
-            // remove res tag if empty
-            if (res_map.empty())
-                collection.erase(res_map_it);
-        }
+        // remove res tag if empty
+        if (res_map.empty())
+            res_map_it = collection.erase(res_map_it);
+        else
+            ++res_map_it;
     }
 }
 

@@ -2,7 +2,7 @@
 #include <cmath>
 #include <cassert>
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include <gdal.h>
 #include <gdal_priv.h>
@@ -69,55 +69,50 @@ std::vector<imagefusion::Coordinate> convertProj(imagefusion::GeoInfo const& giS
 }
 
 
-std::vector<imagefusion::Coordinate> convertLatLong(imagefusion::GeoInfo const& gi, std::vector<imagefusion::Coordinate> const& coords, bool imgCoords /* otherwise proj coords */, bool reverse /* from long lat? */) {
+std::vector<imagefusion::Coordinate> convertLongLat(imagefusion::GeoInfo const& gi, std::vector<imagefusion::Coordinate> const& coords, bool imgCoords /* otherwise proj coords */, bool reverse /* from long lat? */) {
     // collect coordinates
     int nSamplePoints = coords.size();
     std::vector<double> x;
     std::vector<double> y;
     x.reserve(nSamplePoints);
     y.reserve(nSamplePoints);
-    if (imgCoords && !reverse) {
-        for (imagefusion::Coordinate c : coords) {
+    for (imagefusion::Coordinate c : coords) {
+        if (imgCoords && !reverse)
             c = gi.geotrans.imgToProj(c);
-            x.push_back(c.x);
-            y.push_back(c.y);
-        }
-    }
-    else {
-        for (imagefusion::Coordinate const& c : coords) {
-            x.push_back(c.x);
-            y.push_back(c.y);
-        }
+        x.push_back(c.x);
+        y.push_back(c.y);
     }
 
-    // Drop GEOGCS|UNIT child to be sure to output as degrees
-    OGRSpatialReference* poLatLong = gi.geotransSRS.CloneGeogCS();
-    OGR_SRSNode* poGEOGCS = poLatLong->GetRoot();
-    if (poGEOGCS) {
-        const int iUnitChild = poGEOGCS->FindChild("UNIT");
-        if (iUnitChild != -1)
-            poGEOGCS->DestroyChild(iUnitChild);
-    }
+    // prepare long/lat target CRS, see https://gdal.org/tutorials/osr_api_tut.html#coordinate-transformation
+    OGRSpatialReference* poLongLat = gi.geotransSRS.CloneGeogCS();
+    #if GDAL_VERSION_MAJOR >= 3
+        poLongLat->SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER);
+    #endif
 
     // build the transformer object
     OGRCoordinateTransformation* poTransform;
-    if (reverse)
-        poTransform = OGRCreateCoordinateTransformation(poLatLong,
+    if (reverse) {
+        poTransform = OGRCreateCoordinateTransformation(poLongLat,
                                                         const_cast<OGRSpatialReference*>(&gi.geotransSRS));
-    else
+    }
+    else {
         poTransform = OGRCreateCoordinateTransformation(const_cast<OGRSpatialReference*>(&gi.geotransSRS),
-                                                        poLatLong);
+                                                        poLongLat);
+    }
+
     if (poTransform == nullptr)
         IF_THROW_EXCEPTION(imagefusion::invalid_argument_error(
                 "Cannot make the transformation to or from latitude / longitude. Please provide a valid projection reference system."));
 
     // transform in place
-    if (!poTransform->Transform(nSamplePoints, x.data(), y.data()))
+    if (!poTransform->Transform(nSamplePoints, x.data(), y.data())) {
+        OGRCoordinateTransformation::DestroyCT(poTransform);
         IF_THROW_EXCEPTION(imagefusion::invalid_argument_error(
                 "Could not transform to or from latitude / longitude. Don't know why, sorry! Maybe the points are given in the wrong coordinate space and thus are not in the expected range."));
+    }
 
     OGRCoordinateTransformation::DestroyCT(poTransform);
-    OGRSpatialReference::DestroySpatialReference(poLatLong);
+    OGRSpatialReference::DestroySpatialReference(poLongLat);
 
     // convert to coordinates again
     std::vector<imagefusion::Coordinate> ret;
@@ -260,7 +255,7 @@ void GeoInfo::readFrom(GDALDataset const* img_arg) {
 }
 
 void GeoInfo::addTo(std::string const& filename) const {
-    if (!boost::filesystem::exists(filename))
+    if (!std::filesystem::exists(filename))
         IF_THROW_EXCEPTION(not_found_error("Could not find any file at path " + filename + " to add GeoInfo to it."))
                 << boost::errinfo_file_name(filename);
 
@@ -724,36 +719,36 @@ std::vector<Coordinate> GeoInfo::projToProj(std::vector<Coordinate> const& c_p, 
     return convertProj(*this, to, c_p, false, false);
 }
 
-Coordinate GeoInfo::imgToLatLong(Coordinate const& c_i) const {
-    return imgToLatLong(std::vector<Coordinate>{c_i}).front();
+Coordinate GeoInfo::imgToLongLat(Coordinate const& c_i) const {
+    return imgToLongLat(std::vector<Coordinate>{c_i}).front();
 }
 
-Coordinate GeoInfo::projToLatLong(Coordinate const& c_p) const {
-    return projToLatLong(std::vector<Coordinate>{c_p}).front();
+Coordinate GeoInfo::projToLongLat(Coordinate const& c_p) const {
+    return projToLongLat(std::vector<Coordinate>{c_p}).front();
 }
 
-Coordinate GeoInfo::latLongToProj(Coordinate const& c_l) const {
-    return latLongToProj(std::vector<Coordinate>{c_l}).front();
+Coordinate GeoInfo::longLatToProj(Coordinate const& c_l) const {
+    return longLatToProj(std::vector<Coordinate>{c_l}).front();
 }
 
-Coordinate GeoInfo::latLongToImg(Coordinate const& c_l) const {
-    return latLongToImg(std::vector<Coordinate>{c_l}).front();
+Coordinate GeoInfo::longLatToImg(Coordinate const& c_l) const {
+    return longLatToImg(std::vector<Coordinate>{c_l}).front();
 }
 
-std::vector<Coordinate> GeoInfo::imgToLatLong(std::vector<Coordinate> const& c_i) const {
-    return convertLatLong(*this, c_i, true, false);
+std::vector<Coordinate> GeoInfo::imgToLongLat(std::vector<Coordinate> const& c_i) const {
+    return convertLongLat(*this, c_i, true, false);
 }
 
-std::vector<Coordinate> GeoInfo::projToLatLong(std::vector<Coordinate> const& c_p) const {
-    return convertLatLong(*this, c_p, false, false);
+std::vector<Coordinate> GeoInfo::projToLongLat(std::vector<Coordinate> const& c_p) const {
+    return convertLongLat(*this, c_p, false, false);
 }
 
-std::vector<Coordinate> GeoInfo::latLongToProj(std::vector<Coordinate> const& c_l) const {
-    return convertLatLong(*this, c_l, false, true);
+std::vector<Coordinate> GeoInfo::longLatToProj(std::vector<Coordinate> const& c_l) const {
+    return convertLongLat(*this, c_l, false, true);
 }
 
-std::vector<Coordinate> GeoInfo::latLongToImg(std::vector<Coordinate> const& c_l) const {
-    return convertLatLong(*this, c_l, true, true);
+std::vector<Coordinate> GeoInfo::longLatToImg(std::vector<Coordinate> const& c_l) const {
+    return convertLongLat(*this, c_l, true, true);
 }
 
 Coordinate GeoTransform::imgToProj(Coordinate const& c_i) const {

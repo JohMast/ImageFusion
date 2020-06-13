@@ -1,6 +1,6 @@
 #include "utils_common.h"
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 namespace helpers {
 
@@ -207,7 +207,7 @@ imagefusion::Image processSetMask(imagefusion::Image mask, imagefusion::ConstIma
 }
 
 std::string outputImageFile(imagefusion::ConstImage const& img, imagefusion::GeoInfo gi, std::string origFileName, std::string prefix, std::string postfix, imagefusion::FileFormat f, int date1, int date2, int date3) {
-    boost::filesystem::path p = origFileName;
+    std::filesystem::path p = origFileName;
 
     std::string extension = p.extension().string();
     if (f != imagefusion::FileFormat::unsupported) {

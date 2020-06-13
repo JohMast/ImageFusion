@@ -6,7 +6,7 @@
 #include "utils_common.h"
 #include "MultiResImages.h"
 #include "GeoInfo.h"
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #ifdef WITH_OMP
 #include "Parallelizer.h"
 #include "ParallelizerOptions.h"
@@ -951,7 +951,7 @@ void execute_spstfm_job_cpp(CharacterVector input_filenames,
     std::string dictPath = LOADDICT_options;
     unsigned int chans = mri->getAny().channels();
     if (chans == 1) {
-      if (!boost::filesystem::exists(dictPath)) {
+      if (!std::filesystem::exists(dictPath)) {
         std::cerr << "Could not find the dictionary file " << dictPath << " to load a single-channel dictionary." << std::endl;
       }
       
@@ -965,10 +965,10 @@ void execute_spstfm_job_cpp(CharacterVector input_filenames,
         std::cerr << "Could not load dictionary from " << dictPath << " although the file exists. Defect file? Ignoring option --load-dict." << std::endl;
     }
     else {
-      boost::filesystem::path p = dictPath;
+      std::filesystem::path p = dictPath;
       std::string extension = p.extension().string();
       std::string basename  = p.stem().string();
-      if (boost::filesystem::exists(dictPath))
+      if (std::filesystem::exists(dictPath))
         basename.pop_back(); // drop channel number
       
       for (unsigned int c = 0; c < chans; ++c) {
@@ -976,7 +976,7 @@ void execute_spstfm_job_cpp(CharacterVector input_filenames,
         auto outpath = p;
         
         std::string infilename = outpath.string();
-        if (!boost::filesystem::exists(infilename)) {
+        if (!std::filesystem::exists(infilename)) {
           std::cerr << "Could not find the dictionary file " << infilename << " to load a part of a multi-channel dictionary. "
           "Give either the same filename as specified with --save-dict or one of the actual files with channel number." << std::endl;
         }
@@ -1127,7 +1127,7 @@ void execute_spstfm_job_cpp(CharacterVector input_filenames,
         std::cerr << "Could not save dictionary to " << dictPath << "." << std::endl;
     }
     else {
-      boost::filesystem::path p = dictPath;
+      std::filesystem::path p = dictPath;
       std::string extension = p.extension().string();
       std::string basename  = p.stem().string();
       for (unsigned int c = 0; c < chans; ++c) {

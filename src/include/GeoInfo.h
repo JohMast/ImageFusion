@@ -1152,7 +1152,7 @@ public:
     Type baseType = Type::invalid;
 
     /**
-     * @brief Filename of the image
+     * @brief Filename of the image or subdataset
      *
      * This is simply the filename of the image, but if the GeoInfo was constructed from a special
      * GDAL subdataset name, like
@@ -1824,14 +1824,14 @@ public:
      * @return the corresponding geographic coordinates, where the latitude is returned in y and
      * the longitude in x, both in degree.
      *
-     * @see Use imgToLatLong(std::vector<Coordinate> const& c_i) const
+     * @see Use imgToLongLat(std::vector<Coordinate> const& c_i) const
      * to convert multiple coordinates at once for efficiency.
      * For the other transformations with longitude / latitude see also
-     * latLongToProj(Coordinate const& c_l) const,
-     * latLongToImg(Coordinate const& c_l) const,
-     * projToLatLong(Coordinate const& c_p) const
+     * longLatToProj(Coordinate const& c_l) const,
+     * longLatToImg(Coordinate const& c_l) const,
+     * projToLongLat(Coordinate const& c_p) const
      */
-    Coordinate imgToLatLong(Coordinate const& c_i) const;
+    Coordinate imgToLongLat(Coordinate const& c_i) const;
 
     /**
      * @brief Transform multiple image space coordinates to latitude / longitude
@@ -1844,12 +1844,12 @@ public:
      *
      * @see
      * For the other transformations with longitude / latitude see also
-     * projToLatLong(Coordinate const& c_p) const,
-     * latLongToProj(Coordinate const& c_l) const,
-     * latLongToImg(Coordinate const& c_l) const,
-     * imgToLatLong(Coordinate const& c_i) const
+     * projToLongLat(Coordinate const& c_p) const,
+     * longLatToProj(Coordinate const& c_l) const,
+     * longLatToImg(Coordinate const& c_l) const,
+     * imgToLongLat(Coordinate const& c_i) const
      */
-    std::vector<Coordinate> imgToLatLong(std::vector<Coordinate> const& c_i) const;
+    std::vector<Coordinate> imgToLongLat(std::vector<Coordinate> const& c_i) const;
 
     /**
      * @brief Transform projection coordinate to latitude / longitude
@@ -1858,14 +1858,14 @@ public:
      * @return the corresponding geographic coordinates, where the latitude is returned in y and
      * the longitude in x, both in degree.
      *
-     * @see Use projToLatLong(std::vector<Coordinate> const& c_i) const
+     * @see Use projToLongLat(std::vector<Coordinate> const& c_i) const
      * to convert multiple coordinates at once for efficiency.
      * For the other transformations with longitude / latitude see also
-     * latLongToProj(Coordinate const& c_l) const,
-     * latLongToImg(Coordinate const& c_l) const,
-     * imgToLatLong(Coordinate const& c_i) const
+     * longLatToProj(Coordinate const& c_l) const,
+     * longLatToImg(Coordinate const& c_l) const,
+     * imgToLongLat(Coordinate const& c_i) const
      */
-    Coordinate projToLatLong(Coordinate const& c_p) const;
+    Coordinate projToLongLat(Coordinate const& c_p) const;
 
     /**
      * @brief Transform multiple projection coordinates to latitude / longitude
@@ -1876,12 +1876,12 @@ public:
      *
      * @see
      * For the other transformations with longitude / latitude see also
-     * projToLatLong(Coordinate const& c_p) const,
-     * latLongToProj(Coordinate const& c_l) const,
-     * latLongToImg(Coordinate const& c_l) const,
-     * imgToLatLong(Coordinate const& c_i) const
+     * projToLongLat(Coordinate const& c_p) const,
+     * longLatToProj(Coordinate const& c_l) const,
+     * longLatToImg(Coordinate const& c_l) const,
+     * imgToLongLat(Coordinate const& c_i) const
      */
-    std::vector<Coordinate> projToLatLong(std::vector<Coordinate> const& c_p) const;
+    std::vector<Coordinate> projToLongLat(std::vector<Coordinate> const& c_p) const;
 
     /**
      * @brief Transform latitude / longitude to projection space coordinate
@@ -1891,14 +1891,14 @@ public:
      *
      * @return the corresponding projection space coordinates.
      *
-     * @see Use latLongToProj(std::vector<Coordinate> const& c_l) const
+     * @see Use longLatToProj(std::vector<Coordinate> const& c_l) const
      * to convert multiple coordinates at once for efficiency.
      * For the other transformations with longitude / latitude see also
-     * projToLatLong(Coordinate const& c_p) const,
-     * latLongToImg(Coordinate const& c_l) const,
-     * imgToLatLong(Coordinate const& c_i) const
+     * projToLongLat(Coordinate const& c_p) const,
+     * longLatToImg(Coordinate const& c_l) const,
+     * imgToLongLat(Coordinate const& c_i) const
      */
-    Coordinate latLongToProj(Coordinate const& c_l) const;
+    Coordinate longLatToProj(Coordinate const& c_l) const;
 
     /**
      * @brief Transform multiple latitude / longitude to projection space coordinate
@@ -1910,12 +1910,12 @@ public:
      *
      * @see
      * For the other transformations with longitude / latitude see also
-     * projToLatLong(Coordinate const& c_p) const,
-     * latLongToProj(Coordinate const& c_l) const,
-     * latLongToImg(Coordinate const& c_l) const,
-     * imgToLatLong(Coordinate const& c_i) const
+     * projToLongLat(Coordinate const& c_p) const,
+     * longLatToProj(Coordinate const& c_l) const,
+     * longLatToImg(Coordinate const& c_l) const,
+     * imgToLongLat(Coordinate const& c_i) const
      */
-    std::vector<Coordinate> latLongToProj(std::vector<Coordinate> const& c_l) const;
+    std::vector<Coordinate> longLatToProj(std::vector<Coordinate> const& c_l) const;
 
     /**
      * @brief Transform latitude / longitude to image space coordinate
@@ -1926,14 +1926,14 @@ public:
      * @return the corresponding image space coordinate, see @ref GeoTransform for details about
      * image space coordinates.
      *
-     * @see Use latLongToImg(std::vector<Coordinate> const& c_l) const
+     * @see Use longLatToImg(std::vector<Coordinate> const& c_l) const
      * to convert multiple coordinates at once for efficiency.
      * For the other transformations with longitude / latitude see also
-     * latLongToProj(Coordinate const& c_l) const,
-     * projToLatLong(Coordinate const& c_p) const,
-     * imgToLatLong(Coordinate const& c_i) const
+     * longLatToProj(Coordinate const& c_l) const,
+     * projToLongLat(Coordinate const& c_p) const,
+     * imgToLongLat(Coordinate const& c_i) const
      */
-    Coordinate latLongToImg(Coordinate const& c_l) const;
+    Coordinate longLatToImg(Coordinate const& c_l) const;
 
     /**
      * @brief Transform multiple projection coordinates to latitude / longitude
@@ -1946,12 +1946,12 @@ public:
      *
      * @see
      * For the other transformations with longitude / latitude see also
-     * projToLatLong(Coordinate const& c_p) const,
-     * latLongToProj(Coordinate const& c_l) const,
-     * latLongToImg(Coordinate const& c_l) const,
-     * imgToLatLong(Coordinate const& c_i) const
+     * projToLongLat(Coordinate const& c_p) const,
+     * longLatToProj(Coordinate const& c_l) const,
+     * longLatToImg(Coordinate const& c_l) const,
+     * imgToLongLat(Coordinate const& c_i) const
      */
-    std::vector<Coordinate> latLongToImg(std::vector<Coordinate> const& c_l) const;
+    std::vector<Coordinate> longLatToImg(std::vector<Coordinate> const& c_l) const;
 
 
     /**

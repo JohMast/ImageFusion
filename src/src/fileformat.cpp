@@ -2,7 +2,7 @@
 
 #include <gdal.h>
 #include <gdal_priv.h>
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 namespace imagefusion {
 

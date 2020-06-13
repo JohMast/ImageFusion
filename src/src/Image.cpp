@@ -3,7 +3,7 @@
 #include <type_traits>
 #include <sstream>
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include <gdal.h>
 #include <gdal_priv.h>
@@ -71,7 +71,7 @@ GDALDataset* Image::asGDALDataset() {
 void ConstImage::write(std::string const& filename, GeoInfo const& gi, FileFormat format) const {
     GDALAllRegister();
     if (format == FileFormat::unsupported) {
-        boost::filesystem::path p = filename;
+        std::filesystem::path p = filename;
         std::string ext = p.extension().string();
         format = FileFormat::fromFileExtension(ext);
         if (format == FileFormat::unsupported) {
@@ -406,6 +406,9 @@ void Image::copyValuesFrom(ConstImage const& src, ConstImage const& mask) {
 
 
 Image ConstImage::clone() const {
+    if (empty())
+        return {};
+
     cv::Size wholeSize;
     cv::Point offset;
     img.locateROI(wholeSize, offset);
@@ -752,44 +755,43 @@ void Image::merge(std::vector<ConstImage> const& images) {
     img = ::merge(images);
 }
 
+namespace {
+template<typename OP>
+Image SimpleBroadcastOperation(ConstImage const& A, Image B, OP const& op) {
+    cv::Mat a = A.cvMat();
+    if (a.channels() == 1 && B.channels() > 1) {
+        std::vector<cv::Mat> aaa(B.channels(), a);
+        cv::merge(aaa, a); // note: broadcasting could be done without temporary memory allocation for better performance
+    }
+    else if (B.channels() == 1 && a.channels() > 1) {
+        std::vector<cv::Mat> bbb(a.channels(), B.cvMat());
+        cv::merge(bbb, B.cvMat());
+    }
 
-Image ConstImage::absdiff(ConstImage const& B) const& {
-    Image res(size(), type());
-    cv::absdiff(img, B.img, res.img);
-    return res;
+    op(a, B.cvMat(), B.cvMat());
+    return B;
 }
+} /* anonymous namespace */
+
 
 Image ConstImage::absdiff(Image&& B) const& {
-    cv::absdiff(img, B.img, B.img);
-    return std::move(B);
+    if (empty() || B.empty())
+        IF_THROW_EXCEPTION(invalid_argument_error("Empty images are not allowed for arithmetic operations (only for bitwise logical operations)."));
+
+    return SimpleBroadcastOperation(*this, std::move(B),
+                                    [] (cv::Mat const& mat1, cv::Mat const& mat2, cv::Mat& res) {cv::absdiff(mat1, mat2, res);});
+}
+
+Image ConstImage::absdiff(ConstImage const& B) const& {
+    if (B.channels() > channels()) // for performance only in case of broadcasting
+        return absdiff(B.clone()); // B has multiple channels and can be used to save the result
+    return B.absdiff(clone());
 }
 
 Image Image::absdiff(ConstImage const& B)&& {
-    cv::absdiff(img, B.img, img);
-    return std::move(*this);
+    return B.absdiff(std::move(*this));
 }
 
-Image Image::absdiff(Image&& B)&& {
-    cv::absdiff(img, B.img, img);
-    return std::move(*this);
-}
-
-struct AbsRefFunctor {
-    Image& srcdst;
-
-    template<Type baseType>
-    Image& operator()() {
-        using basetype = typename DataType<baseType>::base_type;
-        int w = srcdst.width();
-        int h = srcdst.height();
-        unsigned int chans = srcdst.channels();
-        for (int y = 0; y < h; ++y)
-            for (int x = 0; x < w; ++x)
-                for (unsigned int c = 0; c < chans; ++c)
-                    srcdst.at<basetype>(x, y, c) = cv::saturate_cast<basetype>(std::abs(srcdst.at<basetype>(x, y, c)));
-        return srcdst;
-    }
-};
 
 Image ConstImage::abs() const& {
     if (isUnsignedType(type()))
@@ -802,21 +804,218 @@ Image ConstImage::abs() const& {
     }
 
     Image ret = clone();
-    CallBaseTypeFunctorRestrictBaseTypesTo<Type::int8, Type::int16, Type::int32, Type::float32, Type::float64>::run(AbsRefFunctor{ret}, ret.basetype());
+    auto op = [] (auto& v, int, int, int) {
+        using type = std::remove_reference_t<decltype(v)>;
+        v = cv::saturate_cast<type>(std::abs(v));
+    };
+    CallBaseTypeFunctorRestrictBaseTypesTo<Type::int8, Type::int16, Type::int32, Type::float32, Type::float64>::run(InplacePointOperationFunctor{ret, {}, op}, ret.basetype());
     return ret;
 }
 
 
 Image Image::abs()&& {
     if (isUnsignedType(type()))
-        std::move(*this);
+        return std::move(*this);
 
-    if (channels() <= 4)
+    if (channels() <= 4) {
         img = cv::abs(img);
-    else
-        CallBaseTypeFunctorRestrictBaseTypesTo<Type::int8, Type::int16, Type::int32, Type::float32, Type::float64>::run(AbsRefFunctor{*this}, basetype());
+    }
+    else {
+        auto op = [] (auto& v, int, int, int) {
+            using type = std::remove_reference_t<decltype(v)>;
+            v = cv::saturate_cast<type>(std::abs(v));
+        };
+        CallBaseTypeFunctorRestrictBaseTypesTo<Type::int8, Type::int16, Type::int32, Type::float32, Type::float64>::run(InplacePointOperationFunctor{*this, {}, op}, basetype());
+    }
 
     return std::move(*this);
+}
+
+namespace {
+
+void checkMask(ConstImage const& mask, unsigned int imgChans) {
+    if (mask.channels() > 1 && mask.channels() != imgChans)
+        IF_THROW_EXCEPTION(image_type_error("Mask has a wrong number of channels. It should be single-channel"
+                                            + (imgChans > 1 ? " or multi-channel with " + std::to_string(imgChans) + " channels" : "")
+                                            + ". However, it has " + std::to_string(mask.channels()) + " channels."))
+                << errinfo_image_type(mask.type());
+
+    if (mask.basetype() != Type::uint8)
+        IF_THROW_EXCEPTION(image_type_error("Mask has an invalid type. It should have basetype Type::uint8, "
+                                            "but has " + to_string(mask.basetype()) + "."))
+                << errinfo_image_type(mask.basetype());
+}
+
+template<typename CvOp, typename StdOp>
+Image minimum_maximum(Image A, ConstImage const& B, ConstImage const& mask, CvOp const& cvminmax, StdOp const& stdminmax) {
+    if (B.empty())
+        return A;
+    if (A.empty())
+        return B.clone();
+
+    // no mask --> use OpenCV with broadcasting
+    if (mask.empty())
+        return SimpleBroadcastOperation(B, std::move(A), cvminmax);
+
+    // broadcasting minimum or maximum with mask
+    if (A.channels() > 1 && B.channels() == 1) {
+        auto op = [&B, &stdminmax](auto& v, int const& x, int const& y, int const& /*c*/){
+            using type = std::remove_reference_t<decltype(v)>;
+            v = stdminmax(v, B.at<type>(x, y, 0));
+        };
+        CallBaseTypeFunctor::run(InplacePointOperationFunctor{A, mask, op}, A.type());
+        return A;
+    }
+
+
+    if (A.channels() == 1 && B.channels() > 1) {
+        std::vector<cv::Mat> aaa(B.channels(), A.cvMat());
+        cv::merge(aaa, A.cvMat());
+    }
+
+    auto op = [&B, &stdminmax](auto& v, int const& x, int const& y, int const& c){
+        using type = std::remove_reference_t<decltype(v)>;
+        v = stdminmax(v, B.at<type>(x, y, c));
+    };
+    CallBaseTypeFunctor::run(InplacePointOperationFunctor{A, mask, op}, A.type());
+    return A;
+}
+
+template<typename CvOp, typename CustomOp>
+Image minimum_maximum_pixel(std::vector<double> const& pix, Image A, ConstImage const& mask, CvOp const& cvop, CustomOp const& customop) {
+    using std::to_string;
+    checkMask(mask, A.channels());
+
+    if (pix.size() != 1 && pix.size() != A.channels())
+        IF_THROW_EXCEPTION(invalid_argument_error("The number of pixel values must be one or match number of channels of the image. "
+                                                  "Here the number of values is " + to_string(pix.size()) + ", but the image has " + to_string(A.channels()) + "."));
+
+    // no mask --> use OpenCV
+    if (mask.empty()) {
+        cvop(A.cvMat(), pix, A.cvMat());
+        return A;
+    }
+
+    // fallback code
+    if (pix.size() < A.channels()) {
+        double p = pix.front();
+        auto op = [p, &customop] (auto& v, int /*x*/, int /*y*/, int /*c*/) {
+            using type = std::remove_reference_t<decltype(v)>;
+            v = cv::saturate_cast<type>(customop(static_cast<double>(v), p));
+        };
+        CallBaseTypeFunctor::run(InplacePointOperationFunctor{A, mask, op}, A.type());
+    }
+    else {
+        auto op = [&pix, &customop](auto& v, int, int, int const& c){
+            using type = std::remove_reference_t<decltype(v)>;
+            v = cv::saturate_cast<type>(customop(static_cast<double>(v), pix.at(c)));
+        };
+        CallBaseTypeFunctor::run(InplacePointOperationFunctor{A, mask, op}, A.type());
+    }
+
+    return A;
+}
+
+template<typename CvOp, typename CustomOp>
+Image add_subtract_pixel(std::vector<double> const& pix, Image A, ConstImage const& mask, CvOp const& cvop, CustomOp const& customop) {
+    using std::to_string;
+    checkMask(mask, A.channels());
+
+    if (pix.size() != 1 && pix.size() != A.channels())
+        IF_THROW_EXCEPTION(invalid_argument_error("The number of pixel values must be one or match number of channels of the image. "
+                                                  "Here the number of values is " + to_string(pix.size()) + ", but the image has " + to_string(A.channels()) + "."));
+
+    // try OpenCV operation first, for performance reasons, but it does not accept all types (e. g. it throws on uint8x2)
+    if (mask.empty() || mask.channels() == 1) {
+        try {
+            cvop(A.cvMat(), pix, A.cvMat(), mask.cvMat());
+            return A;
+        } catch (cv::Exception&) {
+            /* empty, fall through */
+        }
+    }
+
+    // fallback code
+    if (pix.size() < A.channels()) {
+        double p = pix.front();
+        auto op = [p, &customop] (auto& v, int /*x*/, int /*y*/, int /*c*/) {
+            using type = std::remove_reference_t<decltype(v)>;
+            v = cv::saturate_cast<type>(customop(v, p));
+        };
+        CallBaseTypeFunctor::run(InplacePointOperationFunctor{A, mask, op}, A.type());
+    }
+    else {
+        auto op = [&pix, &customop](auto& v, int, int, int const& c){
+            using type = std::remove_reference_t<decltype(v)>;
+            v = cv::saturate_cast<type>(customop(v, pix.at(c)));
+        };
+        CallBaseTypeFunctor::run(InplacePointOperationFunctor{A, mask, op}, A.type());
+    }
+
+    return A;
+}
+
+} /* anonymous namespace */
+
+Image ConstImage::minimum(Image&& B, ConstImage const& mask) const& {
+    if (mask.empty())
+        return std::move(B).minimum(*this, mask);
+    return clone().minimum(B, mask); // order must be consistent when using masks
+}
+
+Image ConstImage::minimum(ConstImage const& B, ConstImage const& mask) const& {
+    if (B.channels() < channels() || !mask.empty()) // for performance only in case of broadcasting and non-empty mask
+        return clone().minimum(B, mask);     // A has multiple channels and can be used to save the result
+    return B.clone().minimum(*this, mask);   // in case of a non-empty mask it must be A.minimum(B, mask) instead of B.minimum(A, mask)
+}
+
+Image Image::minimum(ConstImage const& B, ConstImage const& mask)&& {
+    return minimum_maximum(std::move(*this), B, mask,
+                           [] (cv::Mat const& mat1, cv::Mat const& mat2, cv::Mat& res) {cv::min(mat1, mat2, res);},
+                           [] (auto a, auto b) { return std::min(a, b); });
+}
+
+Image ConstImage::minimum(std::vector<double> const& pix, ConstImage const& mask) const& {
+    return clone().minimum(pix, mask); // call rvalue method
+}
+
+Image Image::minimum(std::vector<double> const& pix, ConstImage const& mask)&& {
+    return minimum_maximum_pixel(pix, std::move(*this), mask,
+                                 [] (cv::Mat const& mat, std::vector<double> const& pix, cv::Mat& res) {
+                                     cv::min(mat, pix, res);
+                                 },
+                                 [] (auto a, auto b) { return std::min(a, b); });
+}
+
+
+Image ConstImage::maximum(Image&& B, ConstImage const& mask) const& {
+    if (mask.empty())
+        return std::move(B).maximum(*this, mask);
+    return clone().maximum(B, mask); // order must be consistent when using masks
+}
+
+Image ConstImage::maximum(ConstImage const& B, ConstImage const& mask) const& {
+    if (B.channels() < channels() || !mask.empty()) // for performance only in case of broadcasting and non-empty mask
+        return clone().maximum(B, mask);     // A has multiple channels and can be used to save the result
+    return B.clone().maximum(*this, mask);   // in case of a non-empty mask it must be A.maximum(B, mask) instead of B.maximum(A, mask)
+}
+
+Image Image::maximum(ConstImage const& B, ConstImage const& mask)&& {
+    return minimum_maximum(std::move(*this), B, mask,
+                           [] (cv::Mat const& mat1, cv::Mat const& mat2, cv::Mat& res) {cv::max(mat1, mat2, res);},
+                           [] (auto a, auto b) { return std::max(a, b); });
+}
+
+Image ConstImage::maximum(std::vector<double> const& pix, ConstImage const& mask) const& {
+    return clone().maximum(pix, mask); // call rvalue method
+}
+
+Image Image::maximum(std::vector<double> const& pix, ConstImage const& mask)&& {
+    return minimum_maximum_pixel(pix, std::move(*this), mask,
+                                 [] (cv::Mat const& mat, std::vector<double> const& pix, cv::Mat& res) {
+                                     cv::max(mat, pix, res);
+                                 },
+                                 [] (auto a, auto b) { return std::max(a, b); });
 }
 
 
@@ -827,20 +1026,37 @@ Image ConstImage::add(ConstImage const& B, Type resultType) const {
 }
 
 Image ConstImage::add(Image&& B) const& {
-    cv::add(img, B.img, B.img);
-    return std::move(B);
+    if (empty() || B.empty())
+        IF_THROW_EXCEPTION(invalid_argument_error("Empty images are not allowed for arithmetic operations (only for bitwise logical operations)."));
+
+    return SimpleBroadcastOperation(*this, std::move(B),
+                                    [] (cv::Mat const& mat1, cv::Mat const& mat2, cv::Mat& res) {cv::add(mat1, mat2, res);});
 }
 
 Image ConstImage::add(ConstImage const& B) const& {
-    Image res(size(), type());
-    cv::add(img, B.img, res.img);
-    return res;
+    if (B.channels() > channels()) // for performance only in case of broadcasting
+        return add(B.clone());     // B has multiple channels and can be used to save the result
+    return B.add(clone());
 }
 
+Image Image::add(ConstImage const& B)&& {
+    return B.add(std::move(*this));
+}
 
-Image Image::add(Image const& B)&& {
-    cv::add(img, B.img, img);
-    return std::move(*this);
+Image ConstImage::add(std::vector<double> const& pix, ConstImage const& mask, Type resultType) const& {
+    if (resultType == Type::invalid || getBaseType(resultType) == basetype())
+        return clone().add(pix, mask); // call rvalue method
+    else // different type
+        return convertTo(resultType).add(pix, mask); // call rvalue method
+}
+
+Image Image::add(std::vector<double> const& pix, ConstImage const& mask)&& {
+    int sameResultType = toCVType(basetype());
+    return add_subtract_pixel(pix, std::move(*this), mask,
+                              [sameResultType] (cv::Mat const& mat, std::vector<double> const& pix, cv::Mat& res, cv::Mat const& mask) {
+                                  cv::add(mat, pix, res, mask, sameResultType);
+                              },
+                              [] (auto a, auto b) { return a + b; });
 }
 
 
@@ -851,20 +1067,39 @@ Image ConstImage::subtract(ConstImage const& B, Type resultType) const {
 }
 
 Image ConstImage::subtract(Image&& B) const& {
-    cv::subtract(img, B.img, B.img);
-    return std::move(B);
+    if (empty() || B.empty())
+        IF_THROW_EXCEPTION(invalid_argument_error("Empty images are not allowed for arithmetic operations (only for bitwise logical operations)."));
+
+    return SimpleBroadcastOperation(*this, std::move(B),
+                                    [](cv::Mat const& mat1, cv::Mat const& mat2, cv::Mat& res){cv::subtract(mat1, mat2, res);});
 }
 
 Image ConstImage::subtract(ConstImage const& B) const& {
-    Image res(size(), type());
-    cv::subtract(img, B.img, res.img);
-    return res;
+    return subtract(B.clone());
 }
 
+Image Image::subtract(ConstImage const& B)&& {
+    if (empty() || B.empty())
+        IF_THROW_EXCEPTION(invalid_argument_error("Empty images are not allowed for arithmetic operations (only for bitwise logical operations)."));
 
-Image Image::subtract(Image const& B)&& {
-    cv::subtract(img, B.img, img);
-    return std::move(*this);
+    return SimpleBroadcastOperation(/*mat1*/ B, /*mat2*/ std::move(*this),
+                                    [] (cv::Mat const& mat1, cv::Mat const& mat2, cv::Mat& res) {cv::subtract(mat2, mat1, res);});
+}
+
+Image ConstImage::subtract(std::vector<double> const& pix, ConstImage const& mask, Type resultType) const& {
+    if (resultType == Type::invalid || getBaseType(resultType) == basetype())
+        return clone().subtract(pix, mask); // call rvalue method
+    else // different type
+        return convertTo(resultType).subtract(pix, mask); // call rvalue method
+}
+
+Image Image::subtract(std::vector<double> const& pix, ConstImage const& mask)&& {
+    int sameResultType = toCVType(basetype());
+    return add_subtract_pixel(pix, std::move(*this), mask,
+                              [sameResultType] (cv::Mat const& mat, std::vector<double> const& pix, cv::Mat& res, cv::Mat const& mask) {
+                                  cv::subtract(mat, pix, res, mask, sameResultType);
+                              },
+                              [] (auto a, auto b) { return a - b; });
 }
 
 
@@ -875,19 +1110,55 @@ Image ConstImage::multiply(ConstImage const& B, Type resultType) const {
 }
 
 Image ConstImage::multiply(Image&& B) const& {
-    cv::multiply(img, B.img, B.img);
-    return std::move(B);
+    if (empty() || B.empty())
+        IF_THROW_EXCEPTION(invalid_argument_error("Empty images are not allowed for arithmetic operations (only for bitwise logical operations)."));
+
+    return SimpleBroadcastOperation(*this, std::move(B),
+                                    [] (cv::Mat const& mat1, cv::Mat const& mat2, cv::Mat& res) {cv::multiply(mat1, mat2, res);});
 }
 
 Image ConstImage::multiply(ConstImage const& B) const& {
-    Image res(size(), type());
-    cv::multiply(img, B.img, res.img);
-    return res;
+    if (B.channels() > channels())  // for performance only in case of broadcasting
+        return multiply(B.clone()); // B has multiple channels and can be used to save the result
+    return B.multiply(clone());
 }
 
+Image Image::multiply(ConstImage const& B)&& {
+    return B.multiply(std::move(*this));
+}
 
-Image Image::multiply(Image const& B)&& {
-    cv::multiply(img, B.img, img);
+Image ConstImage::multiply(std::vector<double> const& pix, ConstImage const& mask, Type resultType) const& {
+    if (resultType == Type::invalid || getBaseType(resultType) == basetype())
+        return clone().multiply(pix, mask); // call rvalue method
+    else // different type
+        return convertTo(resultType).multiply(pix, mask); // call rvalue method
+}
+
+Image Image::multiply(std::vector<double> const& pix, ConstImage const& mask)&& {
+    using std::to_string;
+    checkMask(mask, channels());
+
+    if (pix.size() != 1 && pix.size() != channels())
+        IF_THROW_EXCEPTION(invalid_argument_error("The number of pixel values must be one or match number of channels of the image. "
+                                                  "Here the number of values is " + to_string(pix.size()) + ", but the image has " + to_string(channels()) + "."));
+
+    // try OpenCV operation first, for performance reasons, but it does not accept all types (e. g. it throws on uint8x2)
+    if (mask.empty()) {
+        try {
+            cv::multiply(img, pix, img, /* scale */ 1, toCVType(basetype()));
+            return std::move(*this);
+        } catch (cv::Exception&) {
+            /* empty, fall through */
+        }
+    }
+
+    std::vector<double> const& pix_n = pix.size() < channels() ? std::vector<double>(channels(), pix.front()) : pix;
+    auto op = [&pix_n](auto& v, int, int, int const& c){
+        using type = std::remove_reference_t<decltype(v)>;
+        v = cv::saturate_cast<type>(v * pix_n.at(c));
+    };
+    CallBaseTypeFunctor::run(InplacePointOperationFunctor{*this, mask, op}, basetype());
+
     return std::move(*this);
 }
 
@@ -899,82 +1170,143 @@ Image ConstImage::divide(ConstImage const& B, Type resultType) const {
 }
 
 Image ConstImage::divide(Image&& B) const& {
-    cv::divide(img, B.img, B.img);
-    return std::move(B);
+    if (empty() || B.empty())
+        IF_THROW_EXCEPTION(invalid_argument_error("Empty images are not allowed for arithmetic operations (only for bitwise logical operations)."));
+
+    return SimpleBroadcastOperation(*this, std::move(B),
+                                    [] (cv::Mat const& mat1, cv::Mat const& mat2, cv::Mat& res) {cv::divide(mat1, mat2, res);});
 }
 
 Image ConstImage::divide(ConstImage const& B) const& {
-    Image res(size(), type());
-    cv::divide(img, B.img, res.img);
-    return res;
+    return divide(B.clone());
 }
 
+Image Image::divide(ConstImage const& B)&& {
+    if (empty() || B.empty())
+        IF_THROW_EXCEPTION(invalid_argument_error("Empty images are not allowed for arithmetic operations (only for bitwise logical operations)."));
 
-Image Image::divide(Image const& B)&& {
-    cv::divide(img, B.img, img);
+    return SimpleBroadcastOperation(/*mat1*/ B, /*mat2*/ std::move(*this),
+                                    [] (cv::Mat const& mat1, cv::Mat const& mat2, cv::Mat& res) {cv::divide(mat2, mat1, res);});
+}
+
+Image ConstImage::divide(std::vector<double> const& pix, ConstImage const& mask, Type resultType) const& {
+    if (resultType == Type::invalid || getBaseType(resultType) == basetype())
+        return clone().divide(pix, mask); // call rvalue method
+    else // different type
+        return convertTo(resultType).divide(pix, mask); // call rvalue method
+}
+
+Image Image::divide(std::vector<double> const& pix, ConstImage const& mask)&& {
+    using std::to_string;
+    checkMask(mask, channels());
+
+    if (pix.size() != 1 && pix.size() != channels())
+        IF_THROW_EXCEPTION(invalid_argument_error("The number of pixel values must be one or match number of channels of the image. "
+                                                  "Here the number of values is " + to_string(pix.size()) + ", but the image has " + to_string(channels()) + "."));
+
+    for (double d : pix) {
+        if (d == 0) {
+            std::string vals = "[";
+            for (unsigned int i = 0; i < pix.size(); ++i) {
+                vals += std::to_string(pix.at(i));
+                if (i < pix.size() - 1)
+                    vals += ", ";
+                else
+                    vals += "]";
+            }
+            IF_THROW_EXCEPTION(invalid_argument_error("You try to divide the image by zero. Your divisor is: " + vals));
+        }
+    }
+
+
+    // try OpenCV operation first, for performance reasons, but it does not accept all types (e. g. it throws on uint8x2)
+    if (mask.empty()) {
+        try {
+            cv::divide(img, pix, img, /* scale */ 1, toCVType(basetype()));
+            return std::move(*this);
+        } catch (cv::Exception&) {
+            /* empty, fall through */
+        }
+    }
+
+    std::vector<double> const& pix_n = pix.size() < channels() ? std::vector<double>(channels(), pix.front()) : pix;
+    auto op = [&pix_n](auto& v, int, int, int const& c){
+        using type = std::remove_reference_t<decltype(v)>;
+        v = cv::saturate_cast<type>(v / pix_n.at(c));
+    };
+    CallBaseTypeFunctor::run(InplacePointOperationFunctor{*this, mask, op}, type());
+
     return std::move(*this);
 }
 
 
 Image ConstImage::bitwise_and(Image&& B) const& {
-    cv::bitwise_and(img, B.img, B.img);
-    return std::move(B);
+    if (B.empty())
+        return clone();
+    if (empty())
+        return std::move(B);
+
+    return SimpleBroadcastOperation(*this, std::move(B),
+                                    [] (cv::Mat const& mat1, cv::Mat const& mat2, cv::Mat& res) {cv::bitwise_and(mat1, mat2, res);});
 }
 
 Image ConstImage::bitwise_and(ConstImage const& B) const& {
-    Image res(size(), type());
-    cv::bitwise_and(img, B.img, res.img);
-    return res;
+    return bitwise_and(B.clone());
 }
 
 Image Image::bitwise_and(ConstImage const& B)&& {
-    cv::bitwise_and(img, B.img, img);
-    return std::move(*this);
+    return B.bitwise_and(std::move(*this));
 }
 
 
 Image ConstImage::bitwise_or(Image&& B) const& {
-    cv::bitwise_or(img, B.img, B.img);
-    return std::move(B);
+    if (B.empty())
+        return clone();
+    if (empty())
+        return std::move(B);
+
+    return SimpleBroadcastOperation(*this, std::move(B),
+                                    [] (cv::Mat const& mat1, cv::Mat const& mat2, cv::Mat& res) {cv::bitwise_or(mat1, mat2, res);});
 }
 
 Image ConstImage::bitwise_or(ConstImage const& B) const& {
-    Image res(size(), type());
-    cv::bitwise_or(img, B.img, res.img);
-    return res;
+    return bitwise_or(B.clone());
 }
 
 Image Image::bitwise_or(ConstImage const& B)&& {
-    cv::bitwise_or(img, B.img, img);
-    return std::move(*this);
+    return B.bitwise_or(std::move(*this));
 }
 
 
 Image ConstImage::bitwise_xor(Image&& B) const& {
-    cv::bitwise_xor(img, B.img, B.img);
-    return std::move(B);
+    if (B.empty())
+        return clone();
+    if (empty())
+        return std::move(B);
+
+    return SimpleBroadcastOperation(*this, std::move(B),
+                                    [] (cv::Mat const& mat1, cv::Mat const& mat2, cv::Mat& res) {cv::bitwise_xor(mat1, mat2, res);});
 }
 
 Image ConstImage::bitwise_xor(ConstImage const& B) const& {
-    Image res(size(), type());
-    cv::bitwise_xor(img, B.img, res.img);
-    return res;
+    return bitwise_xor(B.clone());
 }
 
 Image Image::bitwise_xor(ConstImage const& B)&& {
-    cv::bitwise_xor(img, B.img, img);
-    return std::move(*this);
+    return B.bitwise_xor(std::move(*this));
 }
 
 
 Image ConstImage::bitwise_not() const& {
     Image ret;
-    cv::bitwise_not(img, ret.img);
+    if (!empty())
+        cv::bitwise_not(img, ret.img);
     return ret;
 }
 
 Image Image::bitwise_not()&& {
-    cv::bitwise_not(img, img);
+    if (!empty())
+        cv::bitwise_not(img, img);
     return std::move(*this);
 }
 
@@ -1097,89 +1429,44 @@ std::pair<std::vector<double>, std::vector<double>> ConstImage::meanStdDev(Const
 }
 
 
-struct SetWithMaskFunctor {
-    Image& i;
-    ConstImage const& mask;
-    std::vector<double> const& vals;
-    SetWithMaskFunctor(Image& i, ConstImage const& mask, std::vector<double> const& vals) : i{i}, mask{mask}, vals{vals} { }
-
-    template<Type t>
-    void operator()() {
-        static_assert(getChannels(t) == 1, "This functor only accepts base type to reduce code size.");
-        using type = typename DataType<t>::base_type;
-        unsigned int chans = i.channels();
-        unsigned int maskchans = mask.channels();
-        int w = i.width();
-        int h = i.height();
-        for (int y = 0; y < h; ++y)
-            for (int x = 0; x < w; ++x)
-                for (unsigned int c = 0; c < chans; ++c)
-                    if (mask.at<uint8_t>(x, y, maskchans == chans ? c : 0))
-                        i.at<type>(x, y, c) = vals.at(c);
-
-    }
-};
-
-struct SetWithoutMaskFunctor {
-    Image& i;
-    std::vector<double> const& vals;
-    SetWithoutMaskFunctor(Image& i, std::vector<double> const& vals) : i{i}, vals{vals} { }
-
-    template<Type t>
-    void operator()() {
-        static_assert(getChannels(t) == 1, "This functor only accepts base type to reduce code size.");
-        using type = typename DataType<t>::base_type;
-        unsigned int chans = i.channels();
-        int w = i.width();
-        int h = i.height();
-        for (int y = 0; y < h; ++y)
-            for (int x = 0; x < w; ++x)
-                for (unsigned int c = 0; c < chans; ++c)
-                    i.at<type>(x, y, c) = vals.at(c);
-
-    }
-};
-
 void Image::set(double val, ConstImage const& mask) {
     set(std::vector<double>(channels(), val), mask);
 }
 
 void Image::set(std::vector<double> const& vals, ConstImage const& mask) {
     using std::to_string;
+    checkMask(mask, channels());
     if (vals.size() != channels())
         IF_THROW_EXCEPTION(invalid_argument_error("The number of values must match number of channels as the image. "
                                                   "Here the number of values is " + to_string(vals.size()) + ", but the image has " + to_string(channels()) + "."));
+
     if (mask.type() == Type::uint8x1 && channels() <= 4) { // OpenCV supports multi-channel masks since version 3.3.1. So in future, we can simplify this.
         cv::Scalar cvVals;
         for (unsigned int i = 0; i < vals.size() && i < 4; ++i)
             cvVals[i] = vals.at(i);
         img.setTo(cvVals, mask.cvMat());
+        return;
     }
-    else if (mask.basetype() == Type::uint8 && (mask.channels() == 1 || mask.channels() == channels())) {
-        if (mask.empty())
-            CallBaseTypeFunctor::run(SetWithoutMaskFunctor{*this, vals}, type());
-        else
-            CallBaseTypeFunctor::run(SetWithMaskFunctor{*this, mask, vals}, type());
 
+    auto op = [&vals] (auto& v, int, int, int const& c) {
+        using type = std::remove_reference_t<decltype(v)>;
+        v = cv::saturate_cast<type>(vals.at(c));
+    };
+    CallBaseTypeFunctor::run(InplacePointOperationFunctor{*this, mask, op}, basetype());
 
-        // Alternative implementation based on OpenCV functions. Performance results for an older version:
-        // Requires more memory (ca. x2), could be faster for some situations and slower for other (33% faster or slower).
-//        unsigned int chans = channels();
-//        std::vector<cv::Mat> img_chans(chans);
-//        cv::split(img, img_chans);
+    // Alternative implementation based on OpenCV functions. Performance results for an older version:
+    // Requires more memory (ca. x2), could be faster for some situations and slower for other (33% faster or slower).
+//    unsigned int chans = channels();
+//    std::vector<cv::Mat> img_chans(chans);
+//    cv::split(img, img_chans);
 
-//        std::vector<cv::Mat> mask_chans(chans);
-//        cv::split(mask.img, mask_chans);
+//    std::vector<cv::Mat> mask_chans(chans);
+//    cv::split(mask.img, mask_chans);
 
-//        for (unsigned int c = 0; c < chans; ++c)
-//            img_chans[c].setTo(val[c], mask_chans[c]);
+//    for (unsigned int c = 0; c < chans; ++c)
+//        img_chans[c].setTo(val[c], mask_chans[c]);
 
-//        cv::merge(img_chans, img);
-    }
-    else
-        IF_THROW_EXCEPTION(image_type_error("The mask type must be Type::uint8 with 1 channel or the same number of channels as the image. "
-                                            "Here the mask has type " + to_string(mask.type()) + " and the image " + to_string(type()) + "."))
-                << errinfo_image_type(mask.type());
+//    cv::merge(img_chans, img);
 }
 
 static std::array<std::vector<double>,2> fixBounds(std::vector<Interval> const& channelRanges, Type t) {
@@ -1370,9 +1657,9 @@ Image ConstImage::createMultiChannelMaskFromSet(std::vector<IntervalSet> const& 
 
 
 Image ConstImage::convertTo(Type t) const {
-        Image ret{height(), width(), t};
-        img.convertTo(ret.img, toCVType(t));
-        return ret;
+    Image ret;
+    img.convertTo(ret.img, toCVType(getBaseType(t)));
+    return ret;
 }
 
 namespace {
@@ -1447,7 +1734,7 @@ struct ConvertToBUFunctor {
                 const double res = (  (sum_sn == 0 ? 0 : (swir - nir) / sum_sn)
                                     - (sum_nr == 0 ? 0 : (nir - red)  / sum_nr))
                                    * (scale / 2) + offset;
-                dst.at<dtype>(x, y) = cv::saturate_cast<dtype>(res);                                                   // casting non fitting results to integers is UB (wrong number or crash?)
+                dst.at<dtype>(x, y) = cv::saturate_cast<dtype>(res);  // casting non fitting results to integers is UB (wrong number or crash?)
             }
         }
         return dst;

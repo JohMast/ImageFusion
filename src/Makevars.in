@@ -5,7 +5,7 @@ PKG_CPPFLAGS= @PKG_CPPFLAGS@ `$(R_HOME)/bin/Rscript -e 'ROpenCVLite::opencvConfi
 PKG_LIBS= @PKG_LIBS@ `$(R_HOME)/bin/Rscript -e 'ROpenCVLite::opencvConfig("libs")'` -L/usr/include -lboost_filesystem 
 
 PKG_CXXFLAGS = -Iinclude 
-CXX_STD=CXX11
+CXX_STD=CXX17
 #Add all cpp files from the subfolder src
 CPPFILES = $(wildcard *.cpp src/*.cpp utils/helpers/*common.cpp)
 SOURCES = $(CPPFILES)

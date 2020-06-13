@@ -588,6 +588,9 @@ inline GDALDataType toGDALDepth(Type t) {
  * \ingroup typegrp
  */
 inline int toCVType(Type t) {
+    if (t == Type::invalid)
+        return -1; // we use Type::invalid often as "don't change", and OpenCV often uses -1 as "don't change"
+
     std::div_t const d = std::div(static_cast<uint8_t>(t), type_channel_diff);
     int const& base  = d.rem;
     int const  chans = d.quot + 1;
@@ -607,8 +610,9 @@ inline int toCVType(Type t) {
     case static_cast<uint8_t>(Type::float64):
         return CV_MAKETYPE(CV_64F, chans);
     }
+
     using std::to_string;
-    IF_THROW_EXCEPTION(logic_error("You forgot to check the type " + to_string(t) + " here."))
+    IF_THROW_EXCEPTION(logic_error("Check for the type " + to_string(t) + " is missing here."))
             << errinfo_image_type(t);
     return -1;
 }

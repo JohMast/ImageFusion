@@ -4,7 +4,8 @@
 #include "GeoInfo.h"
 
 #include <boost/tokenizer.hpp>
-#include <boost/filesystem.hpp>
+#include <filesystem>
+#include <boost/predef.h>
 
 #include <string>
 #include <fstream>
@@ -1492,7 +1493,7 @@ ArgStatus ArgChecker::File(const Option& option) {
     if (option.arg.empty())
         IF_THROW_EXCEPTION(invalid_argument_error("There was no filename given for option '" + option.name + "'"));
 
-    if (!boost::filesystem::exists(option.arg))
+    if (!std::filesystem::exists(option.arg))
         IF_THROW_EXCEPTION(invalid_argument_error("File '" + option.arg + "' does not exist"))
                 << boost::errinfo_file_name(option.arg);
 
@@ -2497,14 +2498,14 @@ void LineWrapper::process(imagefusion::option::IStringWriter& write, const char*
 
 
 // getTerminalColumns is here, since at least windows.h defines too many macros, which lead to name clashes
-#if defined(BOOST_OS_LINUX) && !defined(__MINGW32__)
+#if BOOST_OS_LINUX && !BOOST_PLAT_MINGW
     #include <sys/ioctl.h>
     int imagefusion::option::getTerminalColumns() {
         winsize w;
         ioctl(0, TIOCGWINSZ, &w);
         return w.ws_col < 1 ? 120 : w.ws_col;
     }
-#elif defined(BOOST_OS_WINDOWS) || defined(__MINGW32__)
+#elif BOOST_OS_WINDOWS || BOOST_PLAT_MINGW
     #include <windows.h>
     int imagefusion::option::getTerminalColumns() {
         CONSOLE_SCREEN_BUFFER_INFO csbiInfo;
