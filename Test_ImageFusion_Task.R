@@ -1,9 +1,5 @@
-#pkgbuild::compile_dll()
-#7053eb080acfbcad49d3dcad661c7eba4ac9ac93
-#roxygen2::roxygenise()
 library(rgdal)
 library(magrittr)
-#setwd("../Testground/")
 outdir <- "../TesOut"
 if(!dir.exists(outdir)){dir.create(outdir)}
 
