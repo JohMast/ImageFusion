@@ -51,7 +51,7 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames,
 {
   if(use_parallelisation){
 #ifndef WITH_OMP
-    std::cout<<"Sorry, if you want to use Parallelizer, you need to install OpenMP first."<<std::endl;
+    Rcout <<"Sorry, if you want to use Parallelizer, you need to install OpenMP first."<<std::endl;
     use_parallelisation = false;
 #endif
   }
@@ -70,7 +70,7 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames,
   std::string high_template_filename = Rcpp::as<std::vector<std::string> >(filenames_high)[0];
  //GeoInfo const& giHighPair1 {high_template_filename};
   GeoInfo giHighPair1{high_template_filename};
-  //std::cout<<"Getting High Resolution Geoinformation from File: "<<high_template_filename<<std::endl;
+  //Rcout <<"Getting High Resolution Geoinformation from File: "<<high_template_filename<<std::endl;
   
   // find the gi the first pair low image 
   Rcpp::LogicalVector is_low(input_filenames.size());
@@ -78,7 +78,7 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames,
     is_low[i] = (input_resolutions[i] == lowtag);}
   Rcpp::CharacterVector filenames_low = input_filenames[is_low];
   std::string low_template_filename = Rcpp::as<std::vector<std::string> >(filenames_low)[0];
-  //std::cout<<"Getting Low Resolution Geoinformation from File: "<<low_template_filename<<std::endl;
+  //Rcout <<"Getting Low Resolution Geoinformation from File: "<<low_template_filename<<std::endl;
   GeoInfo  giLowPair1{low_template_filename};
   
 
@@ -241,12 +241,12 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames,
     //If we have a parallelised fusor object, use that
     if(use_parallelisation){
 #ifdef WITH_OMP
-      if(verbose){std::cout <<"Predicting for date"<< pred_dates[i]<< " using both pairs from dates " << date1 << " and " << date3 << "." << std::endl;}
+      if(verbose){Rcout  <<"Predicting for date"<< pred_dates[i]<< " using both pairs from dates " << date1 << " and " << date3 << "." << std::endl;}
       pesf.predict(pred_dates[i],predMask);
       pesf.outputImage().write(pred_filename);
 #endif /* Otherwise, use the standard fusor object*/
     }else{
-      if(verbose){std::cout <<"Predicting for date"<< pred_dates[i]<< " using both pairs from dates " << date1 << " and " << date3 << "." << std::endl;}
+      if(verbose){Rcout  <<"Predicting for date"<< pred_dates[i]<< " using both pairs from dates " << date1 << " and " << date3 << "." << std::endl;}
       esf.predict(pred_dates[i],predMask);  
       esf.outputImage().write(pred_filename);
     }
@@ -308,7 +308,7 @@ void execute_starfm_job_cpp(CharacterVector input_filenames,
   
   if(use_parallelisation){
 #ifndef WITH_OMP
-    std::cout<<"Sorry, if you want to use Parallelizer, you need to install OpenMP first."<<std::endl;
+    Rcout <<"Sorry, if you want to use Parallelizer, you need to install OpenMP first."<<std::endl;
     use_parallelisation = false;
 #endif
   }
@@ -324,7 +324,7 @@ void execute_starfm_job_cpp(CharacterVector input_filenames,
   Rcpp::CharacterVector filenames_high = input_filenames[is_high];
   std::string high_template_filename = Rcpp::as<std::vector<std::string> >(filenames_high)[0];
   GeoInfo giHighPair1 {high_template_filename};
-  //std::cout<<"Getting High Resolution Geoinformation from File: "<<high_template_filename<<std::endl;
+  //Rcout <<"Getting High Resolution Geoinformation from File: "<<high_template_filename<<std::endl;
   
   // find the gi the first pair low image 
   Rcpp::LogicalVector is_low(input_filenames.size());
@@ -332,7 +332,7 @@ void execute_starfm_job_cpp(CharacterVector input_filenames,
     is_low[i] = (input_resolutions[i] == lowtag);}
   Rcpp::CharacterVector filenames_low = input_filenames[is_low];
   std::string low_template_filename = Rcpp::as<std::vector<std::string> >(filenames_low)[0];
-  //std::cout<<"Getting Low Resolution Geoinformation from File: "<<low_template_filename<<std::endl;
+  //Rcout <<"Getting Low Resolution Geoinformation from File: "<<low_template_filename<<std::endl;
   GeoInfo giLowPair1 {low_template_filename};
   
   // a copy of the high image gi, which we later use for the output (and might modify a bit)
@@ -513,11 +513,11 @@ void execute_starfm_job_cpp(CharacterVector input_filenames,
     if(use_parallelisation){
 #ifdef WITH_OMP
       //OPTIONAL START
-      if(verbose){std::cout << "Predicting for date " << pred_dates[i];}
+      if(verbose){Rcout  << "Predicting for date " << pred_dates[i];}
       if (po.isDoublePairModeConfigured())
-        if(verbose){std::cout << " using both pairs from dates " << date1 << " and " << date3 << "." << std::endl;}
+        if(verbose){Rcout  << " using both pairs from dates " << date1 << " and " << date3 << "." << std::endl;}
       else {
-        if(verbose){std::cout << " using a single pair from date " << date1 << "." << std::endl;}
+        if(verbose){Rcout  << " using a single pair from date " << date1 << "." << std::endl;}
       }
       //OPTIONAL END
       psf.predict(pred_dates[i],predMask);
@@ -525,11 +525,11 @@ void execute_starfm_job_cpp(CharacterVector input_filenames,
 #endif /* Otherwise, use the standard fusor object*/
     }else{
       //OPTIONAL START
-      if(verbose){std::cout << "Predicting for date " << pred_dates[i];}
+      if(verbose){Rcout  << "Predicting for date " << pred_dates[i];}
       if (o.isDoublePairModeConfigured())
-        if(verbose){std::cout << " using both pairs from dates " << date1 << " and " << date3 << "." << std::endl;}
+        if(verbose){Rcout  << " using both pairs from dates " << date1 << " and " << date3 << "." << std::endl;}
       else {
-        if(verbose){std::cout << " using a single pair from date " << date1 << "." << std::endl;}
+        if(verbose){Rcout  << " using a single pair from date " << date1 << "." << std::endl;}
       }
       
       //OPTIONAL END
@@ -589,7 +589,7 @@ void execute_fitfc_job_cpp(CharacterVector input_filenames,
   
   if(use_parallelisation){
 #ifndef WITH_OMP
-    std::cout<<"Sorry, if you want to use Parallelizer, you need to install OpenMP first."<<std::endl;
+    Rcout <<"Sorry, if you want to use Parallelizer, you need to install OpenMP first."<<std::endl;
     use_parallelisation = false;
 #endif
   }
@@ -607,7 +607,7 @@ void execute_fitfc_job_cpp(CharacterVector input_filenames,
   Rcpp::CharacterVector filenames_high = input_filenames[is_high];
   std::string high_template_filename = Rcpp::as<std::vector<std::string> >(filenames_high)[0];
   GeoInfo giHighPair1 {high_template_filename};
-  //std::cout<<"Getting High Resolution Geoinformation from File: "<<high_template_filename<<std::endl;
+  //Rcout <<"Getting High Resolution Geoinformation from File: "<<high_template_filename<<std::endl;
   
   // find the gi the first pair low image 
   Rcpp::LogicalVector is_low(input_filenames.size());
@@ -615,7 +615,7 @@ void execute_fitfc_job_cpp(CharacterVector input_filenames,
     is_low[i] = (input_resolutions[i] == lowtag);}
   Rcpp::CharacterVector filenames_low = input_filenames[is_low];
   std::string low_template_filename = Rcpp::as<std::vector<std::string> >(filenames_low)[0];
-  //std::cout<<"Getting Low Resolution Geoinformation from File: "<<low_template_filename<<std::endl;
+  //Rcout <<"Getting Low Resolution Geoinformation from File: "<<low_template_filename<<std::endl;
   GeoInfo  giLowPair1 {low_template_filename};
   
   // a copy of the high image gi, which we later use for the output (and might modify a bit)
@@ -777,14 +777,14 @@ void execute_fitfc_job_cpp(CharacterVector input_filenames,
     //If we have a parallelised fusor object, use that
     if(use_parallelisation){
 #ifdef WITH_OMP
-      if(verbose){std::cout << "Predicting for date " << pred_dates[i];}
-      if(verbose){std::cout << " using pair from date " << date1<< std::endl;}
+      if(verbose){Rcout  << "Predicting for date " << pred_dates[i];}
+      if(verbose){Rcout  << " using pair from date " << date1<< std::endl;}
       pffc.predict(pred_dates[i],predMask);
       pffc.outputImage().write(pred_filename);
 #endif /* Otherwise, use the standard fusor object*/
     }else{
-      if(verbose){std::cout << "Predicting for date " << pred_dates[i];}
-      if(verbose){std::cout << " using pair from date " << date1<< std::endl;}
+      if(verbose){Rcout  << "Predicting for date " << pred_dates[i];}
+      if(verbose){Rcout  << " using pair from date " << date1<< std::endl;}
       ffc.predict(pred_dates[i],predMask);  
       ffc.outputImage().write(pred_filename);
     }
@@ -843,7 +843,7 @@ void execute_spstfm_job_cpp(CharacterVector input_filenames,
 )
 {
   if(use_parallelisation){
-    std::cout<<"Sorry,Parallelizer not implemented for spstfm."<<std::endl;
+    Rcout <<"Sorry,Parallelizer not implemented for spstfm."<<std::endl;
     use_parallelisation = false;
   }
   
@@ -866,7 +866,7 @@ void execute_spstfm_job_cpp(CharacterVector input_filenames,
   Rcpp::CharacterVector filenames_high = input_filenames[is_high];
   std::string high_template_filename = Rcpp::as<std::vector<std::string> >(filenames_high)[0];
   GeoInfo  giHighPair1 {high_template_filename};
-  //std::cout<<"Getting High Resolution Geoinformation from File: "<<high_template_filename<<std::endl;
+  //Rcout <<"Getting High Resolution Geoinformation from File: "<<high_template_filename<<std::endl;
   
   // find the gi the first pair low image 
   Rcpp::LogicalVector is_low(input_filenames.size());
@@ -874,7 +874,7 @@ void execute_spstfm_job_cpp(CharacterVector input_filenames,
     is_low[i] = (input_resolutions[i] == lowtag);}
   Rcpp::CharacterVector filenames_low = input_filenames[is_low];
   std::string low_template_filename = Rcpp::as<std::vector<std::string> >(filenames_low)[0];
-  //std::cout<<"Getting Low Resolution Geoinformation from File: "<<low_template_filename<<std::endl;
+  //Rcout <<"Getting Low Resolution Geoinformation from File: "<<low_template_filename<<std::endl;
   GeoInfo giLowPair1 {low_template_filename};
   
   
@@ -958,7 +958,7 @@ void execute_spstfm_job_cpp(CharacterVector input_filenames,
       arma::mat dict;
       bool loadOK = dict.load(dictPath);
       if (loadOK) {
-        if(verbose){std::cout << "Using dictionary from " << dictPath << "." << std::endl;}
+        if(verbose){Rcout  << "Using dictionary from " << dictPath << "." << std::endl;}
         spsf.setDictionary(dict);
       }
       else
@@ -984,7 +984,7 @@ void execute_spstfm_job_cpp(CharacterVector input_filenames,
         arma::mat dict;
         bool loadOK = dict.load(infilename);
         if (loadOK) {
-          if(verbose){std::cout << "Using dictionary from " << infilename << " for channel " << c << "." << std::endl;}
+          if(verbose){Rcout  << "Using dictionary from " << infilename << " for channel " << c << "." << std::endl;}
           spsf.setDictionary(dict, c);
         }
         else {
@@ -1052,7 +1052,7 @@ void execute_spstfm_job_cpp(CharacterVector input_filenames,
   
   //Step 6: Training
   // train dictionary (if there is one from a previous time series, improve it)
-  if(verbose){std::cout << "Training with dates " << date1 << " and " << date3 << std::endl;}
+  if(verbose){Rcout  << "Training with dates " << date1 << " and " << date3 << std::endl;}
   if (reuseOpt == "improve")
     o.setDictionaryReuse(imagefusion::SpstfmOptions::ExistingDictionaryHandling::improve);
   else if (reuseOpt == "clear")
@@ -1092,7 +1092,7 @@ void execute_spstfm_job_cpp(CharacterVector input_filenames,
     if (predValidSets.hasLow)
       //Adjust the mask by also applying those ranges.
       predMask = helpers::processSetMask(std::move(predMask), mri->get(lowtag, pred_dates[i]), predValidSets.low);
-    if(verbose){std::cout <<"Predicting for date"<< pred_dates[i]<< " using both pairs from dates " << date1 << " and " << date3 << "." << std::endl;}
+    if(verbose){Rcout  <<"Predicting for date"<< pred_dates[i]<< " using both pairs from dates " << date1 << " and " << date3 << "." << std::endl;}
     
     spsf.predict(pred_dates[i],predMask);  
     spsf.outputImage().write(pred_filename);
@@ -1122,7 +1122,7 @@ void execute_spstfm_job_cpp(CharacterVector input_filenames,
     if (chans == 1) {
       success = spsf.getDictionary().save(dictPath);
       if (success)
-        if(verbose){std::cout << "Saved dictionary to " << dictPath << "." << std::endl;}
+        if(verbose){Rcout  << "Saved dictionary to " << dictPath << "." << std::endl;}
       else
         std::cerr << "Could not save dictionary to " << dictPath << "." << std::endl;
     }
@@ -1137,12 +1137,12 @@ void execute_spstfm_job_cpp(CharacterVector input_filenames,
         std::string outfilename = outpath.string();
         bool saved = spsf.getDictionary(c).save(outfilename);
         if (saved)
-          if(verbose){std::cout << "Saved dictionary for channel " << c << " to " << outfilename << "." << std::endl;}
+          if(verbose){Rcout  << "Saved dictionary for channel " << c << " to " << outfilename << "." << std::endl;}
         success &= saved;
       }
       
       if (success)
-        if(verbose){std::cout << "For loading the dictionaries later on, you can still use --load-dict=" << dictPath << "." << std::endl;}
+        if(verbose){Rcout  << "For loading the dictionaries later on, you can still use --load-dict=" << dictPath << "." << std::endl;}
     }
   }
   
