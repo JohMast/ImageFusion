@@ -2,6 +2,13 @@
 .Rhistory
 .RData
 .Ruserdata
-*.o
+# Binaries
 *.so
 *.dll
+*.a
+*.o
+*.obj
+
+autom4te.cache
+src/Makevars
+windows
