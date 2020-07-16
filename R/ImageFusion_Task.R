@@ -76,8 +76,53 @@ assert_that(spstfm_mode %in% c("none","separate","iterative"))
 assert_that(!(singlepair_mode =="mixed" & ( method == "estarfm" | method == "spstfm")))
 assert_that(!(singlepair_mode =="all" & ( method == "estarfm" | method == "spstfm")))
 
+##Check that resolutions match
+high_resolutions <- lapply(filenames_high, function(x){
+  res(stack(x))
+})
+low_resolutions <- lapply(filenames_high, function(x){
+  res(stack(x))
+})
+all_resolutions <- lapply(files, function(x){
+  res(stack(x))
+})
 
-#2DO DOES EVERYTHING ALSO WORK IF DATES DO NOT START AT 0?
+
+if(!all(sapply(high_resolutions, identical, high_resolutions[[1]]))){
+  stop("Resolutions of High images are not identical")
+}
+
+if(!all(sapply(low_resolutions, identical, low_resolutions[[1]]))){
+  stop("Resolutions of Low images are not identical")
+}
+
+if(!all(sapply(all_resolutions, identical, all_resolutions[[1]]))){
+  stop("Resolutions of High and Low images are not identical.")
+}
+##Check that extents match
+high_extents <- lapply(filenames_high, function(x){
+  extent(stack(x))
+})
+low_extents <- lapply(filenames_high, function(x){
+  extent(stack(x))
+})
+all_extents <- lapply(files, function(x){
+  extent(stack(x))
+})
+
+
+if(!all(sapply(high_extents, identical, high_extents[[1]]))){
+  stop("Extents of High images are not identical")
+}
+
+if(!all(sapply(low_extents, identical, low_extents[[1]]))){
+  stop("Extents of Low images are not identical")
+}
+
+if(!all(sapply(all_extents, identical, all_extents[[1]]))){
+  stop("Extents of High and Low images are not identical.")
+}
+
 
 ####2: Find and prepare the jobs####
 #Make one data frame for the high images and one for the low images
