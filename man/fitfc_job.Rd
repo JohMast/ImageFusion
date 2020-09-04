@@ -2,7 +2,7 @@
 % Please edit documentation in R/fitfc_job.R
 \name{fitfc_job}
 \alias{fitfc_job}
-\title{fitfc_job}
+\title{Execute a single self-contained self-contained time-series imagefusion job using FITFC}
 \usage{
 fitfc_job(
   input_filenames,
@@ -30,13 +30,13 @@ fitfc_job(
 \arguments{
 \item{input_filenames}{A string vector containing the filenames of the input images}
 
-\item{input_resolutions}{A string vector containing the resolution-tags \code{hightag} and \code{lowtag} of the input images}
+\item{input_resolutions}{A string vector containing the resolution-tags (corresponding to the arguments \code{hightag} and \code{lowtag}, which are by default "high" and "low") of the input images.}
 
 \item{input_dates}{An integer vector containing the dates of the input images.}
 
-\item{pred_dates}{A string vector containing the dates for which images should be predicted.}
+\item{pred_dates}{An integer vector  containing the dates for which images should be predicted.}
 
-\item{pred_filenames}{A string vector containing the filenames for the predicted images. Must match \code{pred_dates} in length and order.}
+\item{pred_filenames}{A string vector containing the filenames for the predicted images. Must match \code{pred_dates} in length and order. Must include an extension relating to one of the \href{https://gdal.org/drivers/raster/index.html}{drivers supported by GDAL}, such as ".tif".}
 
 \item{pred_area}{(Optional) An integer vector containing parameters in image coordinates for a bounding box which specifies the prediction area. The prediction will only be done in this area. (x_min, y_min, width, height). By default will use the entire area of the first input image.}
 

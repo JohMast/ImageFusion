@@ -13,6 +13,6 @@ License: BSD 3 | file LICENSE
 Imports: Rcpp (>= 1.0.2), RcppArmadillo, raster, rgdal, parallel, ggplot2, assertthat, foreach, dplyr, magrittr
 LinkingTo: Rcpp, RcppArmadillo, BH
 Depends: R (>= 4.0)
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 SystemRequirements: libgdal-dev libopencv-dev libproj-dev
 NeedsCompilation: yes

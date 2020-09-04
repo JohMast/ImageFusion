@@ -21,6 +21,11 @@ More algorithms will be added over time.
 The algorithms are implemented in C++ via 'GDAL', 'opencv' and 'Boost' and work from input images on disk without prior loading into R.
 }
 
+\section{Usage}{
+
+Use the \link{ImageFusion_Task} function to set up a complete time-series fusion task. Use the algorithm-specific functions \link{fitfc_job} \link{estarfm_job} \link{spstfm_job} and \link{starfm_job} to execute individual jobs.
+}
+
 \author{
 Christof Kaufmann (C++)
 

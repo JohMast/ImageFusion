@@ -11,6 +11,7 @@ imagefusion_task(
   dates_high,
   dates_low,
   dates_pred,
+  filenames_pred = NULL,
   singlepair_mode = "ignore",
   method = "starfm",
   spstfm_mode = "none",
