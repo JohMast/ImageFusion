@@ -30,7 +30,6 @@
 #' @param use_quality_weighted_regression (Optional) This enables the smooth weighting of the regression coefficient by its quality. The regression coefficient is not limited strictly by the quality, but linearly blended to 1 in case of bad quality. Default is "false".
 #' @param output_masks (Optional) Write mask images to disk? Default is "false".
 #' @param use_nodata_value (Optional) Use the nodata value as invalid range for masking? Default is "true".
-#' @param use_parallelisation (Optional) Use parallelisation when possible? Default is "false".
 #' @references Zhu, X., Chen, J., Gao, F., Chen, X., & Masek, J. G. (2010). An enhanced spatial and temporal adaptive reflectance fusion model for complex heterogeneous regions. Remote Sensing of Environment, 114(11), 2610-2623.
 #' @return Nothing. Output files are written to disk. The Geoinformation for the output images is adopted from the first input pair images.
 #' @export
@@ -43,7 +42,7 @@
 #' @family {fusion_algorithms}
 
 
-estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,pred_filenames,pred_area,winsize,date1,date3,n_cores,data_range_min, data_range_max, uncertainty_factor,number_classes,hightag,lowtag,MASKIMG_options,MASKRANGE_options,use_local_tol,use_quality_weighted_regression,output_masks,use_nodata_value,use_parallelisation,verbose=T
+estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,pred_filenames,pred_area,winsize,date1,date3,n_cores,data_range_min, data_range_max, uncertainty_factor,number_classes,hightag,lowtag,MASKIMG_options,MASKRANGE_options,use_local_tol,use_quality_weighted_regression,output_masks,use_nodata_value,verbose=T
                         ) {
 
   
@@ -116,14 +115,6 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
     use_nodata_value_c <- use_nodata_value
   }else{
     use_nodata_value_c <- TRUE
-  } 
-  
-  #### use_parallelisation ####
-  if(!missing(use_parallelisation)){
-    assert_that(class(use_parallelisation)=="logical")
-    use_parallelisation_c <- use_parallelisation
-  }else{
-    use_parallelisation_c <- FALSE
   } 
   
   #### uncertainty_factor ####
@@ -312,7 +303,7 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
       print("MASKRANGE Options: ")
       print(MASKRANGE_options_c)
     }
-    if(use_parallelisation_c){
+    if(n_cores_c>1){
       print(paste("USING PARALLELISATION WITH ", n_cores_c," CORES"))
     }
   }
@@ -332,7 +323,6 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
                                    use_quality_weighted_regression = use_quality_weighted_regression_c,
                                    output_masks = output_masks_c,
                                    use_nodata_value = use_nodata_value_c,
-                                   use_parallelisation = use_parallelisation_c,
                                    uncertainty_factor = uncertainty_factor_c,
                                    number_classes = number_classes_c,
                                    data_range_min = data_range_min_c,

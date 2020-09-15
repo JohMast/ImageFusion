@@ -36,7 +36,6 @@
 #' @param lowtag (Optional) A string which is used in \code{input_resolutions} to describe the low-resolution images.  Default is "low".
 #' @param output_masks (Optional) Write mask images to disk? Default is "false".
 #' @param use_nodata_value (Optional) Use the nodata value as invalid range for masking? Default is "true".
-#' @param use_parallelisation (Optional) Use parallelisation when possible? Note that parallelisation is currently not implemented for spstfm, and only listed here for consistency. Default is "false".
 #' @param random_sampling (Optional) Use random samples for training data instead of the samples with the most variance? Default is "false".
 #' @references Huang, B., & Song, H. (2012). Spatiotemporal reflectance fusion via sparse representation. IEEE Transactions on Geoscience and Remote Sensing, 50(10), 3707-3716.
 #' @return Nothing. Output files are written to disk. The Geoinformation for the output images is adopted from the first input pair images.
@@ -53,7 +52,7 @@
 
 spstfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,pred_filenames,pred_area,winsize,date1,date3,n_cores,dict_size,
                        n_training_samples,patch_size,patch_overlap,min_train_iter,max_train_iter,
-                       hightag,lowtag,MASKIMG_options,MASKRANGE_options,LOADDICT_options,SAVEDICT_options,REUSE_options,output_masks,use_nodata_value,use_parallelisation,random_sampling,verbose=T
+                       hightag,lowtag,MASKIMG_options,MASKRANGE_options,LOADDICT_options,SAVEDICT_options,REUSE_options,output_masks,use_nodata_value,random_sampling,verbose=T
 ) {
 
   
@@ -102,15 +101,6 @@ spstfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,
     use_nodata_value_c <- TRUE
   } 
   
-  #### use_parallelisation ####
-  if(!missing(use_parallelisation)){
-    assert_that(class(use_parallelisation)=="logical")
-    use_parallelisation_c <- use_parallelisation
-    print("Attempting to use Parallelisation for SPSTFM, which is not implemented.")
-  }else{
-    use_parallelisation_c <- FALSE
-  } 
-
   #### random_sampling ####
   if(!missing(random_sampling)){
     assert_that(class(random_sampling)=="logical")
@@ -320,8 +310,8 @@ spstfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,
       print("MASKRANGE Options: ")
       print(MASKRANGE_options_c)
     }
-    if(use_parallelisation_c){
-      print(paste("USING PARALLELISATION WITH ", n_cores_c," CORES"))
+    if(n_cores>1){
+      print(paste("PARALLELISATION WITH ", n_cores_c," CORES NOT SUPPORTED IN SPSTFM"))
     }
   }
   
@@ -343,7 +333,6 @@ spstfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,
                                         max_train_iter = max_train_iter_c,
                                        output_masks = output_masks_c,
                                        use_nodata_value = use_nodata_value_c,
-                                       use_parallelisation = use_parallelisation_c,
                                         random_sampling = random_sampling_c,
                                       verbose=verbose,
                                        hightag=hightag_c,

@@ -24,7 +24,6 @@
 ##' }
 #' @param output_masks  (Optional) Write mask images to disk? Default is "false".
 #' @param use_nodata_value (Optional) Use the nodata value as invalid range for masking? Default is "true".
-#' @param use_parallelisation (Optional) Use parallelisation when possible? Default is "false".
 #' @param resolution_factor (Optional) Scale factor with which the low resolution image has been upscaled. This will be used for cubic interpolation of the residuals. Setting it to 1 will disable it. Default: 30.
 #' @references Wang, Qunming, and Peter M. Atkinson. "Spatio-temporal fusion for daily Sentinel-2 images." Remote Sensing of Environment 204 (2018): 31-42.
 #' @return Nothing. Output files are written to disk. The Geoinformation for the output images is adopted from the first input pair images.
@@ -37,7 +36,7 @@
 #' @examples Sorry, maybe later
 #' @family {fusion_algorithms}
 #' 
-fitfc_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,pred_filenames,pred_area,winsize,date1,date3,n_cores,n_neighbors,hightag,lowtag,MASKIMG_options,MASKRANGE_options,output_masks,use_nodata_value,use_parallelisation,resolution_factor,verbose=T
+fitfc_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,pred_filenames,pred_area,winsize,date1,date3,n_cores,n_neighbors,hightag,lowtag,MASKIMG_options,MASKRANGE_options,output_masks,use_nodata_value,resolution_factor,verbose=T
 ){
   
   ##### A: Check all the Optional Inputs #####
@@ -92,14 +91,6 @@ fitfc_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,p
   }else{
     use_nodata_value_c <- TRUE
   } 
-  
-  #### use_parallelisation ####
-  if(!missing(use_parallelisation)){
-    assert_that(class(use_parallelisation)=="logical")
-    use_parallelisation_c <- use_parallelisation
-  }else{
-    use_parallelisation_c <- FALSE
-  }   
   
 
   #### resolution_factor ####
@@ -248,7 +239,7 @@ fitfc_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,p
       print("MASKRANGE Options: ")
       print(MASKRANGE_options_c)
     }
-    if(use_parallelisation_c){
+    if(n_cores>1){
       print(paste("USING PARALLELISATION WITH ", n_cores_c," CORES"))
     }
   }
@@ -272,7 +263,6 @@ fitfc_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,p
                                       n_neighbors = n_neighbors_c,
                                       output_masks = output_masks_c,
                                       use_nodata_value = use_nodata_value_c,
-                                      use_parallelisation = use_parallelisation_c,
                                       resolution_factor = resolution_factor_c,
                                       hightag = hightag_c,
                                       lowtag = lowtag_c,
@@ -299,7 +289,6 @@ fitfc_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,p
                                        n_neighbors = n_neighbors_c,
                                        output_masks = output_masks_c,
                                        use_nodata_value = use_nodata_value_c,
-                                       use_parallelisation = use_parallelisation_c,
                                        resolution_factor = resolution_factor_c,
                                        hightag = hightag_c,
                                        lowtag = lowtag_c,
@@ -322,7 +311,6 @@ fitfc_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,p
                                        n_neighbors = n_neighbors_c,
                                        output_masks = output_masks_c,
                                        use_nodata_value = use_nodata_value_c,
-                                       use_parallelisation = use_parallelisation_c,
                                        resolution_factor = resolution_factor_c,
                                        hightag = hightag_c,
                                        lowtag = lowtag_c,

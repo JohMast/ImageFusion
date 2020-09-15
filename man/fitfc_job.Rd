@@ -22,7 +22,6 @@ fitfc_job(
   MASKRANGE_options,
   output_masks,
   use_nodata_value,
-  use_parallelisation,
   resolution_factor,
   verbose = T
 )
@@ -66,8 +65,6 @@ fitfc_job(
 \item{output_masks}{(Optional) Write mask images to disk? Default is "false".}
 
 \item{use_nodata_value}{(Optional) Use the nodata value as invalid range for masking? Default is "true".}
-
-\item{use_parallelisation}{(Optional) Use parallelisation when possible? Default is "false".}
 
 \item{resolution_factor}{(Optional) Scale factor with which the low resolution image has been upscaled. This will be used for cubic interpolation of the residuals. Setting it to 1 will disable it. Default: 30.}
 }

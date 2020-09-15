@@ -83,13 +83,13 @@ imagefusion_task <- function(...,filenames_high,filenames_low,dates_high,dates_l
   
   ##Check that resolutions match
   high_resolutions <- lapply(filenames_high, function(x){
-    res(stack(x))
+    raster::res(stack(x))
   })
   low_resolutions <- lapply(filenames_low, function(x){
-    res(stack(x))
+    raster::res(stack(x))
   })
   all_resolutions <- lapply(c(filenames_high,filenames_low), function(x){
-    res(stack(x))
+    raster::res(stack(x))
   })
 
 

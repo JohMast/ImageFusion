@@ -37,7 +37,6 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames,
                              bool use_quality_weighted_regression,
                              bool output_masks,
                              bool use_nodata_value,
-                             bool use_parallelisation,
                              bool verbose,
                              double uncertainty_factor,
                              double number_classes,
@@ -49,13 +48,11 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames,
                              const std::string& MASKRANGE_options
 )
 {
-  if(use_parallelisation){
 #ifndef WITH_OMP
+  if(n_cores>1){
     Rcout <<"Sorry, if you want to use Parallelizer, you need to install OpenMP first."<<std::endl;
-    use_parallelisation = false;
-#endif
   }
-  
+#endif 
   
   using namespace imagefusion;
   //Step 1: Prepare the Input
@@ -112,28 +109,24 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames,
   o.setDataRange(data_range_min,data_range_max);
   o.setUseQualityWeightedRegression(use_quality_weighted_regression);
   
-  //create a parallelizer options object if desired
+  
+  
+  //Step 3: Create the Fusor and pass the options
+  //Create the Fusor
 #ifdef WITH_OMP
-  if(use_parallelisation){
     ParallelizerOptions<EstarfmOptions> po;
     po.setNumberOfThreads(n_cores);
     po.setAlgOptions(o);
-  }
+    Parallelizer<EstarfmFusor> esf;
+    esf.srcImages(mri);
+    esf.processOptions(po);
+#else /* WITH_OMP not defined */
+    EstarfmFusor esf;
+    esf.srcImages(mri); 
+    esf.processOptions(o);
 #endif /* WITH_OMP */
   
-  
-  //Step 3: Create the Fusor
-  //Create the Fusor
-  EstarfmFusor esf;
-  esf.srcImages(mri); 
-  esf.processOptions(o);
-#ifdef WITH_OMP
-  if(use_parallelisation){
-    Parallelizer<StarfmFusor> pesf;
-    pesf.srcImages(mri);
-    pesf.processOptions(po);
-  }
-#endif /* WITH_OMP */
+
   
   
   //Step 4: Handle the Masking for the Input Pairs
@@ -238,18 +231,9 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames,
       predMask = helpers::processSetMask(std::move(predMask), mri->get(lowtag, pred_dates[i]), predValidSets.low);
     
     //Predict using the new mask we have made
-    //If we have a parallelised fusor object, use that
-    if(use_parallelisation){
-#ifdef WITH_OMP
-      if(verbose){Rcout  <<"Predicting for date"<< pred_dates[i]<< " using both pairs from dates " << date1 << " and " << date3 << "." << std::endl;}
-      pesf.predict(pred_dates[i],predMask);
-      pesf.outputImage().write(pred_filename);
-#endif /* Otherwise, use the standard fusor object*/
-    }else{
       if(verbose){Rcout  <<"Predicting for date"<< pred_dates[i]<< " using both pairs from dates " << date1 << " and " << date3 << "." << std::endl;}
       esf.predict(pred_dates[i],predMask);  
       esf.outputImage().write(pred_filename);
-    }
     
     //Write the masks if desired
     if (output_masks){
@@ -306,12 +290,12 @@ void execute_starfm_job_cpp(CharacterVector input_filenames,
                             const std::string& MASKRANGE_options
 ){
   
-  if(use_parallelisation){
+
 #ifndef WITH_OMP
+  if(n_cores>1){
     Rcout <<"Sorry, if you want to use Parallelizer, you need to install OpenMP first."<<std::endl;
-    use_parallelisation = false;
-#endif
   }
+#endif 
   using namespace imagefusion;
   //Step 1: Prepare the Input
   //create a prediction area rectangle
@@ -379,30 +363,27 @@ void execute_starfm_job_cpp(CharacterVector input_filenames,
   }
   o.setUseTempDiffForWeights(tempDiffSetting);
   
-  
+    
+  //Step 3: Create the Fusor
+  //Create the Fusor
+
   //create a parallelizer options object if desired
 #ifdef WITH_OMP
-  if(use_parallelisation){
     ParallelizerOptions<StarfmOptions> po;
     po.setNumberOfThreads(n_cores);
     po.setAlgOptions(o);
-  }
+    Parallelizer<StarfmFusor> sf;
+    sf.srcImages(mri);
+    sf.processOptions(po);
+#else /* WITH_OMP not defined */
+    StarfmFusor sf;
+    sf.srcImages(mri); 
+    sf.processOptions(o);
 #endif /* WITH_OMP */
   
+
   
-  //Step 3: Create the Fusor
-  //Create the Fusor
-  StarfmFusor sf;
-  sf.srcImages(mri); 
-  sf.processOptions(o);
-  
-#ifdef WITH_OMP
-  if(use_parallelisation){
-    Parallelizer<StarfmFusor> psf;
-    psf.srcImages(mri);
-    psf.processOptions(po);
-  }
-#endif /* WITH_OMP */
+
   
   
   //Step 4: Handle the Masking for the Input Pairs
@@ -510,20 +491,7 @@ void execute_starfm_job_cpp(CharacterVector input_filenames,
     
     //Predict using the new mask we have made
     //If we have a parallelised fusor object, use that
-    if(use_parallelisation){
-#ifdef WITH_OMP
-      //OPTIONAL START
-      if(verbose){Rcout  << "Predicting for date " << pred_dates[i];}
-      if (po.isDoublePairModeConfigured())
-        if(verbose){Rcout  << " using both pairs from dates " << date1 << " and " << date3 << "." << std::endl;}
-      else {
-        if(verbose){Rcout  << " using a single pair from date " << date1 << "." << std::endl;}
-      }
-      //OPTIONAL END
-      psf.predict(pred_dates[i],predMask);
-      psf.outputImage().write(pred_filename);
-#endif /* Otherwise, use the standard fusor object*/
-    }else{
+
       //OPTIONAL START
       if(verbose){Rcout  << "Predicting for date " << pred_dates[i];}
       if (o.isDoublePairModeConfigured())
@@ -535,7 +503,6 @@ void execute_starfm_job_cpp(CharacterVector input_filenames,
       //OPTIONAL END
       sf.predict(pred_dates[i],predMask);  
       sf.outputImage().write(pred_filename);
-    }
     
     //Write the masks if desired
     if (output_masks){
@@ -587,12 +554,11 @@ void execute_fitfc_job_cpp(CharacterVector input_filenames,
                             const std::string& MASKRANGE_options
 ){
   
-  if(use_parallelisation){
 #ifndef WITH_OMP
+  if(n_cores>1){
     Rcout <<"Sorry, if you want to use Parallelizer, you need to install OpenMP first."<<std::endl;
-    use_parallelisation = false;
-#endif
   }
+#endif 
   using namespace imagefusion;
   //Step 1: Prepare the Input
   //create a prediction area rectangle
@@ -646,30 +612,25 @@ void execute_fitfc_job_cpp(CharacterVector input_filenames,
   o.setNumberNeighbors(n_neighbors);
   o.setResolutionFactor(resolution_factor);
 
-  
-  //create a parallelizer options object if desired
-#ifdef WITH_OMP
-  if(use_parallelisation){
-    ParallelizerOptions<FitFCOptions> po;
-    po.setNumberOfThreads(n_cores);
-    po.setAlgOptions(o);
-  }
-#endif /* WITH_OMP */
-  
+    
   
   //Step 3: Create the Fusor
+  //create a parallelizer options object if desired
+#ifdef WITH_OMP
+  ParallelizerOptions<FitFCOptions> po;
+  po.setNumberOfThreads(n_cores);
+  po.setAlgOptions(o);
+  Parallelizer<StarfmFusor> ffc;
+  ffc.srcImages(mri);
+  ffc.processOptions(po);
+#else /* WITH_OMP not defined */    
   //Create the Fusor
   FitFCFusor ffc;
   ffc.srcImages(mri); 
   ffc.processOptions(o);
-  
-#ifdef WITH_OMP
-  if(use_parallelisation){
-    Parallelizer<StarfmFusor> pffc;
-    pffc.srcImages(mri);
-    pffc.processOptions(po);
-  }
 #endif /* WITH_OMP */
+
+
   
   
   //Step 4: Handle the Masking for the Input Pairs
@@ -775,19 +736,10 @@ void execute_fitfc_job_cpp(CharacterVector input_filenames,
     
     //Predict using the new mask we have made
     //If we have a parallelised fusor object, use that
-    if(use_parallelisation){
-#ifdef WITH_OMP
-      if(verbose){Rcout  << "Predicting for date " << pred_dates[i];}
-      if(verbose){Rcout  << " using pair from date " << date1<< std::endl;}
-      pffc.predict(pred_dates[i],predMask);
-      pffc.outputImage().write(pred_filename);
-#endif /* Otherwise, use the standard fusor object*/
-    }else{
       if(verbose){Rcout  << "Predicting for date " << pred_dates[i];}
       if(verbose){Rcout  << " using pair from date " << date1<< std::endl;}
       ffc.predict(pred_dates[i],predMask);  
       ffc.outputImage().write(pred_filename);
-    }
     
     //Write the masks if desired
     if (output_masks){
@@ -842,10 +794,11 @@ void execute_spstfm_job_cpp(CharacterVector input_filenames,
                              
 )
 {
-  if(use_parallelisation){
-    Rcout <<"Sorry,Parallelizer not implemented for spstfm."<<std::endl;
-    use_parallelisation = false;
+#ifndef WITH_OMP
+  if(n_cores>1){
+    Rcout <<"Sorry, if you want to use Parallelizer, you need to install OpenMP first."<<std::endl;
   }
+#endif 
   
   
   using namespace imagefusion;

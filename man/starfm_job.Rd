@@ -25,7 +25,6 @@ starfm_job(
   MASKRANGE_options,
   output_masks,
   use_nodata_value,
-  use_parallelisation,
   use_strict_filtering,
   double_pair_mode,
   use_temp_diff_for_weights,
@@ -80,8 +79,6 @@ starfm_job(
 \item{output_masks}{(Optional) Write mask images to disk? Default is "false".}
 
 \item{use_nodata_value}{(Optional) Use the nodata value as invalid range for masking? Default is "true".}
-
-\item{use_parallelisation}{(Optional) Use parallelisation when possible? Default is "false".}
 
 \item{use_strict_filtering}{(Optional) Use strict filtering, which means that candidate pixels will be accepted only if they have less temporal *and* spectral difference than the central pixel (like in the paper). Default is "false".}
 

@@ -1,8 +1,7 @@
 VERSION = 4.0.1
 RWINLIB = ../windows/opencv-$(VERSION)
-PKG_CPPFLAGS = -I$(RWINLIB)/include/opencv4
+#PKG_CPPFLAGS = -I$(RWINLIB)/include/opencv4
 TARGET = lib$(subst gcc,,$(COMPILED_BY))$(R_ARCH)
-
 
 RWINLIB_GDAL = ../windows/gdal2-2.2.3
 RWINLIB_CURL = ../windows/libcurl-7.59.0
@@ -18,7 +17,8 @@ PKG_CPPFLAGS = -I$(RWINLIB_GDAL)/include/gdal \
                -I$(RWINLIB)/include/opencv4 \
                -Iinclude \
                -I../src/utils/helpers \
-               -DCURL_STATICLIB -DR_PACKAGE
+               -DCURL_STATICLIB -DR_PACKAGE -DWITH_OMP \
+               $(SHLIB_OPENMP_CFLAGS)
  
 PKG_LIBS = -lstdc++fs -L$(RWINLIB_GDAL)/lib$(R_ARCH) \
   -lgdal -lsqlite3 -lspatialite -lproj -lgeos_c -lgeos  \
@@ -35,7 +35,8 @@ PKG_LIBS = -lstdc++fs -L$(RWINLIB_GDAL)/lib$(R_ARCH) \
 	-ljpeg -lwebp -lpng -lz -ltiff \
 	-lcomctl32 -lgdi32 -lole32 -lsetupapi -lws2_32 -lavifil32 -lavicap32 -lwinmm -lmsvfw32 \
 	-lopengl32 -lglu32 -lcomdlg32 -lOleAut32 -luuid \
-	$(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS) 
+	$(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS) \
+	$(SHLIB_OPENMP_CFLAGS)
 
 all: clean winlibs
 

@@ -27,7 +27,6 @@ estarfm_job(
   use_quality_weighted_regression,
   output_masks,
   use_nodata_value,
-  use_parallelisation,
   verbose = T
 )
 }
@@ -82,8 +81,6 @@ estarfm_job(
 \item{output_masks}{(Optional) Write mask images to disk? Default is "false".}
 
 \item{use_nodata_value}{(Optional) Use the nodata value as invalid range for masking? Default is "true".}
-
-\item{use_parallelisation}{(Optional) Use parallelisation when possible? Default is "false".}
 }
 \value{
 Nothing. Output files are written to disk. The Geoinformation for the output images is adopted from the first input pair images.

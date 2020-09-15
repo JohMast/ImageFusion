@@ -30,7 +30,6 @@ spstfm_job(
   REUSE_options,
   output_masks,
   use_nodata_value,
-  use_parallelisation,
   random_sampling,
   verbose = T
 )
@@ -94,8 +93,6 @@ spstfm_job(
 \item{output_masks}{(Optional) Write mask images to disk? Default is "false".}
 
 \item{use_nodata_value}{(Optional) Use the nodata value as invalid range for masking? Default is "true".}
-
-\item{use_parallelisation}{(Optional) Use parallelisation when possible? Note that parallelisation is currently not implemented for spstfm, and only listed here for consistency. Default is "false".}
 
 \item{random_sampling}{(Optional) Use random samples for training data instead of the samples with the most variance? Default is "false".}
 }
