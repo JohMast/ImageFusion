@@ -5,7 +5,7 @@ Version: 1.0
 Date: 2019-10-12
 Author: c(
     person("Christof", "Kaufmann", email = "christof.kaufmann@hs-bochum.de", role = "aut"),
-    person("Johannes", "Mast", email = "johannes.mast@stud-mail.uni-wuerzburg.de", role = "cre"),
+    person("Johannes", "Mast", email = "johannes.mast@stud-mail.uni-wuerzburg.de", role = "cre",comment = c(ORCID = "0000-0001-6595-5834")),
     person("Thorsten", "Dahms", email = "thorsten.dahms@uni-wuerzburg.de"", role = "sad"),
     person("Jakob", "Schwalb-Willmann", email = "movevis@schwalb-willmann.de", role = "sad"),
     person("Dinesh", "Kumar Babu", email = "dinesh.kumar-babu@adwaiseo.eu", role = "ctb")
