@@ -13,7 +13,6 @@ OBJECTS = Image.o\
 
 PKG_CPPFLAGS = -I$(RWINLIB_GDAL)/include/gdal \
                -I$(RWINLIB_CURL)/include \
-               -I$(RWINLIB_SQLITE) \
                -I$(RWINLIB)/include/opencv4 \
                -Iinclude \
                -I../src/utils/helpers \
