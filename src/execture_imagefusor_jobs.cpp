@@ -67,7 +67,7 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames,
   std::string high_template_filename = Rcpp::as<std::vector<std::string> >(filenames_high)[0];
  //GeoInfo const& giHighPair1 {high_template_filename};
   GeoInfo giHighPair1{high_template_filename};
-  //Rcout <<"Getting High Resolution Geoinformation from File: "<<high_template_filename<<std::endl;
+  if(verbose){Rcout <<"Getting High Resolution Geoinformation from File: "<<high_template_filename<<std::endl;}
   
   // find the gi the first pair low image 
   Rcpp::LogicalVector is_low(input_filenames.size());
@@ -75,7 +75,7 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames,
     is_low[i] = (input_resolutions[i] == lowtag);}
   Rcpp::CharacterVector filenames_low = input_filenames[is_low];
   std::string low_template_filename = Rcpp::as<std::vector<std::string> >(filenames_low)[0];
-  //Rcout <<"Getting Low Resolution Geoinformation from File: "<<low_template_filename<<std::endl;
+  if(verbose){Rcout <<"Getting Low Resolution Geoinformation from File: "<<low_template_filename<<std::endl;}
   GeoInfo  giLowPair1{low_template_filename};
   
 
@@ -308,7 +308,7 @@ void execute_starfm_job_cpp(CharacterVector input_filenames,
   Rcpp::CharacterVector filenames_high = input_filenames[is_high];
   std::string high_template_filename = Rcpp::as<std::vector<std::string> >(filenames_high)[0];
   GeoInfo giHighPair1 {high_template_filename};
-  //Rcout <<"Getting High Resolution Geoinformation from File: "<<high_template_filename<<std::endl;
+  if(verbose){Rcout <<"Getting High Resolution Geoinformation from File: "<<high_template_filename<<std::endl;}
   
   // find the gi the first pair low image 
   Rcpp::LogicalVector is_low(input_filenames.size());
@@ -316,7 +316,7 @@ void execute_starfm_job_cpp(CharacterVector input_filenames,
     is_low[i] = (input_resolutions[i] == lowtag);}
   Rcpp::CharacterVector filenames_low = input_filenames[is_low];
   std::string low_template_filename = Rcpp::as<std::vector<std::string> >(filenames_low)[0];
-  //Rcout <<"Getting Low Resolution Geoinformation from File: "<<low_template_filename<<std::endl;
+  if(verbose){Rcout <<"Getting Low Resolution Geoinformation from File: "<<low_template_filename<<std::endl;}
   GeoInfo giLowPair1 {low_template_filename};
   
   // a copy of the high image gi, which we later use for the output (and might modify a bit)
@@ -573,7 +573,7 @@ void execute_fitfc_job_cpp(CharacterVector input_filenames,
   Rcpp::CharacterVector filenames_high = input_filenames[is_high];
   std::string high_template_filename = Rcpp::as<std::vector<std::string> >(filenames_high)[0];
   GeoInfo giHighPair1 {high_template_filename};
-  //Rcout <<"Getting High Resolution Geoinformation from File: "<<high_template_filename<<std::endl;
+  if(verbose){Rcout <<"Getting High Resolution Geoinformation from File: "<<high_template_filename<<std::endl;}
   
   // find the gi the first pair low image 
   Rcpp::LogicalVector is_low(input_filenames.size());
@@ -581,7 +581,7 @@ void execute_fitfc_job_cpp(CharacterVector input_filenames,
     is_low[i] = (input_resolutions[i] == lowtag);}
   Rcpp::CharacterVector filenames_low = input_filenames[is_low];
   std::string low_template_filename = Rcpp::as<std::vector<std::string> >(filenames_low)[0];
-  //Rcout <<"Getting Low Resolution Geoinformation from File: "<<low_template_filename<<std::endl;
+  if(verbose){Rcout <<"Getting Low Resolution Geoinformation from File: "<<low_template_filename<<std::endl;}
   GeoInfo  giLowPair1 {low_template_filename};
   
   // a copy of the high image gi, which we later use for the output (and might modify a bit)
@@ -819,7 +819,7 @@ void execute_spstfm_job_cpp(CharacterVector input_filenames,
   Rcpp::CharacterVector filenames_high = input_filenames[is_high];
   std::string high_template_filename = Rcpp::as<std::vector<std::string> >(filenames_high)[0];
   GeoInfo  giHighPair1 {high_template_filename};
-  //Rcout <<"Getting High Resolution Geoinformation from File: "<<high_template_filename<<std::endl;
+  if(verbose){Rcout <<"Getting High Resolution Geoinformation from File: "<<high_template_filename<<std::endl;}
   
   // find the gi the first pair low image 
   Rcpp::LogicalVector is_low(input_filenames.size());
@@ -827,7 +827,7 @@ void execute_spstfm_job_cpp(CharacterVector input_filenames,
     is_low[i] = (input_resolutions[i] == lowtag);}
   Rcpp::CharacterVector filenames_low = input_filenames[is_low];
   std::string low_template_filename = Rcpp::as<std::vector<std::string> >(filenames_low)[0];
-  //Rcout <<"Getting Low Resolution Geoinformation from File: "<<low_template_filename<<std::endl;
+  if(verbose){Rcout <<"Getting Low Resolution Geoinformation from File: "<<low_template_filename<<std::endl;}
   GeoInfo giLowPair1 {low_template_filename};
   
   

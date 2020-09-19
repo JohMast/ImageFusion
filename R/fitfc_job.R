@@ -25,6 +25,7 @@
 #' @param output_masks  (Optional) Write mask images to disk? Default is "false".
 #' @param use_nodata_value (Optional) Use the nodata value as invalid range for masking? Default is "true".
 #' @param resolution_factor (Optional) Scale factor with which the low resolution image has been upscaled. This will be used for cubic interpolation of the residuals. Setting it to 1 will disable it. Default: 30.
+#' @param verbose (Optional) Print progress updates to console? Default is "true".
 #' @references Wang, Qunming, and Peter M. Atkinson. "Spatio-temporal fusion for daily Sentinel-2 images." Remote Sensing of Environment 204 (2018): 31-42.
 #' @return Nothing. Output files are written to disk. The Geoinformation for the output images is adopted from the first input pair images.
 #' @export
@@ -33,7 +34,7 @@
 #' @author Christof Kaufmann (C++)
 #' @author Johannes Mast (R)
 #' @details Executes the FITFC Algorithm. If more than one pair is given, will perform prediction for the pred dates twice, once for each of the input pairs.
-#' @examples Sorry, maybe later
+#' @examples #
 #' @family {fusion_algorithms}
 #' 
 fitfc_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,pred_filenames,pred_area,winsize,date1,date3,n_cores,n_neighbors,hightag,lowtag,MASKIMG_options,MASKRANGE_options,output_masks,use_nodata_value,resolution_factor,verbose=T

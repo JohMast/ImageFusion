@@ -87,6 +87,8 @@ starfm_job(
 \item{use_temp_diff_for_weights}{(Optional) Use temporal difference in the candidates weight (like in the paper)? Default is to use temporal weighting in double pair mode, and to not use it in single pair mode.}
 
 \item{do_copy_on_zero_diff}{(Optional) Predict for all pixels, even for pixels with zero temporal or spectral difference (behaviour of the reference implementation). Default is "false".}
+
+\item{verbose}{(Optional) Print progress updates to console? Default is "true".}
 }
 \value{
 Nothing. Output files are written to disk. The Geoinformation for the output images is adopted from the first input pair images.
@@ -105,7 +107,7 @@ Executes the STARFM algorithm to create a number of synthetic high-resolution im
 }
 }
 \examples{
-Sorry, maybe later
+#
 }
 \references{
 Gao, Feng, et al. "On the blending of the Landsat and MODIS surface reflectance: Predicting daily Landsat surface reflectance." IEEE Transactions on Geoscience and Remote sensing 44.8 (2006): 2207-2218.

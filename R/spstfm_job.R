@@ -37,6 +37,7 @@
 #' @param output_masks (Optional) Write mask images to disk? Default is "false".
 #' @param use_nodata_value (Optional) Use the nodata value as invalid range for masking? Default is "true".
 #' @param random_sampling (Optional) Use random samples for training data instead of the samples with the most variance? Default is "false".
+#' @param verbose (Optional) Print progress updates to console? Default is "true".
 #' @references Huang, B., & Song, H. (2012). Spatiotemporal reflectance fusion via sparse representation. IEEE Transactions on Geoscience and Remote Sensing, 50(10), 3707-3716.
 #' @return Nothing. Output files are written to disk. The Geoinformation for the output images is adopted from the first input pair images.
 #' @export
@@ -46,7 +47,7 @@
 #' @author Christof Kaufmann (C++)
 #' @author Johannes Mast (R)
 #' @details Executes the SPSTFM algorithm to create a number of synthetic high-resolution images from two pairs of matching high- and low-resolution images.  Assumes that the input images already have matching size. For a detailed explanation how SPSTFM works there is the original paper and the thesis, which yielded this implementation. The latter explains also all available options and shows some test results. However, the default options should give good results.
-#' @examples Sorry, maybe later
+#' @examples #
 #' @family {fusion_algorithms}
 
 

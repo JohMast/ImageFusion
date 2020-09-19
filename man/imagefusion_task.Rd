@@ -74,7 +74,7 @@ The main function of the ImageFusion Package, intended for the fusion of images 
 The function firstly seeks among the inputs for pair dates, which are dates for which have both a high resolution image and a low resolution image are available. It then splits the task into a number of self-contained \emph{jobs} which handle the fusion between these pair dates using the paired images as anchors. These jobs can also be called directly via their respective functions, see \code{method}.
 }
 \examples{
-Sorry, maybe later
+#
 }
 \seealso{
 

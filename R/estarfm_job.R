@@ -30,6 +30,7 @@
 #' @param use_quality_weighted_regression (Optional) This enables the smooth weighting of the regression coefficient by its quality. The regression coefficient is not limited strictly by the quality, but linearly blended to 1 in case of bad quality. Default is "false".
 #' @param output_masks (Optional) Write mask images to disk? Default is "false".
 #' @param use_nodata_value (Optional) Use the nodata value as invalid range for masking? Default is "true".
+#' @param verbose (Optional) Print progress updates to console? Default is "true".
 #' @references Zhu, X., Chen, J., Gao, F., Chen, X., & Masek, J. G. (2010). An enhanced spatial and temporal adaptive reflectance fusion model for complex heterogeneous regions. Remote Sensing of Environment, 114(11), 2610-2623.
 #' @return Nothing. Output files are written to disk. The Geoinformation for the output images is adopted from the first input pair images.
 #' @export
@@ -38,7 +39,7 @@
 #' @author Christof Kaufmann (C++)
 #' @author Johannes Mast (R)
 #' @details Executes the ESTARFM algorithm to create a number of synthetic high-resolution images from two pairs of matching high- and low-resolution images.  Assumes that the input images already have matching size. See the original paper for details (Note: There is a difference to the algorithm as described in the paper though. The regression for R is now done with all candidates of one window. This complies to the reference implementation, but not to the paper, since there the regression is done only for the candidates that belong to one single coarse pixel. However, the coarse grid is not known at prediction and not necessarily trivial to find out (e. g. in case of higher order interpolation). 
-#' @examples Sorry, maybe later
+#' @examples #
 #' @family {fusion_algorithms}
 
 

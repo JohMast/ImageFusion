@@ -32,6 +32,7 @@
 #' @param double_pair_mode (Optional) Use two dates \code{date1} and \code{date3} for prediction, instead of just \code{date1} for all predictions? Default is "true" if *all* the pred dates are in between input pairs, and "false" otherwise. Note: It may be desirable to predict in double-pair mode where possible, as in the following example: \code{[(7) 10 12 (13) 14] } , where we may wish to predict 10 and 12 in double pair mode, but can only predict 14 in single-pair mode. Do achieve this it is necessary to split the task into different jobs.
 #' @param use_temp_diff_for_weights (Optional) Use temporal difference in the candidates weight (like in the paper)? Default is to use temporal weighting in double pair mode, and to not use it in single pair mode.
 #' @param do_copy_on_zero_diff (Optional) Predict for all pixels, even for pixels with zero temporal or spectral difference (behaviour of the reference implementation). Default is "false".
+#' @param verbose (Optional) Print progress updates to console? Default is "true".
 #' @references Gao, Feng, et al. "On the blending of the Landsat and MODIS surface reflectance: Predicting daily Landsat surface reflectance." IEEE Transactions on Geoscience and Remote sensing 44.8 (2006): 2207-2218.
 #' @return Nothing. Output files are written to disk. The Geoinformation for the output images is adopted from the first input pair images.
 #' @export
@@ -47,12 +48,10 @@
 ##'  \item{The paper states that a good candidate should satisfy (15) and (16). This can be set with use_strict_filtering, which is by default used. However the other behaviour, that a candidate should fulfill (15) or (16), as in the reference implementation, can be also be selected with that option.}
 ##'  \item{The paper uses max in (15) and (16), which would choose the largest spectral and temporal difference from all input pairs (only one or two are possible). Since this should filter out bad candidates, we believe this is a mistake and should be min instead of max, like it is done in the reference implementation. So this implementation uses min here.}
 ##' }
-#' @examples Sorry, maybe later
+#' @examples #
 #' @family {fusion_algorithms}
 #' 
 starfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,pred_filenames,pred_area,winsize,date1,date3,n_cores, logscale_factor,spectral_uncertainty, temporal_uncertainty, number_classes,hightag,lowtag,MASKIMG_options,MASKRANGE_options,output_masks,use_nodata_value,use_strict_filtering,double_pair_mode,use_temp_diff_for_weights,do_copy_on_zero_diff,verbose=T) {
-  library(assertthat)
-  library(raster)
   
   ##### A: Check all the Optional Inputs #####
   #These are variables which are optional 

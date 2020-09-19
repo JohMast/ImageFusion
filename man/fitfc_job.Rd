@@ -67,6 +67,8 @@ fitfc_job(
 \item{use_nodata_value}{(Optional) Use the nodata value as invalid range for masking? Default is "true".}
 
 \item{resolution_factor}{(Optional) Scale factor with which the low resolution image has been upscaled. This will be used for cubic interpolation of the residuals. Setting it to 1 will disable it. Default: 30.}
+
+\item{verbose}{(Optional) Print progress updates to console? Default is "true".}
 }
 \value{
 Nothing. Output files are written to disk. The Geoinformation for the output images is adopted from the first input pair images.
@@ -78,7 +80,7 @@ A wrapper function for \code{execute_fitfc_job_cpp}. Intended to execute a singl
 Executes the FITFC Algorithm. If more than one pair is given, will perform prediction for the pred dates twice, once for each of the input pairs.
 }
 \examples{
-Sorry, maybe later
+#
 }
 \references{
 Wang, Qunming, and Peter M. Atkinson. "Spatio-temporal fusion for daily Sentinel-2 images." Remote Sensing of Environment 204 (2018): 31-42.
