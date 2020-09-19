@@ -3,17 +3,18 @@ Type: Package
 Title: Temporal Fusion of Raster Images
 Version: 1.0
 Date: 2019-10-12
-Author: c(
+Authors@R: c(
     person("Christof", "Kaufmann", email = "christof.kaufmann@hs-bochum.de", role = "aut",comment=c(ORCID = "0000-0002-0191-3341")),
-    person("Johannes", "Mast", email = "johannes.mast@stud-mail.uni-wuerzburg.de", role = "cre",comment = c(ORCID = "0000-0001-6595-5834")),
-    person("Thorsten", "Dahms", email = "thorsten.dahms@uni-wuerzburg.de"", role = "sad"),
+    person("Johannes", "Mast", email = "johannes.mast@stud-mail.uni-wuerzburg.de", role = c("aut", "cre"),comment = c(ORCID = "0000-0001-6595-5834")),
+    person("Thorsten", "Dahms", email = "thorsten.dahms@uni-wuerzburg.de", role = "sad"),
     person("Jakob", "Schwalb-Willmann", email = "movevis@schwalb-willmann.de", role = "sad",comment = c(ORCID = "0000-0003-2665-1509")),
-    person("Dinesh", "Kumar Babu", email = "dinesh.kumar-babu@adwaiseo.eu", role = "ctb")
+    person("Dinesh", "Kumar Babu", email = "dinesh.kumar-babu@adwaiseo.eu", role = "ctb"))
 Description: Temporal fusion of raster image time-Series. Provides implementation of the FITFC, ESTARFM, SPSTFM and STARFM algorithms in c++.
 License: BSD 3 | file LICENSE
 Imports: Rcpp (>= 1.0.2), RcppArmadillo, raster, rgdal, parallel, ggplot2, assertthat, foreach, dplyr, magrittr
 LinkingTo: Rcpp, RcppArmadillo, BH
 Depends: R (>= 4.0)
+Encoding: UTF-8
 RoxygenNote: 7.1.1
 SystemRequirements: libgdal-dev libopencv-dev libproj-dev
 NeedsCompilation: yes
