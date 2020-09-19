@@ -1,7 +1,7 @@
 Package: ImageFusion
 Type: Package
 Title: Temporal Fusion of Raster Images
-Version: 1.0
+Version: 0.1
 Date: 2019-10-12
 Authors@R: c(
     person("Christof", "Kaufmann", email = "christof.kaufmann@hs-bochum.de", role = "aut",comment=c(ORCID = "0000-0002-0191-3341")),
