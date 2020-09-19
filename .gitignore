@@ -9,6 +9,8 @@
 *.o
 *.obj
 
+config.status
+config.log
 autom4te.cache
 src/Makevars
 windows
