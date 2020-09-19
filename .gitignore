@@ -11,7 +11,9 @@
 
 config.status
 config.log
+prof_conf_test3.c
 autom4te.cache
+
 src/Makevars
 windows
 inst
