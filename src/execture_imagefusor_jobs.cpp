@@ -16,12 +16,7 @@ using namespace Rcpp;
 
 using  std::vector;
 
-//TO DO:
-//ADD VERBOSE OPTION
-
-
 //===========================================estarfm=================================
-//' @export
 // [[Rcpp::export]]
 void execute_estarfm_job_cpp(CharacterVector input_filenames, 
                              CharacterVector input_resolutions, 
@@ -260,7 +255,6 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames,
 
 //===========================================starfm=================================
 
-//' @export
 // [[Rcpp::export]]
 void execute_starfm_job_cpp(CharacterVector input_filenames, 
                             CharacterVector input_resolutions, 
@@ -531,7 +525,6 @@ void execute_starfm_job_cpp(CharacterVector input_filenames,
 
 //===========================================fitfc=================================
 
-//' @export
 // [[Rcpp::export]]
 void execute_fitfc_job_cpp(CharacterVector input_filenames, 
                             CharacterVector input_resolutions, 
@@ -762,7 +755,6 @@ void execute_fitfc_job_cpp(CharacterVector input_filenames,
 
 
 //===========================================spstfm=================================
-//' @export
 // [[Rcpp::export]]
 void execute_spstfm_job_cpp(CharacterVector input_filenames, 
                              CharacterVector input_resolutions, 
