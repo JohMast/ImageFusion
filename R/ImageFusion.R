@@ -1,6 +1,6 @@
 #' Imagefusion: A package for fusion of images
 #'
-#' 
+#' @description Implementation of Time-Series fusion.
 #' @section Outline:
 #' \code{ImageFusion} provides implementations of the following time-series fusion algorithms:
 #' \itemize{
@@ -13,7 +13,7 @@
 #' @section Implementation:
 #' The algorithms are implemented in C++ via 'GDAL', 'opencv' and 'Boost' and work from input images on disk without prior loading into R.
 #' @section Usage:
-#' Use the \link{ImageFusion_Task} function to set up a complete time-series fusion task. Use the algorithm-specific functions \link{fitfc_job} \link{estarfm_job} \link{spstfm_job} and \link{starfm_job} to execute individual jobs.
+#' Use the \link{imagefusion_task} function to set up a complete time-series fusion task. Use the algorithm-specific functions \link{fitfc_job} \link{estarfm_job} \link{spstfm_job} and \link{starfm_job} to execute individual jobs.
 #'
 #' @docType package
 #' @name ImageFusion

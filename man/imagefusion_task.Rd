@@ -78,9 +78,6 @@ The function firstly seeks among the inputs for pair dates, which are dates for 
 \examples{
 #
 }
-\seealso{
-
-}
 \author{
 Christof Kaufmann (C++), Johannes Mast (R)
 }
