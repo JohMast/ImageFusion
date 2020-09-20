@@ -1,7 +1,7 @@
 #Add the gdal opencv headers and the imagefusion headers from the /include directory
-PKG_CPPFLAGS= @PKG_CPPFLAGS@ -I../src/utils/helpers  -I/usr/include/opencv4/opencv -I/usr/include/opencv4 -D_DATA_PREFIX=/usr  -DWITH_OMP  $(SHLIB_OPENMP_CFLAGS)
+PKG_CPPFLAGS= @PKG_CPPFLAGS@ -I../src/utils/helpers  -I/usr/include/opencv4/opencv -I/usr/include/opencv4 -D_DATA_PREFIX=/usr  -DWITH_OMP  $(SHLIB_OPENMP_CPPFLAGS)
 #Also include boost_filesystem manually 
-PKG_LIBS= @PKG_LIBS@ -lopencv_imgproc -lopencv_core -L/usr/include  $(SHLIB_OPENMP_CFLAGS) 
+PKG_LIBS= @PKG_LIBS@ -lopencv_imgproc -lopencv_core -L/usr/include  $(SHLIB_OPENMP_CPPFLAGS) 
 
 PKG_CXXFLAGS = -Iinclude 
 CXX_STD=CXX17
