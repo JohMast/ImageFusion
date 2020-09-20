@@ -34,6 +34,8 @@ imagefusion_task(
 
 \item{dates_pred}{An integer vector dates for which an output should be generated.}
 
+\item{filenames_pred}{(Optional) A character vector of the filenames for the predicted images. If unspecified, filenames will be created from \code{out_dir} and \code{pred_dates}.}
+
 \item{singlepair_mode}{(Optional) How should singlepair predictions (those \code{dates_pred}, which do not lie between two dates with a high&low pair) be handled? \itemize{
 \item{ignore: No prediction will be performed for those dates. This is the default.}
 \item{mixed: Use doublepair mode where possible, and singlepair mode otherwise (only supported for \code{method} fitfc and starfm)}

@@ -47,6 +47,8 @@ spstfm_job(
 
 \item{pred_area}{(Optional) An integer vector containing parameters in image coordinates for a bounding box which specifies the prediction area. The prediction will only be done in this area. (x_min, y_min, width, height). By default will use the entire area of the first input image.}
 
+\item{winsize}{(Optional) Window size of the rectangle around the current pixel. Default is 51.}
+
 \item{date1}{(Optional) Set the date of the first input image pair. By default, will use the pair with the lowest date value.}
 
 \item{date3}{(Optional) Set the date of the second input image pair. By default, will use the pair with the highest date value.}

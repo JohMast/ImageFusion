@@ -5,6 +5,7 @@
 #' @param dates_high An integer vector of the dates associated with the \code{filenames_high}. Must match \code{filenames_high} in length and order.
 #' @param dates_low An integer vector of the dates associated with the \code{filenames_low}. Must match \code{filenames_low} in length and order.
 #' @param dates_pred An integer vector dates for which an output should be generated.
+#' @param filenames_pred (Optional) A character vector of the filenames for the predicted images. If unspecified, filenames will be created from \code{out_dir} and \code{pred_dates}. 
 #' @param singlepair_mode  (Optional) How should singlepair predictions (those \code{dates_pred}, which do not lie between two dates with a high&low pair) be handled? \itemize{
 #' \item{ignore: No prediction will be performed for those dates. This is the default.}
 #' \item{mixed: Use doublepair mode where possible, and singlepair mode otherwise (only supported for \code{method} fitfc and starfm)}

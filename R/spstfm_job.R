@@ -7,6 +7,7 @@
 #' @param pred_filenames A string vector containing the filenames for the predicted images. Must match \code{pred_dates} in length and order. Must include an extension relating to one of the \href{https://gdal.org/drivers/raster/index.html}{drivers supported by GDAL}, such as ".tif".
 #' @param pred_dates An integer vector  containing the dates for which images should be predicted.
 #' @param pred_area (Optional) An integer vector containing parameters in image coordinates for a bounding box which specifies the prediction area. The prediction will only be done in this area. (x_min, y_min, width, height). By default will use the entire area of the first input image.
+#' @param winsize (Optional) Window size of the rectangle around the current pixel. Default is 51.
 #' @param date1 (Optional) Set the date of the first input image pair. By default, will use the pair with the lowest date value.
 #' @param date3 (Optional) Set the date of the second input image pair. By default, will use the pair with the highest date value.
 #' @param n_cores (Optional) Set the number of cores to use when using parallelisation. Note that parallelisation is currently not implemented for spstfm, and only listed here for consistency. Default is 1.

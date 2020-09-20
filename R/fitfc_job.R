@@ -9,6 +9,7 @@
 #' @param pred_area (Optional) An integer vector containing parameters in image coordinates for a bounding box which specifies the prediction area. The prediction will only be done in this area. (x_min, y_min, width, height). By default will use the entire area of the first input image.
 #' @param winsize (Optional) Window size of the rectangle around the current pixel. Default is 51.
 #' @param date1 (Optional) Set the date of the first input image pair. By default, will use the pair with the lowest date value.
+#' @param date3 (Optional) For pseudo-doublepair mode: Set the date of the second input image pair. By default, will use the pair with the highest date value.
 #' @param n_cores (Optional) Set the number of cores to use when using parallelisation. Default is 1.
 #' @param n_neighbors (Optional) The number of near pixels (including the center) to use in the filtering step (spatial filtering and residual compensation). Default is 10.
 #' @param hightag (Optional) A string which is used in \code{input_resolutions} to describe the high-resolution images. Default is "high".
@@ -26,6 +27,7 @@
 #' @param use_nodata_value (Optional) Use the nodata value as invalid range for masking? Default is "true".
 #' @param resolution_factor (Optional) Scale factor with which the low resolution image has been upscaled. This will be used for cubic interpolation of the residuals. Setting it to 1 will disable it. Default: 30.
 #' @param verbose (Optional) Print progress updates to console? Default is "true".
+#'
 #' @references Wang, Qunming, and Peter M. Atkinson. "Spatio-temporal fusion for daily Sentinel-2 images." Remote Sensing of Environment 204 (2018): 31-42.
 #' @return Nothing. Output files are written to disk. The Geoinformation for the output images is adopted from the first input pair images.
 #' @export
@@ -230,6 +232,10 @@ fitfc_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,p
     print(pred_dates_c)
     print("Predicting from Pair on Date:")
     print(paste(date1_c))
+    if(date1_c!=date3_c){
+      print("Additionally predicting from Pair on Date:")
+      print(paste(date3_c))
+    }
     print("Prediction Area: ")
     print(pred_area_c)
     if (!grepl("^\\s*$", MASKIMG_options_c)){
@@ -299,7 +305,7 @@ fitfc_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,p
     )
     #modify output names a bit to make them unique for each input pair
     pred_filenames_c3 <- paste(paste(tools::file_path_sans_ext(pred_filenames_c),"from_pair",date3_c,sep="_"),tools::file_ext(pred_filenames_c),sep=".")
-    #execture job fromdate 3
+    #execture job from date 3
     ImageFusion::execute_fitfc_job_cpp(input_filenames = input_filenames_c,
                                        input_resolutions = input_resolutions_c,
                                        input_dates = input_dates_c,
