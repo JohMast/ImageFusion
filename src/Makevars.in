@@ -13,7 +13,7 @@ CXX_STD=CXX17
 
 #########################
 # Include all C++ files in src/ and its subdirectories: src/A and src/B 
-SOURCES=execture_imagefusor_jobs.cpp RcppExports.cpp utils/helpers/*common.cpp @SUBDIR_SOURCES@
+SOURCES=execture_imagefusor_jobs.cpp RcppExports.cpp utils/helpers/utils_common.cpp @SUBDIR_SOURCES@
 
 # Obtain the object files
 OBJECTS=$(SOURCES:.cpp=.o) 
