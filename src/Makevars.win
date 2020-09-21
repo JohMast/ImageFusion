@@ -1,35 +1,39 @@
 VERSION = 4.0.1
-RWINLIB_OPENCV = ../windows/opencv-$(VERSION)
+RWINLIB = ../windows/opencv-$(VERSION)
+#PKG_CPPFLAGS = -I$(RWINLIB)/include/opencv4
 TARGET = lib$(subst gcc,,$(COMPILED_BY))$(R_ARCH)
 
 RWINLIB_GDAL = ../windows/gdal2-2.2.3
+RWINLIB_CURL = ../windows/libcurl-7.59.0
+#RWINLIB_SQLITE = ../windows/sqlite-amalgamation-3260000
 #RWINLIB_OPENCV = ../windows/opencv-4.0.1/include/opencv4/opencv2
 RWINLIB_BOOST= ../windows/boost_1_55_0/boost
 OBJECTS = Image.o\
 			RcppExports.o
 
 PKG_CPPFLAGS = -I$(RWINLIB_GDAL)/include/gdal \
-               -I$(RWINLIB_OPENCV)/include/opencv4 \
+               -I$(RWINLIB_CURL)/include \
+               -I$(RWINLIB)/include/opencv4 \
                -Iinclude \
                -I../src/utils/helpers \
-               -DR_PACKAGE -DWITH_OMP \
-               $(SHLIB_OPENMP_CPPFLAGS)
+               -DCURL_STATICLIB -DR_PACKAGE -DWITH_OMP \
+               $(SHLIB_OPENMP_CFLAGS)
  
 PKG_LIBS = -lstdc++fs -L$(RWINLIB_GDAL)/lib$(R_ARCH) \
   -lgdal -lsqlite3 -lspatialite -lproj -lgeos_c -lgeos  \
-	-ljson-c -lnetcdf -lmariadbclient -lpq -lintl -lwebp -lssh2 -lssl -lcrypto \
+	-ljson-c -lnetcdf -lmariadbclient -lpq -lintl -lwebp -lcurl -lssh2 -lssl -lcrypto \
 	-lkea -lhdf5_cpp -lhdf5_hl -lhdf5 -lexpat -lfreexl -lcfitsio \
 	-lmfhdf -ldf -lxdr \
 	-lopenjp2 -ljasper -lpng16 -ljpeg -ltiff -lgeotiff -lgif -lxml2 -llzma -lszip -lz \
 	-lodbc32 -lodbccp32 -liconv -lpsapi -lws2_32 -lcrypt32 -lwldap32 -lsecur32 -lgdi32 \
-	-L$(RWINLIB_OPENCV)/$(TARGET) \
-	-L$(RWINLIB_OPENCV)/lib$(R_ARCH) \
+	-L$(RWINLIB)/$(TARGET) \
+	-L$(RWINLIB)/lib$(R_ARCH) \
 	-lopencv_imgproc -lopencv_core -ltbb \
 	-ljpeg -lwebp -lpng -lz -ltiff \
 	-lcomctl32 -lgdi32 -lole32 -lsetupapi -lws2_32 -lavifil32 -lavicap32 -lwinmm -lmsvfw32 \
 	-lopengl32 -lglu32 -lcomdlg32 -lOleAut32 -luuid \
 	$(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS) \
-	$(SHLIB_OPENMP_CPPFLAGS)
+	$(SHLIB_OPENMP_CFLAGS)
 
 all: clean winlibs
 
@@ -41,7 +45,7 @@ winlibs:
 	cp -r $(RWINLIB_GDAL)/share/gdal ../inst/
 	cp -r $(RWINLIB_GDAL)/share/proj ../inst/
 	"${R_HOME}/bin${R_ARCH_BIN}/Rscript.exe" "../tools/winlibs.R" ${VERSION}
-	cp -r $(RWINLIB_OPENCV)/share ../inst/
+	cp -r $(RWINLIB)/share ../inst/
 
 
 
