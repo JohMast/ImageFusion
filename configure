@@ -586,6 +586,7 @@ PACKAGE_URL=''
 
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
+SUBDIR_SOURCES
 PKG_LIBS
 PKG_CPPFLAGS
 GDAL_DATADIR
@@ -2492,6 +2493,16 @@ PKG_CPPFLAGS="${PKG_CPPFLAGS} -DACCEPT_USE_OF_DEPRECATED_PROJ_API_H"
 
 fi
 PKG_CPPFLAGS="${PKG_CPPFLAGS} -DR_PACKAGE"
+
+
+
+
+### Determine subdirectory source files
+
+# Dynamically generate list of sources from subdirectories via shell
+SUBDIR_SOURCES="$(cd src/ && ls src/*.cpp | tr '\n' ' ')"
+
+# Supply it as a variable
 
 
 

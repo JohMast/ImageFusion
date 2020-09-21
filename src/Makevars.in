@@ -6,8 +6,21 @@ PKG_LIBS= @PKG_LIBS@ -lopencv_imgproc -lopencv_core -L/usr/include  $(SHLIB_OPEN
 PKG_CXXFLAGS = -Iinclude 
 CXX_STD=CXX17
 #Add all cpp files from the subfolder src
-CPPFILES = $(wildcard *.cpp src/*.cpp utils/helpers/*common.cpp)
-SOURCES = $(CPPFILES)
-OBJECTS = $(CPPFILES:.cpp=.o)
+#CPPFILES = $(wildcard *.cpp src/*.cpp utils/helpers/*common.cpp)
+#SOURCES = $(CPPFILES)
+#OBJECTS = $(CPPFILES:.cpp=.o)
 
 
+#########################
+# Include all C++ files in src/ and its subdirectories: src/A and src/B 
+SOURCES=execture_imagefusor_jobs.cpp RcppExports.cpp utils/helpers/*common.cpp @SUBDIR_SOURCES@
+
+# Obtain the object files
+OBJECTS=$(SOURCES:.cpp=.o) 
+
+# Make the shared object
+#all: $(SHLIB)
+
+# Provide recipe to remove all objects
+#clean:
+#	@rm -f $(OBJECTS)

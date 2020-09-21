@@ -653,6 +653,16 @@ AC_SUBST([PKG_CPPFLAGS], ["${PKG_CPPFLAGS} -DR_PACKAGE"])
 
 
 
+### Determine subdirectory source files
+
+# Dynamically generate list of sources from subdirectories via shell
+SUBDIR_SOURCES="$(cd src/ && ls src/*.cpp | tr '\n' ' ')"
+
+# Supply it as a variable
+AC_SUBST(SUBDIR_SOURCES)
+
+
+
 ## PKG_LIBS
 AC_SUBST([PKG_LIBS], ["${INPKG_LIBS} ${GDAL_LIBS}"])
 if test "${NEED_DEPS}" = yes; then
