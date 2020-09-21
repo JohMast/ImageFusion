@@ -3,7 +3,7 @@ RWINLIB_OPENCV = ../windows/opencv-$(VERSION)
 TARGET = lib$(subst gcc,,$(COMPILED_BY))$(R_ARCH)
 
 RWINLIB_GDAL = ../windows/gdal2-2.2.3
-RWINLIB_OPENCV = ../windows/opencv-4.0.1/include/opencv4/opencv2
+#RWINLIB_OPENCV = ../windows/opencv-4.0.1/include/opencv4/opencv2
 RWINLIB_BOOST= ../windows/boost_1_55_0/boost
 OBJECTS = Image.o\
 			RcppExports.o
