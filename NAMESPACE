@@ -2,7 +2,7 @@
 
 export(estarfm_job)
 export(fitfc_job)
-export(has_high)
+export(imagefusion_task)
 export(spstfm_job)
 export(starfm_job)
 import(assertthat)
