@@ -318,7 +318,7 @@ spstfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,
   }
   
   #Call the cpp fusion function with the checked inputs
-  ImageFusion::execute_spstfm_job_cpp(input_filenames = input_filenames_c,
+  execute_spstfm_job_cpp(input_filenames = input_filenames_c,
                                        input_resolutions = input_resolutions_c,
                                        input_dates = input_dates_c,
                                        pred_dates = pred_dates_c,

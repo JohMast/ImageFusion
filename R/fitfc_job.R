@@ -306,7 +306,7 @@ fitfc_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,p
     #modify output names a bit to make them unique for each input pair
     pred_filenames_c3 <- paste(paste(tools::file_path_sans_ext(pred_filenames_c),"from_pair",date3_c,sep="_"),tools::file_ext(pred_filenames_c),sep=".")
     #execture job from date 3
-    ImageFusion::execute_fitfc_job_cpp(input_filenames = input_filenames_c,
+    execute_fitfc_job_cpp(input_filenames = input_filenames_c,
                                        input_resolutions = input_resolutions_c,
                                        input_dates = input_dates_c,
                                        pred_dates = pred_dates_c,
