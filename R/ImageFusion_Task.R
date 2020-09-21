@@ -41,6 +41,11 @@
 #' @author  Christof Kaufmann (C++), Johannes Mast (R)
 #' @examples #
 
+
+
+
+has_high <- has_low <- interval_pairs <- interval_ids <- pred_case  <-  interval_start <-   interval_end <-  interval_npred <- imagefusion_task <-  interval_startpair <-  interval_endpair <-  resolutions <- NULL
+
 imagefusion_task <- function(...,filenames_high,filenames_low,dates_high,dates_low,dates_pred,filenames_pred=NULL,singlepair_mode="ignore",method="starfm",spstfm_mode="none",high_date_prediction_mode="ignore",verbose=T,output_overview=T,out_dir="Pred_Outputs"){
   
   ####1: Prepare Inputs####
