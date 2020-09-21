@@ -1,3 +1,6 @@
+#' NULL declaration to suppres R CMD CHECK warning related to tidyverse syntax
+#' @keywords internal
+#' @noRd
 has_high <- has_low <- interval_pairs <- interval_ids <- pred_case  <-  interval_start <-   interval_end <-  interval_npred <- imagefusion_task <-  interval_startpair <-  interval_endpair <-  resolutions <- NULL
 
 #' Perform time-series image fusion

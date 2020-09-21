@@ -258,7 +258,7 @@ fitfc_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,p
   #If we are in singlepair mode (only one pair specified)
   if(date1_c==date3_c){
   #Call the cpp fusion function once from date 1 with the checked inputs
-  ImageFusion::execute_fitfc_job_cpp(input_filenames = input_filenames_c,
+  execute_fitfc_job_cpp(input_filenames = input_filenames_c,
                                       input_resolutions = input_resolutions_c,
                                       input_dates = input_dates_c,
                                       pred_dates = pred_dates_c,
@@ -284,7 +284,7 @@ fitfc_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,p
     #modify output names a bit to make them unique for each input pair
     pred_filenames_c1 <- paste(paste(tools::file_path_sans_ext(pred_filenames_c),"from_pair",date1_c,sep="_"),tools::file_ext(pred_filenames_c),sep=".")
     #executre job from date1
-    ImageFusion::execute_fitfc_job_cpp(input_filenames = input_filenames_c,
+    execute_fitfc_job_cpp(input_filenames = input_filenames_c,
                                        input_resolutions = input_resolutions_c,
                                        input_dates = input_dates_c,
                                        pred_dates = pred_dates_c,

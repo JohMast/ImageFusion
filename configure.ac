@@ -1,8 +1,8 @@
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT(ImageFusion, 1.0.0, johannes.mast@gmx.de)
+AC_INIT(ImageFusion, 0.0.1, johannes.mast@gmx.de)
 AC_LANG(C++)
-echo "Hello World!"
+echo "Starting Configure."
 
 # find R home and set CC/CFLAGS
 : ${R_HOME=`R RHOME`}
@@ -651,13 +651,44 @@ AC_SUBST([PKG_CPPFLAGS], ["${PKG_CPPFLAGS} -DACCEPT_USE_OF_DEPRECATED_PROJ_API_H
 fi
 AC_SUBST([PKG_CPPFLAGS], ["${PKG_CPPFLAGS} -DR_PACKAGE"])
 
+###OPENMP
+###Mostly copied from: https://github.com/RcppCore/RcppArmadillo/blob/master/configure.ac
+
+## Default the OpenMP flag to the empty string.
+## If and only if OpenMP is found, expand to $(SHLIB_OPENMP_CXXFLAGS)
+openmp_flag=""
+
+
+## Set the fallback, by default it is nope
+arma_have_openmp="#define ARMA_DONT_USE_OPENMP 1"
+
+if test x"${openmp_already_works}" = x"yes"; then
+    arma_have_openmp="#define ARMA_USE_OPENMP 1"
+fi
+
+if test x"${can_use_openmp}" = x"yes"; then
+    AC_MSG_CHECKING([for OpenMP])
+    ## if R has -fopenmp we should be good
+    allldflags=$(${R_HOME}/bin/R CMD config --ldflags)
+    hasOpenMP=$(echo ${allldflags} | grep -- -fopenmp)
+    if test x"${hasOpenMP}" = x""; then
+        AC_MSG_RESULT([missing])
+        arma_have_openmp="#define ARMA_DONT_USE_OPENMP 1"
+    else
+        AC_MSG_RESULT([found and suitable])
+        arma_have_openmp="#define ARMA_USE_OPENMP 1"
+        openmp_flag='$(SHLIB_OPENMP_CXXFLAGS)'
+    fi
+fi
+####Overwrite output from previous block, which is not executed for unknown reasons. Needs to be revisited.
+openmp_flag='$(SHLIB_OPENMP_CXXFLAGS)'
+
+AC_SUBST([OPENMP_FLAG], ["${openmp_flag}"])
 
 
 ### Determine subdirectory source files
-
 # Dynamically generate list of sources from subdirectories via shell
 SUBDIR_SOURCES="$(cd src/ && ls src/*.cpp | tr '\n' ' ')"
-
 # Supply it as a variable
 AC_SUBST(SUBDIR_SOURCES)
 
@@ -677,8 +708,11 @@ AC_SUBST([PKG_LIBS], ["${PKG_LIBS} -lproj"])
 
 AC_MSG_NOTICE([Package CPP flags: ${PKG_CPPFLAGS}])
 AC_MSG_NOTICE([Package LIBS: ${PKG_LIBS}])
-
+AC_MSG_NOTICE([OpenMP flags: ${OPENMP_FLAG}])
 
 AC_CONFIG_FILES([src/Makevars])
 AC_OUTPUT
+
+
+
 
