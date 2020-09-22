@@ -680,8 +680,8 @@ if test x"${can_use_openmp}" = x"yes"; then
         openmp_flag='$(SHLIB_OPENMP_CXXFLAGS)'
     fi
 fi
-####Overwrite output from previous block, which is not executed for unknown reasons. Needs to be revisited.
-openmp_flag='$(SHLIB_OPENMP_CXXFLAGS)'
+## Manually overwrite output from previous block, which is not executed for unknown reasons. Needs to be revisited.
+openmp_flag='-fopenmp'
 
 AC_SUBST([OPENMP_FLAG], ["${openmp_flag}"])
 
