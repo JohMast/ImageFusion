@@ -3,7 +3,7 @@ PKG_CPPFLAGS= @PKG_CPPFLAGS@ -I../src/utils/helpers  -I/usr/include/opencv4/open
 #Also include boost_filesystem manually 
 PKG_LIBS= @PKG_LIBS@ -lopencv_imgproc -lopencv_core -L/usr/include  @OPENMP_FLAG@
 
-PKG_CXXFLAGS = -Iinclude 
+PKG_CXXFLAGS = -Iinclude  @OPENMP_FLAG@
 CXX_STD=CXX17
 #Add all cpp files from the subfolder src
 #CPPFILES = $(wildcard *.cpp src/*.cpp utils/helpers/*common.cpp)

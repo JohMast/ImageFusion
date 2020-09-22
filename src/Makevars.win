@@ -11,7 +11,7 @@ PKG_CPPFLAGS = -I$(RWINLIB_GDAL)/include/gdal \
                -Iinclude \
                -I../src/utils/helpers \
                -DCURL_STATICLIB -DR_PACKAGE -DWITH_OMP \
-               $(SHLIB_OPENMP_CFLAGS)
+               $(SHLIB_OPENMP_CPPFLAGS)
  
 PKG_LIBS = -lstdc++fs -L$(RWINLIB_GDAL)/lib$(R_ARCH) \
   -lgdal -lsqlite3 -lspatialite -lproj -lgeos_c -lgeos  \
