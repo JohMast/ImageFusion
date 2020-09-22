@@ -1,2 +1,3 @@
 #!/bin/sh
-rm -f src/Makevars
+rm -f src/Makevars config.status config.log
+rm -rf autom4te.cache
