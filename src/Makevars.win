@@ -1,10 +1,9 @@
 VERSION = 0.0.1
-RWINLIB = ../windows/opencv-$(VERSION)
 TARGET = lib$(subst gcc,,$(COMPILED_BY))$(R_ARCH)
-
+RWINLIB = ../windows/opencv-$(VERSION)
 RWINLIB_GDAL = ../windows/gdal2-2.2.3
 RWINLIB_BOOST= ../windows/boost_1_55_0/boost
-
+CXX_STD = CXX17
 
 PKG_CPPFLAGS = -I$(RWINLIB_GDAL)/include/gdal \
                -I$(RWINLIB)/include/opencv4 \
@@ -32,7 +31,7 @@ PKG_LIBS = -lstdc++fs -L$(RWINLIB_GDAL)/lib$(R_ARCH) \
 all: clean winlibs
 
 
-CXX_STD = CXX17
+
 winlibs:
 	mkdir -p ../inst
 	"${R_HOME}/bin${R_ARCH_BIN}/Rscript.exe" --vanilla "../tools/winlibs.R"
