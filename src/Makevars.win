@@ -1,4 +1,4 @@
-VERSION = 4.0.1
+VERSION = 0.0.1
 RWINLIB = ../windows/opencv-$(VERSION)
 TARGET = lib$(subst gcc,,$(COMPILED_BY))$(R_ARCH)
 
@@ -27,7 +27,7 @@ PKG_LIBS = -lstdc++fs -L$(RWINLIB_GDAL)/lib$(R_ARCH) \
 	-lcomctl32 -lgdi32 -lole32 -lsetupapi -lws2_32 -lavifil32 -lavicap32 -lwinmm -lmsvfw32 \
 	-lopengl32 -lglu32 -lcomdlg32 -lOleAut32 -luuid \
 	$(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS) \
-	$(SHLIB_OPENMP_CFLAGS)
+	$(SHLIB_OPENMP_CPPFLAGS)
 
 all: clean winlibs
 

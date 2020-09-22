@@ -1,3 +1,4 @@
+VERSION = 0.0.1
 #Add the gdal opencv headers and the imagefusion headers from the /include directory
 PKG_CPPFLAGS= @PKG_CPPFLAGS@ -I../src/utils/helpers  -I/usr/include/opencv4/opencv -I/usr/include/opencv4 -D_DATA_PREFIX=/usr  -DWITH_OMP  @OPENMP_FLAG@
 #Also include boost_filesystem manually 
@@ -12,19 +13,14 @@ CXX_STD=CXX17
 
 
 #########################
-# Include all C++ files in src/ and its subdirectories: src/A and src/B 
 SOURCES=execture_imagefusor_jobs.cpp RcppExports.cpp utils/helpers/utils_common.cpp @SUBDIR_SOURCES@
 
 # Obtain the object files
 OBJECTS=$(SOURCES:.cpp=.o) 
 
 # Make the shared object
-#all: $(SHLIB)
+all: $(SHLIB)
 
 # Provide recipe to remove all objects
-#clean:
-#	@rm -f $(OBJECTS)
-
-
-#########Test OPENMP########
-T = 
+clean:
+	@rm -f $(OBJECTS)
