@@ -9,6 +9,7 @@ PKG_CPPFLAGS = -I$(RWINLIB_GDAL)/include/gdal \
                -I$(RWINLIB)/include/opencv4 \
                -Iinclude \
                -I../src/utils/helpers \
+               -I../src/utils/imginterp \
                -DCURL_STATICLIB -DR_PACKAGE -DWITH_OMP \
                $(SHLIB_OPENMP_CFLAGS)
  
