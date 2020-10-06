@@ -399,9 +399,9 @@ void execute_imginterp_job_cpp(
       if (!gi.hasNodataValue()) {
         double ndv = helpers::findAppropriateNodataValue(imgInterped, maskNowInvalid.bitwise_not());
         if (std::isnan(ndv)) {
-          std::cerr << "Setting the non-interpolated location to a nodata value failed, since all possible values exist in the image " << inputfilename << ".";
+          Rcerr << "Setting the non-interpolated location to a nodata value failed, since all possible values exist in the image " << inputfilename << ".";
           if (!doOutputPS)
-            std::cerr << " Therefore the pixelstate will be output.";
+            Rcerr << " Therefore the pixelstate will be output.";
           Rcerr << std::endl;
         }
         else {
