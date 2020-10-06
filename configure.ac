@@ -712,7 +712,3 @@ AC_MSG_NOTICE([OpenMP flags: ${OPENMP_FLAG}])
 
 AC_CONFIG_FILES([src/Makevars])
 AC_OUTPUT
-
-
-
-

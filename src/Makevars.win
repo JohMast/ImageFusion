@@ -24,7 +24,7 @@ PKG_LIBS = -lstdc++fs -L$(RWINLIB_GDAL)/lib$(R_ARCH) \
 	-L$(RWINLIB)/lib$(R_ARCH) \
 	-lopencv_imgproc -lopencv_core -ltbb \
 	-ljpeg -lwebp -lpng -lz -ltiff \
-	-lcomctl32 -lgdi32 -lole32 -lsetupapi -lws2_32 -lavifil32 -lavicap32 -lwinmm -lmsvfw32 \
+	-lcomctl32 -lgdi32 -lole32 -lws2_32 -lavifil32 -lavicap32 -lwinmm -lmsvfw32 \
 	-lopengl32 -lglu32 -lcomdlg32 -lOleAut32 -luuid \
 	$(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS) \
 	$(SHLIB_OPENMP_CFLAGS)
