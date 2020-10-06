@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 
-#include "MultiResImages.h"
+#include "multiresimages.h"
 
 #include <boost/test/unit_test.hpp>
 

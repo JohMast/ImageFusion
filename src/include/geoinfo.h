@@ -16,6 +16,71 @@ class GDALDataset;
 
 namespace imagefusion {
 
+namespace detail {
+
+/**
+ * @internal
+ * @brief Create coordinates for the top, right, bottom and left edge of a rectangle
+ * @param rect is the rectangle to create the coordinates for
+ * @param numPoints is the number of points on each edge
+ * @return the coordinates for all edges, i. e. 4 * `numPoints` coordinates
+ */
+inline std::vector<Coordinate> makeRectBoundaryCoords(CoordRectangle const& rect, unsigned int numPoints = 33) {
+    std::vector<Coordinate> boundaries(4 * numPoints);
+    double relstep = 1. / (numPoints - 1);
+    for (unsigned int i = 0; i < numPoints; ++i) {
+        double t = i * relstep;
+        // top
+        boundaries.at(i)               = Coordinate(rect.x + t * rect.width, rect.y);
+        // right
+        boundaries.at(i + numPoints)   = Coordinate(rect.x + rect.width,     rect.y + t * rect.height);
+        // bottom
+        boundaries.at(i + 2*numPoints) = Coordinate(rect.x + t * rect.width, rect.y + rect.height);
+        // left
+        boundaries.at(i + 3*numPoints) = Coordinate(rect.x,                  rect.y + t * rect.height);
+    }
+    return boundaries;
+}
+
+/**
+ * @internal
+ * @brief Extract rectangle from some projected boundary points of a rectangle
+ * @param boundaries are the boundary points, which must be 4 * N points for the top, right, bottom and left edges.
+ * @return the rectangle, such that all projected boundary points are inside (or on the edge).
+ */
+inline CoordRectangle getRectFromBoundaryCoords(std::vector<Coordinate> const& boundaries) {
+    assert(boundaries.size() > 4 && "Too less points to describe the boundary shape");
+    auto compareX = [] (imagefusion::Coordinate const& c1, imagefusion::Coordinate const& c2) {
+        return c1.x < c2.x;
+    };
+    auto compareY = [] (imagefusion::Coordinate const& c1, imagefusion::Coordinate const& c2) {
+        return c1.y < c2.y;
+    };
+
+    const unsigned int numPoints = boundaries.size() / 4;
+    auto minmaxTopY    = std::minmax_element(std::begin(boundaries),               std::begin(boundaries) + numPoints,   compareY);
+    auto minmaxRightX  = std::minmax_element(std::begin(boundaries) + numPoints,   std::begin(boundaries) + 2*numPoints, compareX);
+    auto minmaxBottomY = std::minmax_element(std::begin(boundaries) + 2*numPoints, std::begin(boundaries) + 3*numPoints, compareY);
+    auto minmaxLeftX   = std::minmax_element(std::begin(boundaries) + 3*numPoints, std::begin(boundaries) + 4*numPoints, compareX);
+
+    assert(minmaxLeftX.first->x + minmaxLeftX.second->x < minmaxRightX.first->x  + minmaxRightX.second->x);
+    assert(minmaxTopY.first->y  + minmaxTopY.second->y  < minmaxBottomY.first->y + minmaxBottomY.second->y);
+
+    double leftX   = minmaxLeftX.first->x;
+    double rightX  = minmaxRightX.second->x;
+    double topY    = minmaxTopY.first->y;
+    double bottomY = minmaxBottomY.second->y;
+
+    // check for empty rectangle
+    bool isWindowLegal = leftX < rightX && topY < bottomY;
+    if (!isWindowLegal)
+        return {};
+
+    return CoordRectangle{leftX, topY, rightX - leftX, bottomY - topY};
+}
+
+} /* namespace detail */
+
 /**
  * @brief This represents an affine transformation
  *
@@ -149,7 +214,7 @@ public:
      * GeoInfo::geotransSRS) *or* ground control points + the GCP projection coordinate system
      * (@ref GeoInfo::gcpSRS) can be used. They are mutual exclusive ways for georeferencing an
      * image. To use geotransformation specify the transformation with the corresponding methods
-     * and provide a valid spatial reference before using @ref GeoInfo::addTo.
+     * and provide a valid spatial reference before using @ref GeoInfo::addTo().
      *
      * @see clear, set, GeoInfo::geotransSRS
      */
@@ -373,7 +438,7 @@ public:
      *   \end{pmatrix}.
      * \f]
      *
-     * When using @ref GeoInfo::addTo and the geotransform is the identity transformation, it will
+     * When using @ref GeoInfo::addTo() and the geotransform is the identity transformation, it will
      * not be used. The identity transformation is considered as not existing.
      *
      * @return the calling object so you can append other operations.
@@ -1132,7 +1197,11 @@ public:
      * @brief Number of channels
      *
      * The number of channels (in GDAL terminology: rastercount) of the image read during
-     * construction. If this GeoInfo object was constructed without image file, it is 0.
+     * construction. If this GeoInfo object was constructed without image file, it is 0. If it was
+     * constructed with an image container (like HDF) and did not recurse into it (see the
+     * `recurseSubdatasets` parameter in
+     * @ref GeoInfo(std::string const& filename, std::vector<int> const& channels, Rectangle crop, bool flipH, bool flipV, bool recurseSubdatasets),
+     * it is also 0, but then @ref subdatasetsCount() will return the number of subdatasets > 0.
      */
     int channels = 0;
 
@@ -1142,10 +1211,11 @@ public:
      * The base type of the image (in GDAL terminology: depth), i. e. it does not contain the
      * channel information.
      *
-     * Note, when reading an image with subdatasets with the constructor GeoInfo(std::string const&
-     * filename, std::vector<int> const& channels) the base type is determined by the base types of
-     * the selected channels (they could be different). If channels with different types are
-     * selected, the baseType is set to Type::invalid.
+     * Note, when reading an image with subdatasets with the constructor
+     * @ref GeoInfo(std::string const& filename, std::vector<int> const& channels, Rectangle crop, bool flipH, bool flipV, bool recurseSubdatasets)
+     * the base type is determined by the base types of the selected channels (they could be
+     * different). If channels with different types are selected, the baseType is set to @ref
+     * Type::invalid.
      *
      * For default constructed GeoInfo objects it is Type::invalid.
      */
@@ -1387,29 +1457,14 @@ public:
     GeoInfo& operator=(GeoInfo gi) noexcept;
 
     /**
-     * @brief Contruct with information from the given file
-     *
-     * @param filename of an image to read all possible information from.
-     *
-     * If possible, the following information is extracted:
-     *  - a value to mark invalid data which can be used to build a mask (no-data value),
-     *  - arbitrary metadata structured in domains and then key-value pairs and
-     *  - projection coordinate system together with either
-     *    - ground control points or
-     *    - coefficients that define an affine transform (geotransform)
-     *
-     * @throws runtime_error if `filename` cannot be opened with any GDAL driver or does not exist.
-     */
-    explicit GeoInfo(std::string const& filename);
-
-
-    /**
-     * @brief Contruct with information from the given channels of the file
+     * @brief Contruct with information from the specified file
      *
      * @param filename of an image to use.
      *
-     * @param channels to use. These can also be subdataset numbers (0-based!). Specifying an empty
-     * vector means all channels.
+     * @param channels to use. These can also be subdataset numbers (0-based!) in which case their.
+     * GeoInfos will be merged. Specifying an empty vector means all channels for images without
+     * subdatasets. For images (or rather container) with subdatasets an empty `channels` argument
+     * will only merge all the subdatasets' GeoInfos, if `recurseSubdatasets` is set to `true`.
      *
      * @param crop is a rectangle to limit the image size and offset (in image space coordinates).
      * Note, this crop rectangle gets limited by the image boundaries. If you want to refer to
@@ -1422,26 +1477,43 @@ public:
      * @param flipV sets whether to read the image geotransformation flipped vertically. This is
      * equivalent to using @ref GeoTransform::flipImage afterwards.
      *
-     * So in case of normal images, this is similar to GeoInfo(std::string const& filename). But
-     * the `channels` member will be set to the size of the `channels` argument given, if it is not
-     * empty and otherwise to the number of bands contained in the image.
+     * @param recurseSubdatasets is only relevant, if `channels` is empty and the file is an image
+     * container (like an HDF file) with subdatasets. Then, with `recurseSubdatasets` set to
+     * `true`, the GeoInfos of the subdatasets will be merged. Otherwise the GeoInfo is only the
+     * container information, which means that the image size and type etc. is unknown, but the
+     * subdatasets names and description can be accessed.
      *
-     * In case of a multi-image-file, like HDF images, channels refer to subdatasets. These may
-     * have different resolutions, in which case the resulting resolution will be the highest
-     * across the subdatasets. The selected subdatasets must have the same data types, projection
-     * coordinate systems, etc. The GeoInfo object will have the properties of an Image read with
-     * the same channels argument. When the data types of the subdatasets to combine are different
-     * and building the virtual dataset succeeds, baseType of the constructed object will be @ref
+     * If possible, the following information is extracted:
+     *  - a value to mark invalid data which can be used to build a mask (no-data value),
+     *  - size in pixels of the image,
+     *  - base type of the image,
+     *  - number of channels or subdatasets in the image or container, respectively
+     *  - arbitrary metadata structured in domains and then key-value pairs and
+     *  - projection coordinate system together with either
+     *    - ground control points or
+     *    - coefficients that define an affine transform (geotransform)
+     *
+     * In case of a multi-image-file, like HDF images, there are no channels but subdatasets. These
+     * may have different resolutions and types and could have different projection systems (which
+     * should not occur in pratice). Now there are two possibilities for GeoInfo: The first
+     * possibility is to get the information of the container file, which contains the subdatasets'
+     * names and descriptions. The second possibility is the information of one or more
+     * subdatasets. The information of subdatasets is usually different and when collecting GeoInfo
+     * of multiple subdatasets, they will be merged. This results in the case of different
+     * resolution in the highest resolution across the selected subdatasets. The selected
+     * subdatasets must have the same projection coordinate systems etc. for GeoInfo to work. The
+     * merged GeoInfo object will have the same properties as an Image that is read with the same
+     * channels argument. When the data types of the subdatasets to combine are different and
+     * building the virtual dataset succeeds, baseType of the constructed object will be @ref
      * Type::invalid.
      *
      * @note In case of a multi-image-file (or: container file) a call with an empty channels
-     * argument is *not* equivalent to just calling GeoInfo(std::string const& filename)! The
-     * latter will contain the information of the container file, while the former will try to load
-     * and combine all subdatasets.
+     * argument will only merge the GeoInfos of the subdatasets, if `recurseSubdatasets` is set to
+     * `true`. Otherwise the GeoInfo object will contain the information of the container file.
      *
-     * @note The meta data of a multi-image-file with combined channels will be shortened a lot. To
-     * retrieve the meta data of the single subdatasets get the GeoInfo of the container and
-     * retrieve the GeoInfo%s of the children, like:
+     * @note The meta data of a multi-image-file merged from multiple subdatasets will be shortened
+     * a lot. To retrieve the meta data of the single subdatasets get the GeoInfo of the container
+     * and retrieve the GeoInfo%s of the children, like:
      * @code
      * GeoInfo parent{"example.hdf"}; // contains a lot of parent meta data
      * GeoInfo sds1 = parent.subdatasetGeoInfo(0); // infos of first subdataset
@@ -1467,12 +1539,25 @@ public:
      *
      * @throws image_type_error if the channels are out of bounds and thus do not fit to the image
      */
-    explicit GeoInfo(std::string const& filename, std::vector<int> const& channels, Rectangle crop = {0, 0, 0, 0}, bool flipH = false, bool flipV = false);
+    explicit GeoInfo(std::string const& filename, std::vector<int> const& channels = {}, Rectangle crop = {0, 0, 0, 0}, bool flipH = false, bool flipV = false, bool recurseSubdatasets = false);
 
     /**
      * @brief Read in all available information from a specified image
      *
-     * \copydetails GeoInfo(std::string const& filename)
+     * @param filename of an image to read all possible information from.
+     *
+     * If possible, the following information is extracted:
+     *
+     * - a value to mark invalid data which can be used to build a mask (no-data value),
+     * - size in pixels of the image,
+     * - base type of the image,
+     * - number of channels or subdatasets in the image or container, respectively
+     * - arbitrary metadata structured in domains and then key-value pairs and
+     * - projection coordinate system together with either
+     *   - ground control points or
+     *   - coefficients that define an affine transform (geotransform)
+     *
+     * @throws runtime_error if `filename` cannot be opened with any GDAL driver or does not exist.
      */
     void readFrom(std::string const& filename);
 
@@ -2407,10 +2492,6 @@ inline GeoInfo::GeoInfo(GeoInfo&& gi) noexcept
 inline GeoInfo& GeoInfo::operator=(GeoInfo gi) noexcept {
     swap(*this, gi);
     return *this;
-}
-
-inline GeoInfo::GeoInfo(std::string const& filename) : GeoInfo() {
-    readFrom(filename);
 }
 
 inline void swap(GeoInfo& i1, GeoInfo& i2) noexcept {

@@ -4,13 +4,13 @@
 #include <numeric>
 #include <utility>
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include <opencv2/opencv.hpp>
 
-#include "Type.h"
+#include "type.h"
 #include "imagefusion.h"
-#include "Image.h"
+#include "image.h"
 #include "optionparser.h"
 
 // annonymous namespace is important for test configuration
@@ -51,14 +51,13 @@ bool areClose(double x, double y,
 }
 
 std::pair<std::string, std::string> splitToFileBaseAndExtension(std::string const& filename) {
-    boost::filesystem::path p = filename;
+    std::filesystem::path p = filename;
     std::string stem = p.stem().string();        // "test.txt" --> "test"
     std::string ext  = p.extension().string();   // "test.txt" --> ".txt"
     std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
 
-    // return extension only, if something comes before (otherwise its just a hidden file, like ".bashrc")
-    if (stem.empty())
-        std::swap(ext, stem);
+    // note stem from std::filesystem, in contrast to boost::filesystem, yields for hidden files
+    // the filename, e. g. stem returns .bashrc for ".bashrc"
     return {stem, ext};
 }
 
@@ -488,10 +487,10 @@ private:
  *
  * @return the two abbreviated strings as array
  */
-std::array<std::string, 2> shorten(std::string s1, std::string s2, std::function<bool(std::string const&)> isShortEnough, unsigned int keepFront = 3, unsigned int keepBack = 3) {
+std::array<std::string, 2> shorten(std::string s1, std::string s2, std::function<bool(std::string const&)> const& isShortEnough, unsigned int keepFront = 3, unsigned int keepBack = 3) {
     auto diffs = findStringDiffs(s1, s2);
     std::array<std::string, 2> s{s1, s2};
-    for (int i : {0, 1}) {
+    for (int i = 0; i < 2; ++i) {
         std::size_t len = s[i].size();
         if (len > keepFront + keepBack && !isShortEnough(s[i])) {
             std::string start = s[i].substr(0, keepFront);
@@ -937,7 +936,7 @@ void placeXLabels(imagefusion::Image& plot, imagefusion::Point orig, std::vector
     cv::Size tickTextSize = cv::getTextSize(tickText, fontFace, 1, 1, &baseline);
     int bottomLine = orig.y + tickTextSize.height + 7;
     int leftTextBorder = orig.x + pixticks.front() + tickTextSize.width / 2;;
-    cv::putText(plot.cvMat(), tickText, cv::Point{leftTextBorder - tickTextSize.width, bottomLine}, fontFace, 1, cv::Scalar::all(framecolor), 1, CV_AA);
+    cv::putText(plot.cvMat(), tickText, cv::Point{leftTextBorder - tickTextSize.width, bottomLine}, fontFace, 1, cv::Scalar::all(framecolor), 1, cv::LINE_AA);
     if (ticks.size() <= 1)
         return;
 
@@ -946,7 +945,7 @@ void placeXLabels(imagefusion::Image& plot, imagefusion::Point orig, std::vector
     tickText = ss.str();
     tickTextSize = cv::getTextSize(tickText, fontFace, 1, 1, &baseline);
     int rightTextBorder = orig.x + pixticks.back() - tickTextSize.width / 2;
-    cv::putText(plot.cvMat(), tickText, cv::Point{rightTextBorder, bottomLine}, fontFace, 1, cv::Scalar::all(framecolor), 1, CV_AA);
+    cv::putText(plot.cvMat(), tickText, cv::Point{rightTextBorder, bottomLine}, fontFace, 1, cv::Scalar::all(framecolor), 1, cv::LINE_AA);
     if (ticks.size() <= 2)
         return;
 
@@ -972,7 +971,7 @@ void placeXLabels(imagefusion::Image& plot, imagefusion::Point orig, std::vector
         if (leftTextBorder + 5 < textleft && textright < rightTextBorder - 5) { // between min and max
             leftZeroBorder  = textleft;
             rightZeroBorder = textright;
-            cv::putText(plot.cvMat(), tickText, cv::Point{leftZeroBorder, bottomLine}, fontFace, 1, cv::Scalar::all(framecolor), 1, CV_AA);
+            cv::putText(plot.cvMat(), tickText, cv::Point{leftZeroBorder, bottomLine}, fontFace, 1, cv::Scalar::all(framecolor), 1, cv::LINE_AA);
         }
         if (ticks.size() <= 3)
             return;
@@ -1001,7 +1000,7 @@ void placeXLabels(imagefusion::Image& plot, imagefusion::Point orig, std::vector
         if (leftTextBorder + 5 < textleft && textright < rightTextBorder - 5       // between min and max
             && (textright < leftZeroBorder - 5 || textleft > rightZeroBorder + 5)) // not overlapping with 0-label
         {
-            cv::putText(plot.cvMat(), tickText, cv::Point{textleft, bottomLine}, fontFace, 1, cv::Scalar::all(framecolor), 1, CV_AA);
+            cv::putText(plot.cvMat(), tickText, cv::Point{textleft, bottomLine}, fontFace, 1, cv::Scalar::all(framecolor), 1, cv::LINE_AA);
             leftTextBorder = textright;
         }
     }
@@ -1038,7 +1037,7 @@ void placeYLabels(imagefusion::Image& plot, imagefusion::Point orig, std::vector
     cv::Size tickTextSize = cv::getTextSize(tickText, fontFace, 1, 1, &baseline);
     int rightLine = orig.x - 6;
     int lowerTextBorder = orig.y - tickTextSize.height / 2;
-    cv::putText(plot.cvMat(), tickText, cv::Point{rightLine - tickTextSize.width, lowerTextBorder + tickTextSize.height}, fontFace, 1, cv::Scalar::all(framecolor), 1, CV_AA);
+    cv::putText(plot.cvMat(), tickText, cv::Point{rightLine - tickTextSize.width, lowerTextBorder + tickTextSize.height}, fontFace, 1, cv::Scalar::all(framecolor), 1, cv::LINE_AA);
     if (ticks.size() <= 1)
         return;
 
@@ -1047,7 +1046,7 @@ void placeYLabels(imagefusion::Image& plot, imagefusion::Point orig, std::vector
     tickText = ss.str();
     tickTextSize = cv::getTextSize(tickText, fontFace, 1, 1, &baseline);
     int upperTextBorder = orig.y - pixticks.back() + tickTextSize.height / 2;
-    cv::putText(plot.cvMat(), tickText, cv::Point{rightLine - tickTextSize.width, upperTextBorder}, fontFace, 1, cv::Scalar::all(framecolor), 1, CV_AA);
+    cv::putText(plot.cvMat(), tickText, cv::Point{rightLine - tickTextSize.width, upperTextBorder}, fontFace, 1, cv::Scalar::all(framecolor), 1, cv::LINE_AA);
     if (ticks.size() <= 2)
         return;
 
@@ -1073,7 +1072,7 @@ void placeYLabels(imagefusion::Image& plot, imagefusion::Point orig, std::vector
         if (lowerTextBorder - 5 > textbottom && texttop > upperTextBorder + 5) { // between min and max
             upperZeroBorder = texttop;
             lowerZeroBorder = textbottom;
-            cv::putText(plot.cvMat(), tickText, cv::Point{rightLine - tickTextSize.width, lowerZeroBorder}, fontFace, 1, cv::Scalar::all(framecolor), 1, CV_AA);
+            cv::putText(plot.cvMat(), tickText, cv::Point{rightLine - tickTextSize.width, lowerZeroBorder}, fontFace, 1, cv::Scalar::all(framecolor), 1, cv::LINE_AA);
         }
         if (ticks.size() <= 3)
             return;
@@ -1102,7 +1101,7 @@ void placeYLabels(imagefusion::Image& plot, imagefusion::Point orig, std::vector
         if (lowerTextBorder - 5 > textbottom && texttop > upperTextBorder + 5       // between min and max
             && (texttop > lowerZeroBorder + 5 || textbottom < upperZeroBorder - 5)) // not overlapping with 0-label
         {
-            cv::putText(plot.cvMat(), tickText, cv::Point{rightLine - tickTextSize.width, textbottom}, fontFace, 1, cv::Scalar::all(framecolor), 1, CV_AA);
+            cv::putText(plot.cvMat(), tickText, cv::Point{rightLine - tickTextSize.width, textbottom}, fontFace, 1, cv::Scalar::all(framecolor), 1, cv::LINE_AA);
             lowerTextBorder = texttop;
         }
     }
@@ -1231,7 +1230,7 @@ struct PlotScatterFunctor {
                 if (largePlot.at<uint8_t>(py, px) != 255)
                     continue;
 
-                cv::circle(largePlot, {px, py}, r, cv::Scalar::all(0), CV_FILLED);
+                cv::circle(largePlot, {px, py}, r, cv::Scalar::all(0), cv::FILLED);
             }
         }
 
@@ -1363,8 +1362,8 @@ imagefusion::Image plotScatter(imagefusion::ConstImage const& i1,
         int totalWidth = plot.width();
         auto doesFitIntoPlot = [&] (std::string const& s) { return cv::getTextSize(s, fontFace, 1, 1, &baseline).width < totalWidth; };
         auto shortened = shorten("x: " + fn1, "y: " + fn2, doesFitIntoPlot, 4);
-        cv::putText(plot.cvMat(), shortened[0], cv::Point{0, scatterFrameTop + plotSize + 2 * (zerosize + 6)}, fontFace, 1, cv::Scalar::all(framecolor), 1, CV_AA);
-        cv::putText(plot.cvMat(), shortened[1], cv::Point{0, scatterFrameTop + plotSize + 3 * (zerosize + 6)}, fontFace, 1, cv::Scalar::all(framecolor), 1, CV_AA);
+        cv::putText(plot.cvMat(), shortened[0], cv::Point{0, scatterFrameTop + plotSize + 2 * (zerosize + 6)}, fontFace, 1, cv::Scalar::all(framecolor), 1, cv::LINE_AA);
+        cv::putText(plot.cvMat(), shortened[1], cv::Point{0, scatterFrameTop + plotSize + 3 * (zerosize + 6)}, fontFace, 1, cv::Scalar::all(framecolor), 1, cv::LINE_AA);
     }
     plot.crop(detectBorderCropBounds(plot));
 
@@ -1596,21 +1595,21 @@ imagefusion::Image drawHistPlot(std::vector<unsigned int> h1,
         if (gray)
             col = cv::Scalar(128, 128, 128);
 
-        cv::rectangle(initPlot, cv::Rect(i * initBarWidth, initSize.height - 1 - max, initBarWidth + 1, max + 1), col, CV_FILLED);
+        cv::rectangle(initPlot, cv::Rect(i * initBarWidth, initSize.height - 1 - max, initBarWidth + 1, max + 1), col, cv::FILLED);
         if (withOutline)
             cv::rectangle(initPlot, cv::Rect(i * initBarWidth, initSize.height - 1 - max, initBarWidth + 1, max + 1), cv::Scalar(0, 0, 0), 1);
 
         // draw common part
         if (min > 0) { // in case of gray min is 0
             if (withOutline) {
-                cv::rectangle(initPlot, cv::Rect(i * initBarWidth + 1, initSize.height - min, initBarWidth - 1, min - 1), cv::Scalar(192, 128, 192), CV_FILLED);
+                cv::rectangle(initPlot, cv::Rect(i * initBarWidth + 1, initSize.height - min, initBarWidth - 1, min - 1), cv::Scalar(192, 128, 192), cv::FILLED);
 
                 auto col = height1 == height2 ? cv::Scalar(0, 0, 0) : cv::Scalar(64, 0, 64);
                 cv::line(initPlot, cv::Point( i    * initBarWidth + 1, initSize.height - 1 - min),
                                    cv::Point((i+1) * initBarWidth - 1, initSize.height - 1 - min), col, 1);
             }
             else
-                cv::rectangle(initPlot, cv::Rect(i * initBarWidth, initSize.height - 1 - min, initBarWidth + 1, min + 1), cv::Scalar(192, 128, 192), CV_FILLED);
+                cv::rectangle(initPlot, cv::Rect(i * initBarWidth, initSize.height - 1 - min, initBarWidth + 1, min + 1), cv::Scalar(192, 128, 192), cv::FILLED);
         }
     }
 
@@ -1761,8 +1760,8 @@ imagefusion::Image plotHist(std::vector<unsigned int> const& hist1,
         int totalWidth = plot.width();
         auto doesFitIntoPlot = [&] (std::string const& s) { return cv::getTextSize(s, fontFace, 1, 1, &baseline).width < totalWidth; };
         auto shortened = shorten(fn1, fn2, doesFitIntoPlot, 1);
-        cv::putText(plot.cvMat(), shortened[0], cv::Point{0, histFrameTop + plotSize.height + 2 * (zerosize + 6)},                     fontFace, 1, gray ? cv::Scalar::all(framecolor) : cv::Scalar(255, 128, 128), 1, CV_AA);
-        cv::putText(plot.cvMat(), shortened[1], cv::Point{0, histFrameTop + plotSize.height + (fn1.empty() ? 2 : 3) * (zerosize + 6)}, fontFace, 1, gray ? cv::Scalar::all(framecolor) : cv::Scalar(128, 128, 255), 1, CV_AA);
+        cv::putText(plot.cvMat(), shortened[0], cv::Point{0, histFrameTop + plotSize.height + 2 * (zerosize + 6)},                     fontFace, 1, gray ? cv::Scalar::all(framecolor) : cv::Scalar(255, 128, 128), 1, cv::LINE_AA);
+        cv::putText(plot.cvMat(), shortened[1], cv::Point{0, histFrameTop + plotSize.height + (fn1.empty() ? 2 : 3) * (zerosize + 6)}, fontFace, 1, gray ? cv::Scalar::all(framecolor) : cv::Scalar(128, 128, 255), 1, cv::LINE_AA);
     }
     plot.crop(detectBorderCropBounds(plot));
 

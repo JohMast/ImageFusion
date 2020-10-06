@@ -1,8 +1,8 @@
 #include "interpolation.h"
 
-#include "Image.h"
-#include "GeoInfo.h"
-#include "MultiResImages.h"
+#include "image.h"
+#include "geoinfo.h"
+#include "multiresimages.h"
 #include "exceptions.h"
 
 #include <boost/test/unit_test.hpp>

@@ -182,7 +182,8 @@ BOOST_AUTO_TEST_CASE(scatterplots_uint16)
 
     // natural size is 100 = 150 - 50
     Interval range = findRange("auto", "", img1, img2);
-    for (int16_t plotSize : {-1, 50, 77, 100}) {
+    std::array<int16_t, 4> plotSizes{-1, 50, 77, 100};
+    for (int16_t plotSize : plotSizes) {
         Image plot = plotScatter(img1, img2, Image{}, range, plotSize, false);
 
         plotSize = plot.width();
@@ -863,7 +864,6 @@ BOOST_AUTO_TEST_CASE(string_shortening)
     s = shorten("123MM456iiiiii789", "abcMMdefiiiiiighi", isShortEnough);
     BOOST_CHECK_EQUAL(s[0], "123MM4...789");
     BOOST_CHECK_EQUAL(s[1], "abcMMd...ghi");
-
 }
 
 BOOST_AUTO_TEST_SUITE_END()

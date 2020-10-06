@@ -4,7 +4,7 @@
     #error "Sorry, if you want to use ParallelizerOptions, you need to install OpenMP first."
 #endif
 
-#include "Options.h"
+#include "options.h"
 
 #include <omp.h>
 

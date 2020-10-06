@@ -1,7 +1,7 @@
 #include "customopts.h"
 
-#include "Image.h"
-#include "Type.h"
+#include "image.h"
+#include "type.h"
 #include "optionparser.h"
 
 #include <vector>

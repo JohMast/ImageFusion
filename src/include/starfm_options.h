@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Options.h"
+#include "options.h"
 #include "exceptions.h"
 
 namespace imagefusion {
@@ -113,7 +113,10 @@ public:
 
     /**
      * @brief Set the window size in which will be searched for similar pixels
-     * @param size for the search window. Must be an odd number.
+     *
+     * @param size for the search window. Must be an odd number. Example: The default value of 51
+     * means 25 pixel up and down, or left and right, plus the center pixel.
+     *
      * @throws invalid_argument_error if size is even.
      * @see getWinSize()
      */
@@ -125,6 +128,7 @@ public:
 
     /**
      * @brief Get the window size in which is searched for similar pixels
+     * @return The window size in pixel.
      * @see setWinSize()
      */
     unsigned int getWinSize() const {
@@ -214,7 +218,7 @@ public:
 
     /**
      * @brief Get the resolution tag for high resolution
-     * @return tag
+     * @return high resolution tag
      * @see setHighResTag()
      */
     std::string const& getHighResTag() const {
@@ -237,7 +241,7 @@ public:
 
     /**
      * @brief Get the resolution tag for low resolution
-     * @return tag
+     * @return low resolution tag
      * @see setLowResTag()
      */
     std::string const& getLowResTag() const {
@@ -260,7 +264,7 @@ public:
 
     /**
      * @brief Set whether to use strict filtering
-     * @param strict
+     * @param strict specifies, whether to use strict filtering as in the STARFM paper
      *
      * So the original paper says in the text before (13) and (14) that a good candidate must
      * satisfy both equations (actually (15) and (16) to be more precise). This is meant here with
@@ -287,7 +291,7 @@ public:
 
     /**
      * @brief Set whether to copy values on zero spectral or temporal difference
-     * @param copy
+     * @param copy specifies, whether to copy the pixel value, when the difference is zero.
      *
      * The original paper makes some basic assumptions: It states that if no change in the temporal
      * difference appears, the result will be the high resolution pixel and if no change in the

@@ -185,26 +185,13 @@ std::map<std::vector<int>, std::vector<int>> getJobs(std::vector<int> const& pai
 }
 
 
-imagefusion::Image processSetMask(imagefusion::Image mask, imagefusion::ConstImage const& img, imagefusion::IntervalSet const& validSet) {
-    imagefusion::Image tempMask = img.createMultiChannelMaskFromSet({validSet});
+imagefusion::Image processSetMask(imagefusion::ConstImage const& mask, imagefusion::ConstImage const& img, imagefusion::IntervalSet const& validSet, bool singleChannel) {
+    imagefusion::Image tempMask = singleChannel ? img.createSingleChannelMaskFromSet({validSet}) : img.createMultiChannelMaskFromSet({validSet});
     if (mask.empty())
         return tempMask;
-
-    if (mask.channels() != 1 && mask.channels() != tempMask.channels())
-        IF_THROW_EXCEPTION(imagefusion::image_type_error("The mask has " + std::to_string(mask.channels()) + " channels while the image has " + std::to_string(tempMask.channels()) + ". That doesn't fit."))
-                << imagefusion::errinfo_image_type(mask.type());
-
-    // bring mask to the same number of channels
-    if (mask.channels() < tempMask.channels()) {
-        std::vector<imagefusion::Image> masks;
-        masks.reserve(tempMask.channels());
-        for (unsigned int i = 0; i < tempMask.channels(); ++i)
-            masks.push_back(imagefusion::Image(mask.sharedCopy()));
-        mask.merge(masks);
-    }
-
-    return std::move(mask).bitwise_and(tempMask);
+    return mask.bitwise_and(std::move(tempMask));
 }
+
 
 std::string outputImageFile(imagefusion::ConstImage const& img, imagefusion::GeoInfo gi, std::string origFileName, std::string prefix, std::string postfix, imagefusion::FileFormat f, int date1, int date2, int date3) {
     std::filesystem::path p = origFileName;

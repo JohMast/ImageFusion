@@ -8,7 +8,7 @@
 
 #include <boost/exception/error_info.hpp>
 
-#include "Image.h"
+#include "image.h"
 #include "exceptions.h"
 
 namespace imagefusion {
@@ -193,8 +193,6 @@ public:
      * @param date
      *
      * @see has(int) const
-     *
-     * @throws not_found_error if there is no resolution tag `res`.
      */
     void remove(int date);
 

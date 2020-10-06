@@ -11,23 +11,24 @@
 #include <gdal_utils.h>
 #include <cpl_string.h>
 
-#include "Image.h"
-#include "GeoInfo.h"
+#include "image.h"
+#include "geoinfo.h"
 
 namespace {
 
 template <typename Imgtype>
-cv::Mat merge(std::vector<Imgtype> const& images) {
+imagefusion::Image merge_impl(std::vector<Imgtype> const& images) {
     std::vector<cv::Mat> cvImages;
     cvImages.reserve(images.size());
     for (auto const& i : images)
         cvImages.push_back(i.cvMat()); // OpenCV shared copy
 
 //    unsigned int totalChannels = std::accumulate(images.begin(), images.end(), 0, [] (Imgtype const& i, unsigned int count) { return count + i.channels(); });
-    cv::Mat img;
-    cv::merge(cvImages, img);
-    return img;
+    imagefusion::Image multichannel;
+    cv::merge(cvImages, multichannel.cvMat());
+    return multichannel;
 }
+
 
 std::string getGDALMemOptionString(imagefusion::ConstImage const& i) {
     char szPtrValue[128] = { '\0' };
@@ -747,12 +748,12 @@ std::vector<Image> ConstImage::split(std::vector<unsigned int> chans) const {
 }
 
 
-void Image::merge(std::vector<Image> const& images) {
-    img = ::merge(images);
+Image merge(std::vector<Image> const& images) {
+    return merge_impl(images);
 }
 
-void Image::merge(std::vector<ConstImage> const& images) {
-    img = ::merge(images);
+Image merge(std::vector<ConstImage> const& images) {
+    return merge_impl(images);
 }
 
 namespace {
@@ -918,6 +919,9 @@ Image minimum_maximum_pixel(std::vector<double> const& pix, Image A, ConstImage 
 
 template<typename CvOp, typename CustomOp>
 Image add_subtract_pixel(std::vector<double> const& pix, Image A, ConstImage const& mask, CvOp const& cvop, CustomOp const& customop) {
+    if (A.empty())
+        return A;
+
     using std::to_string;
     checkMask(mask, A.channels());
 
@@ -1135,6 +1139,9 @@ Image ConstImage::multiply(std::vector<double> const& pix, ConstImage const& mas
 }
 
 Image Image::multiply(std::vector<double> const& pix, ConstImage const& mask)&& {
+    if (empty())
+        return std::move(*this);
+
     using std::to_string;
     checkMask(mask, channels());
 
@@ -1197,6 +1204,9 @@ Image ConstImage::divide(std::vector<double> const& pix, ConstImage const& mask,
 }
 
 Image Image::divide(std::vector<double> const& pix, ConstImage const& mask)&& {
+    if (empty())
+        return std::move(*this);
+
     using std::to_string;
     checkMask(mask, channels());
 
@@ -1428,6 +1438,111 @@ std::pair<std::vector<double>, std::vector<double>> ConstImage::meanStdDev(Const
     return {mean, stdDev};
 }
 
+
+namespace {
+
+template<class ForwardImgIt>
+ForwardImgIt unique_with_mask(ForwardImgIt img_first, ForwardImgIt img_last, cv::MatConstIterator_<uint8_t> mask_first, cv::MatConstIterator_<uint8_t> mask_last)
+{
+    if (img_first == img_last || mask_first == mask_last)
+        return img_last;
+
+    ForwardImgIt img_result = img_first;
+    while (!*mask_first && mask_first != mask_last) {
+        ++mask_first;
+        ++img_first;
+    }
+
+    // check if no location was valid
+    if (mask_first == mask_last)
+        return img_result;
+
+    // check if first location was invalid
+    if (img_result != img_first)
+        // make sure the first position is valid
+        *img_result = std::move(*img_first);
+
+    // iterate
+    while (++img_first != img_last && ++mask_first != mask_last)
+        if (*mask_first && !(*img_result == *img_first) && ++img_result != img_first)
+            *img_result = std::move(*img_first);
+
+    return ++img_result;
+}
+
+struct UniqueFunctor {
+    Image& img;
+    ConstImage const& mask;
+
+    template<Type basetype>
+    std::vector<double> operator()() const {
+        static_assert(getChannels(basetype) == 1, "This functor only accepts base type to reduce code size.");
+        if (img.channels() != 1)
+            IF_THROW_EXCEPTION(invalid_argument_error("Only single-channel images supported for unique. The image has " + std::to_string(img.channels()) + " channels.")) << errinfo_image_type(img.type());
+        if (mask.type() != Type::uint8x1)
+            IF_THROW_EXCEPTION(invalid_argument_error("Only single-channel masks (with Type uint8) supported for unique. The mask has type " + to_string(mask.type()) + ".")) << errinfo_image_type(mask.type());
+        if (!mask.empty() && mask.size() != img.size())
+            IF_THROW_EXCEPTION(invalid_argument_error("Mask and image have different sizes. image: " + to_string(img.size()) + ", mask: " + to_string(mask.size())));
+
+        using type = typename DataType<basetype>::base_type;
+        auto begin = img.begin<type>(), end = img.end<type>();
+        // remove adjacent duplicates to reduce size
+        auto last = mask.empty() ? std::unique(begin, end) : unique_with_mask(begin, end, mask.begin<uint8_t>(), mask.end<uint8_t>());
+        std::sort(begin, last);                 // sort remaining elements
+        last = std::unique(begin, last);        // remove duplicates
+
+        std::vector<double> vals;
+        while (begin != last) {
+            vals.push_back(static_cast<double>(*begin));
+            ++begin;
+        }
+        return vals;
+    }
+};
+
+struct CountUniqueFunctor {
+    ConstImage const& img;
+    ConstImage const& mask;
+
+    template<Type basetype>
+    std::map<double, unsigned int> operator()() const {
+        static_assert(getChannels(basetype) == 1, "This functor only accepts base type to reduce code size.");
+        if (img.channels() != 1)
+            IF_THROW_EXCEPTION(invalid_argument_error("Only single-channel images supported for unique. The image has " + std::to_string(img.channels()) + " channels.")) << errinfo_image_type(img.type());
+        if (mask.type() != Type::uint8x1)
+            IF_THROW_EXCEPTION(invalid_argument_error("Only single-channel masks (with Type uint8) supported for unique. The mask has type " + to_string(mask.type()) + ".")) << errinfo_image_type(mask.type());
+        if (!mask.empty() && mask.size() != img.size())
+            IF_THROW_EXCEPTION(invalid_argument_error("Mask and image have different sizes. image: " + to_string(img.size()) + ", mask: " + to_string(mask.size())));
+
+        using type = typename DataType<basetype>::base_type;
+        std::map<double, unsigned int> unique;
+        auto img_it = img.begin<type>(), img_end = img.end<type>();
+        if (mask.empty()) {
+            for (; img_it != img_end; ++img_it)
+                ++unique[*img_it];
+        }
+        else {
+            auto mask_it = mask.begin<uint8_t>(), mask_end = mask.end<uint8_t>();
+            for (; img_it != img_end && mask_it != mask_end; ++img_it, ++mask_it)
+                if (*mask_it)
+                    ++unique[*img_it];
+        }
+        return unique;
+    }
+};
+} /* anonymous namespace */
+
+std::vector<double> ConstImage::unique(ConstImage const& mask) const {
+    return clone().unique(mask);
+}
+
+std::vector<double> Image::unique(ConstImage const& mask)&& {
+    return CallBaseTypeFunctor::run(UniqueFunctor{*this, mask}, basetype());
+}
+
+std::map<double, unsigned int> ConstImage::uniqueWithCount(ConstImage const& mask) const {
+    return CallBaseTypeFunctor::run(CountUniqueFunctor{*this, mask}, basetype());
+}
 
 void Image::set(double val, ConstImage const& mask) {
     set(std::vector<double>(channels(), val), mask);
@@ -1740,6 +1855,63 @@ struct ConvertToBUFunctor {
         return dst;
     }
 };
+
+template<Type imfu_src_type>
+struct ConvertToTesseledCapFunctor {
+    ConstImage const& src;
+    ColorMapping map;
+    std::vector<unsigned int> srcChans;
+
+    template<Type imfu_dst_type>
+    Image operator()() {
+        using stype = typename DataType<imfu_src_type>::base_type;
+        using dtype = typename DataType<imfu_dst_type>::base_type;
+        Image dst{src.size(), getFullType(imfu_dst_type, 3)};
+        constexpr double scale =  getImageRangeMax(imfu_dst_type) / getImageRangeMax(imfu_src_type) / (std::is_signed<dtype>::value ? 1 : 2);
+        constexpr double offset = std::is_signed<dtype>::value ? 0 : getImageRangeMax(imfu_dst_type) / 2;
+        std::array<double, 3*7> f;
+        if (map == ColorMapping::Landsat_to_TasseledCap) {
+            constexpr double max = 1 / 2.3103; // if the pixels are all one, this is one over the sum of brightness
+            f = std::array<double, 3*7>{ // values from: "A Physically-Based Transformation of Thematic Mapper Data - The TM Tasseled Cap" by Crist and Cicone, 1984
+                //       Blue,         Green,           Red,           NIR,         SWIR1,         SWIR2
+                +0.3037 * max, +0.2793 * max, +0.4743 * max, +0.5585 * max, +0.5082 * max, +0.1863 * max, 0, // Brightness  // TODO: Check if values are correct, for which Landsat: 4, 5, 7, Digital Numbers, Reflectance factors??
+                -0.2848 * max, -0.2435 * max, -0.5436 * max, +0.7243 * max, +0.0840 * max, -0.1800 * max, 0, // Greenness
+                +0.1509 * max, +0.1973 * max, +0.3279 * max, +0.3406 * max, -0.7112 * max, -0.4572 * max, 0  // Wetness
+            };
+        }
+        else if (map == ColorMapping::Modis_to_TasseledCap) {
+            constexpr double max = 1 / 2.6206; // if the pixels are all one, this is one over the sum of brightness
+            f = std::array<double, 3*7>{ // values from: "MODIS Tasseled Cap Transformation and its Utility" by Zhang et al, 2016
+                //        Red        Near-IR           Blue          Green           M-IR           M-IR           M-IR
+                //    620-670        841-876        459-479        545-565      1230-1250      1628-1652      2105-2155
+                +0.3956 * max, +0.4718 * max, +0.3354 * max, +0.3834 * max, +0.3946 * max, +0.3434 * max, +0.2964 * max, // Brightness
+                -0.3399 * max, +0.5952 * max, -0.2129 * max, -0.2222 * max, +0.4617 * max, -0.1037 * max, -0.4600 * max, // Greenness
+                +0.10839* max, +0.0912 * max, +0.5065 * max, +0.4040 * max, -0.2410 * max, -0.4658 * max, -0.5306 * max  // Wetness
+            };
+        }
+        for (int y = 0; y < src.height(); ++y) {
+            for (int x = 0; x < src.width(); ++x) {
+                double brightness = 0;
+                double greeness = 0;
+                double wetness = 0;
+                for (unsigned int i = 0; i < srcChans.size(); ++i) {
+                    double src_val = src.at<stype>(x, y, srcChans[i]);
+                    brightness += f[i]    * src_val;
+                    greeness   += f[i+7]  * src_val;
+                    wetness    += f[i+14] * src_val;
+                }
+                brightness = scale * brightness + offset;
+                greeness   = scale * greeness   + offset;
+                wetness    = scale * wetness    + offset;
+                dst.at<dtype>(x, y, 0) = cv::saturate_cast<dtype>(brightness);
+                dst.at<dtype>(x, y, 1) = cv::saturate_cast<dtype>(greeness);
+                dst.at<dtype>(x, y, 2) = cv::saturate_cast<dtype>(wetness);
+            }
+        }
+        return dst;
+    }
+};
+
 
 template<Type imfu_src_type>
 struct ConvertToYCbCrFunctor {
@@ -2095,24 +2267,33 @@ struct ConvertFunctor {
             return CallBaseTypeFunctor::run(ConvertToNDIFunctor<srcType>{src, std::move(srcChans)}, dstType);
         case ColorMapping::Red_NIR_SWIR_to_BU:
             return CallBaseTypeFunctor::run(ConvertToBUFunctor<srcType>{src, std::move(srcChans)}, dstType);
+        case ColorMapping::Landsat_to_TasseledCap: // TODO: Add more
+        case ColorMapping::Modis_to_TasseledCap:
+            return CallBaseTypeFunctor::run(ConvertToTesseledCapFunctor<srcType>{src, map, std::move(srcChans)}, dstType);
         default:
             assert(false && "This should not happen. Fix ConvertFunctor!");
             return Image{};
         }
     }
 };
+
+constexpr int requiredChannels(ColorMapping map) {
+    return map == ColorMapping::Pos_Neg_to_NDI         ? 2 :
+           map == ColorMapping::Modis_to_TasseledCap   ? 7 :
+           map == ColorMapping::Landsat_to_TasseledCap ? 6 : // TODO: add more landsat transforms
+                                                         3;
+}
 } /* anonymous namespace */
 
 Image ConstImage::convertColor(ColorMapping map, Type result, std::vector<unsigned int> sourceChannels) const {
-    using CM = ColorMapping;
+//    using CM = ColorMapping;
     for (unsigned int sc : sourceChannels)
         if (sc >= channels())
             IF_THROW_EXCEPTION(invalid_argument_error("Source channels must be in the range [0, channels-1]. One is: " + std::to_string(sc)));
 
-    bool doesMapRequireThreeChannels = map != CM::Pos_Neg_to_NDI;
-    unsigned int requiredSrcChannels = doesMapRequireThreeChannels ? 3 : 2;
+    unsigned int requiredSrcChannels = requiredChannels(map);
     if (channels() < requiredSrcChannels)
-        IF_THROW_EXCEPTION(image_type_error("Color space conversion from " + getFromString(map) + " requires the image to have at least " + std::to_string(requiredSrcChannels) + " channels."))
+        IF_THROW_EXCEPTION(image_type_error("Color space conversion from " + getFromString(map) + " requires the image to have at least " + std::to_string(requiredSrcChannels) + " channels. The provided image has " + std::to_string(channels()) + " channels."))
                 << errinfo_image_type(type());
 
     if (!sourceChannels.empty() && sourceChannels.size() != requiredSrcChannels) {

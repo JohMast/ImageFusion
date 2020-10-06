@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Type.h"
+#include "type.h"
 #include <string>
 #include <boost/exception/exception.hpp>
 #include <boost/icl/interval_set.hpp>

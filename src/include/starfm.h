@@ -1,7 +1,7 @@
 #pragma once
 
-#include "DataFusor.h"
-#include "StarfmOptions.h"
+#include "datafusor.h"
+#include "starfm_options.h"
 #include <cmath>
 #include <iostream>
 #include <opencv2/opencv.hpp>
@@ -262,11 +262,23 @@ public:
      * @param date2 is the prediction date and it is used to get the right Image from `#imgs`. See
      * also \ref starfm_3_image_structure "STARFM image structures".
      *
-     * @param maskParam should be an arbitrary mask in the size of the source images. It can be
-     * single-channel or multi-channel. Zero values prevent the usage of any image at these
-     * locations. The result at these locations is undefined.
+     * @param validMask is either empty or a mask in the size of the source images. It can be
+     * single-channel or multi-channel. Locations with zero values are not used at all and the
+     * result of the @ref outputImage() is undefined at these locations. If the argument is an
+     * empty image, all locations will be considered as valid.
+     *
+     * @param predMask is either empty or a single-channel mask in the size of the source images.
+     * It specifies the locations that should be predicted (255) and the locations that should not
+     * be predicted (0). However, a prediction can only be done for valid locations, as specified
+     * by the `validMask`. The result of the @ref outputImage() is undefined at locations where no
+     * prediction occurs.
+     *
+     * @throws logic_error if source images have not been set.
+     * @throws not_found_error if not all required images are available.
+     * @throws image_type_error if the types (basetypes or channels) of images or masks mismatch
+     * @throws size_error if the sizes of images or masks mismatch
      */
-    void predict(int date2, ConstImage const& maskParam = ConstImage{}) override;
+    void predict(int date2, ConstImage const& validMask = {}, ConstImage const& predMask = {}) override;
 
 protected:
     /// StarfmOptions to use for the next prediction
@@ -298,10 +310,16 @@ protected:
 
     /**
      * @brief Check the input images size, type, etc.
-     * @param mask will also be checked
+     * @param validMask will be checked for size, type and channels
+     * @param predMask will be checked for size, type and channels
      * @param date2 is the prediction date to get the corresponding image
+     *
+     * @throws logic_error if source images have not been set.
+     * @throws not_found_error if not all required images are available.
+     * @throws image_type_error if the types (basetypes or channels) of images or masks mismatch
+     * @throws size_error if the sizes of images or masks mismatch
      */
-    void checkInputImages(ConstImage const& mask, int date2) const;
+    void checkInputImages(ConstImage const& validMask, ConstImage const& predMask, int date2) const;
 };
 
 

@@ -2,12 +2,12 @@
 #include <iomanip>
 #include <string>
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <boost/range/adaptor/reversed.hpp>
 
 #include "optionparser.h"
-#include "GeoInfo.h"
-#include "MultiResImages.h"
+#include "geoinfo.h"
+#include "multiresimages.h"
 #include "utils_common.h"
 #include "fileformat.h"
 
@@ -93,7 +93,7 @@ std::vector<Descriptor> usage{
     "[--ql-fmask] [--ql-img] [--ql-modis]\n"),
     Descriptor::breakTable(),
 
-    Descriptor::text("This utility is developed to perform simple interpolation on a given time series of remote sensing images."
+    Descriptor::text("This utility is developed to perform simple interpolation on a given time series of remote sensing images. "
     "This utility can also perform cloud masking on satellite images with the quality layer provided using [--ql-img] option. "
     "The quality layer can be a bit field image (ex. State_1km: Reflectance Data State QA layer from MODIS) or state image which "
     "provides the state of the pixel (ex. quality layer from FMASK). When a single image with a date and a quality layer with the "
@@ -132,7 +132,7 @@ std::vector<Descriptor> usage{
     {"QLIMG",         "PFMASK",  "",  "ql-python-fmask",          ArgChecker::QL<false, true>,      "  --ql-python-fmask=<img> \tThis option is used to represent the quality layers generated with the python version of FMASK and will mark the states; cloud and cloud shadow as locations to interpolate. It is equivalent to: --interp-ranges=[2,3].\n"},
     {"STATS",         "",       "s",  "stats",                    ArgChecker::Optional,             "  -s, --stats, -s <out>, --stats=<out> \tEnable stats (cloud pixels before and after, etc.) and output into the given file. If no file is specified it is output to stdout.\n"},
     Descriptor::breakTable(),
-    Descriptor::text("\nExamples 1:\n"
+    Descriptor::text("\nExample 1:\n"
     "  \timginterp \t--img='-f day1.tif -d 1' --img='-f day2.tif -d 2' --img='-f day3.tif -d 3' --img='-f day4.tif -d 4' --interp-ranges=[10000,inf]\n"
     "\twill interpolate the images with pixel values greater than or equal to 10000 from day 1 to day 4 and output them to interpolated_day1.tif, "
     "interpolated_day2.tif, interpolated_day3.tif, interpolated_day4.tif.\n\n"
@@ -145,7 +145,7 @@ std::vector<Descriptor> usage{
     "\t  --interp-ranges=[10000,inf]\n"
     "\tdoes the same as the first line, but is easier to handle.\n"
 
-    "\nExamples 2:\n"
+    "\nExample 2:\n"
     "  \timginterp \t--img='-f day1.tif -d 1' --img='-f day2.tif -d 2' --img='-f day3.tif -d 3' --img='-f day4.tif -d 4' "
                              "--ql-fmask='-f ql1.tif -d 1' --ql-fmask='-f ql2.tif -d 2' --ql-fmask='-f ql3.tif -d 3' --ql-fmask='-f ql4.tif -d 4'\n"
     "\twill mask the cloud and cloud shadow pixel locations in the images using the quality layer file provided with the --ql-fmask option "

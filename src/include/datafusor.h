@@ -1,7 +1,7 @@
 #pragma once
 
-#include "MultiResImages.h"
-#include "Options.h"
+#include "multiresimages.h"
+#include "options.h"
 
 
 namespace imagefusion {
@@ -112,18 +112,28 @@ public:
      *
      * @param date is the date for which the image should be predicted.
      *
-     * @param mask is an optional mask in the size of the input images to mark invalid input data
-     * (e. g. fill values). Your predict method should check for a valid mask, like done in
-     * parallelizer_test.cpp. If separate masks for the input images are meaningful and supported
-     * by a data fusor this mask parameter is the mask for the low resolution image at the
-     * prediction date. Otherwise it should be considered as a common mask for all input images.
+     * @param validMask is an optional mask (with Type::uint8) in the size of the input images to
+     * mark valid and invalid input data (e. g. nodata fill values). It should have 255s at valid
+     * locations and 0s at invalid locations. Any data fusor should use this mask, but check
+     * whether it fits to the source images, by using `mask.isMaskFor(src)`. If separate masks for
+     * the input images are meaningful and supported by a data fusor this mask parameter is the
+     * mask for the low resolution image at the prediction date. Otherwise it should be considered
+     * as a common mask for all input images.
      *
-     * Note, all other necessary settings, such as setting the source images and other algorithm
-     * specific settings should be set *before* calling predict!
+     * @param predMask is an optional mask (with Type::uint8) in the size of the input images to
+     * mark the locations with a 255 that should be predicted. At locations with a 0 a prediction
+     * won't be performed, but they might still be valid and thus used to predict other locations.
+     * If a location is marked for prediction, but is at the same time marked as invalid it may
+     * still be predicted, depending on the algorithm. So `predMask` specifies where to write,
+     * while `validMask` specifies where to read. However, many algorithms read a value, modify it
+     * and write it, so they need to be able to read a value for a prediction.
+     *
+     * Note, all other necessary settings, such as setting the source images and algorithm specific
+     * settings should be set *before* calling predict!
      *
      * @see processOptions(Options const& o), srcImages(std::shared_ptr<MultiResImages const> images)
      */
-    virtual void predict(int date, ConstImage const& mask = ConstImage{}) = 0;
+    virtual void predict(int date, ConstImage const& validMask = {}, ConstImage const& predMask = {}) = 0;
 
 
     /**

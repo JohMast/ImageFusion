@@ -3,12 +3,12 @@
 #include <iterator>
 #include <memory>
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include "optionparser.h"
-#include "GeoInfo.h"
-#include "Image.h"
-#include "MultiResImages.h"
+#include "geoinfo.h"
+#include "image.h"
+#include "multiresimages.h"
 #include "fitfc.h"
 #include "fitfc_options.h"
 #include "fileformat.h"
@@ -34,7 +34,7 @@ const char* usageImage =
     "\t  -c <rect>, --crop=<rect> \tOptional. Specifies the crop window, where the "
     "image will be read. A zero width or height means full width or height, respectively.\n"
     "\t<rect> requires either all of the following arguments:\v"
-    "  -c (<num> <num), --center=(<num> <num>) x and y center\v"
+    "  -c (<num> <num>), --center=(<num> <num>) x and y center\v"
     "  -w <num>, --width=<num>  width\v"
     "  -h <num>, --height=<num> height\v"
     "or x can be specified with:\v"
@@ -237,9 +237,9 @@ int main(int argc, char* argv[]) {
 
             pairMasks.push_back(baseMask);
             if (pairValidSets.hasHigh)
-                pairMasks.back() = helpers::processSetMask(std::move(pairMasks.back()), mri->get(jat.highTag, datePair), pairValidSets.high);
+                pairMasks.back() = helpers::processSetMask(pairMasks.back(), mri->get(jat.highTag, datePair), pairValidSets.high);
             if (pairValidSets.hasLow)
-                pairMasks.back() = helpers::processSetMask(std::move(pairMasks.back()), mri->get(jat.lowTag,  datePair), pairValidSets.low);
+                pairMasks.back() = helpers::processSetMask(pairMasks.back(), mri->get(jat.lowTag,  datePair), pairValidSets.low);
         }
 
         // loop over a single time series (multiple images with the same date 1 and maybe date 3)
@@ -267,7 +267,7 @@ int main(int argc, char* argv[]) {
             for (unsigned int idx = 0; idx < pairMasks.size(); ++idx) {
                 imagefusion::Image predMask = pairMasks.at(idx);
                 if (predValidSets.hasLow)
-                    predMask = helpers::processSetMask(std::move(predMask), mri->get(jat.lowTag, datePred), predValidSets.low);
+                    predMask = helpers::processSetMask(predMask, mri->get(jat.lowTag, datePred), predValidSets.low);
 
                 int date1 = pairDate_vec.at(idx);
                 fitfcOpts.setPairDate(date1);

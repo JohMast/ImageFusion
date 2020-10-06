@@ -2,8 +2,8 @@
 
 #include "imagefusion.h"
 #include "exceptions.h"
-#include "Image.h"
-#include "MultiResImages.h"
+#include "image.h"
+#include "multiresimages.h"
 
 #include <string>
 #include <sstream>
@@ -1423,7 +1423,7 @@ struct Parse {
      * const char* usageRectangle =
      *     "  -r <rect>, \t--rectangle=<rect> \tDescription text\v"
      *     "<rect> requires either all of the following arguments:\v"
-     *     "  -c (<num> <num), --center=(<num> <num>) x and y center\v"
+     *     "  -c (<num> <num>), --center=(<num> <num>) x and y center\v"
      *     "  -w <num>, --width=<num>                 width\v"
      *     "  -h <num>, --height=<num>                height\v"
      *     "Examples: --rectangle='--center=(2 3.5) --width 3 -h 4)'\v"
@@ -1502,7 +1502,7 @@ struct Parse {
      * const char* usageRectangle =
      *     "  -r <rect>, \t--rectangle=<rect> \tDescription text\v"
      *     "<rect> requires either all of the following arguments:\v"
-     *     "  -c (<num> <num), --center=(<num> <num>) x and y center\v"
+     *     "  -c (<num> <num>), --center=(<num> <num>) x and y center\v"
      *     "  -w <num>, --width=<num>                 width\v"
      *     "  -h <num>, --height=<num>                height\v"
      *     "Examples: --rectangle='--center=(2 3.5) --width 3 -h 4)'\v"

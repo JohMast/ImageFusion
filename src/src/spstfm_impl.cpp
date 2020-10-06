@@ -16,8 +16,8 @@
 #include <opencv2/opencv.hpp>
 
 #include "exceptions.h"
-#include "Type.h"
-#include "Image.h"
+#include "type.h"
+#include "image.h"
 #include "spstfm.h"
 namespace imagefusion {
 namespace spstfm_impl_detail {

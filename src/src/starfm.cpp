@@ -1,4 +1,4 @@
-#include "Starfm.h"
+#include "starfm.h"
 #include <math.h>
 
 
@@ -52,7 +52,7 @@ Image StarfmFusor::computeDistanceWeights() const {
 }
 
 
-void StarfmFusor::checkInputImages(ConstImage const& mask, int date2) const {
+void StarfmFusor::checkInputImages(ConstImage const& validMask, ConstImage const& predMask, int date2) const {
     if (!imgs)
         IF_THROW_EXCEPTION(logic_error("No MultiResImage object stored in StarfmFusor while predicting. This looks like a programming error."));
 
@@ -108,25 +108,40 @@ void StarfmFusor::checkInputImages(ConstImage const& mask, int date2) const {
                                       " * " + strL3 + " " + to_string(imgs->get(opt.getLowResTag(),  opt.date3).size()) + "\n" : "")));
     }
 
-    if (!mask.empty() && mask.size() != s)
-        IF_THROW_EXCEPTION(size_error("The mask has a wrong size: " + to_string(mask.size()) +
+    if (!validMask.empty() && validMask.size() != s)
+        IF_THROW_EXCEPTION(size_error("The validMask has a wrong size: " + to_string(validMask.size()) +
                                       ". It must have the same size as the images: " + to_string(s) + "."))
-                << errinfo_size(mask.size());
+                << errinfo_size(validMask.size());
 
-    if (!mask.empty() && mask.basetype() != Type::uint8)
-        IF_THROW_EXCEPTION(image_type_error("The mask has a wrong base type: " + to_string(mask.basetype()) +
+    if (!validMask.empty() && validMask.basetype() != Type::uint8)
+        IF_THROW_EXCEPTION(image_type_error("The validMask has a wrong base type: " + to_string(validMask.basetype()) +
                                             ". To represent boolean values with 0 or 255, it must have the basetype: " + to_string(Type::uint8) + "."))
-                << errinfo_image_type(mask.basetype());
+                << errinfo_image_type(validMask.basetype());
 
-    if (!mask.empty() && mask.channels() != 1 && mask.channels() != getChannels(lowType))
-        IF_THROW_EXCEPTION(image_type_error("The mask has a wrong number of channels. It has " + std::to_string(mask.channels()) + " channels while the images have "
+    if (!validMask.empty() && validMask.channels() != 1 && validMask.channels() != getChannels(lowType))
+        IF_THROW_EXCEPTION(image_type_error("The validMask has a wrong number of channels. It has " + std::to_string(validMask.channels()) + " channels while the images have "
                                             + std::to_string(getChannels(lowType)) + ". The mask should have either 1 channel or the same number of channels as the images."))
-                << errinfo_image_type(mask.type());
+                << errinfo_image_type(validMask.type());
+
+    if (!predMask.empty() && predMask.size() != s)
+        IF_THROW_EXCEPTION(size_error("The predMask has a wrong size: " + to_string(predMask.size()) +
+                                      ". It must have the same size as the images: " + to_string(s) + "."))
+                << errinfo_size(predMask.size());
+
+    if (!predMask.empty() && predMask.basetype() != Type::uint8)
+        IF_THROW_EXCEPTION(image_type_error("The predMask has a wrong base type: " + to_string(predMask.basetype()) +
+                                      ". To represent boolean values with 0 or 255, it must have the basetype: " + to_string(Type::uint8) + "."))
+                << errinfo_image_type(predMask.basetype());
+
+    if (!predMask.empty() && predMask.channels() != 1)
+        IF_THROW_EXCEPTION(image_type_error("The predMask must be a single-channel mask, but it has "
+                                            + std::to_string(predMask.channels()) + " channels."))
+                << errinfo_image_type(predMask.type());
 }
 
 
-void StarfmFusor::predict(int date2, ConstImage const& maskParam) {
-    checkInputImages(maskParam, date2);
+void StarfmFusor::predict(int date2, ConstImage const& validMask, ConstImage const& predMask) {
+    checkInputImages(validMask, predMask, date2);
     Rectangle predArea = opt.getPredictionArea();
 
     // if no prediction area has been set, use full img size
@@ -145,7 +160,8 @@ void StarfmFusor::predict(int date2, ConstImage const& maskParam) {
     predArea.y -= sampleArea.y;
 
     // get input images
-    ConstImage sampleMask = maskParam.empty() ? maskParam.sharedCopy() : maskParam.sharedCopy(sampleArea);
+    ConstImage sampleMask = validMask.empty() ? validMask.sharedCopy() : validMask.sharedCopy(sampleArea);
+    ConstImage writeMask = predMask.empty() ? predMask.sharedCopy() : predMask.sharedCopy(sampleArea);
     bool isDoublePairMode = opt.isDoublePairModeConfigured();
     std::vector<ConstImage> hkFull{imgs->get(opt.getHighResTag(), opt.date1).sharedCopy()}; // full image used to ensure that prediction area has no influence
     std::vector<ConstImage> hk_vec{imgs->get(opt.getHighResTag(), opt.date1).sharedCopy(sampleArea)};
@@ -190,7 +206,7 @@ void StarfmFusor::predict(int date2, ConstImage const& maskParam) {
         localValues_vec.emplace_back(localValues.convertTo(l2.type()));
 
         // set tols
-        auto meanStdDev = hkFull.at(ip).meanStdDev(maskParam);
+        auto meanStdDev = hkFull.at(ip).meanStdDev(validMask);
         for (double& sd : meanStdDev.second)
             sd *= 2.0 / opt.getNumberClasses();
         tol_vec.push_back(std::move(meanStdDev.second));
@@ -233,6 +249,9 @@ void StarfmFusor::predict(int date2, ConstImage const& maskParam) {
     // predict with moving window
     for (unsigned int y = predArea.y; y < ymax; ++y) {
         for (unsigned int x = predArea.x; x < xmax; ++x) {
+            if (!writeMask.empty() && !writeMask.boolAt(x, y, 0))
+                continue; // no prediction wanted, skip
+
             Rectangle window((int)x - opt.winSize / 2, (int)y - opt.winSize / 2, opt.winSize, opt.winSize);
             std::vector<ConstImage> hk_win_vec;
             std::vector<ConstImage> dt_win_vec;

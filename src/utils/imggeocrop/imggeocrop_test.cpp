@@ -1,7 +1,7 @@
 #include "imggeocrop.h"
 
-#include "Image.h"
-#include "GeoInfo.h"
+#include "image.h"
+#include "geoinfo.h"
 #include "exceptions.h"
 #include "../helpers/utils_common.h"
 
@@ -15,8 +15,8 @@ using namespace imagefusion;
 // test parsing user crops with --crop-pix and --crop-proj
 BOOST_AUTO_TEST_CASE(parse_crop)
 {
-    std::string dummy = "-f ../test_resources/images/formats/uint16x4.tif "; // to have a valid argument, a valid image is required
-    GeoInfo gi("../test_resources/images/test_info_image.tif");
+    std::string dummy = "-f test_resources/images/formats/uint16x4.tif "; // to have a valid argument, a valid image is required
+    GeoInfo gi("test_resources/images/test_info_image.tif");
     CoordRectangle refRect{379545, 5963595, 389265 - 379545, 5973315 - 5963595}; // from gdalinfo
     CoordRectangle parsedRect;
 
@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_CASE(parse_crop)
 // test parsing latitude / longitude extents
 BOOST_AUTO_TEST_CASE(geo_extents)
 {
-    GeoInfo gi("../test_resources/images/test_info_image.tif");
+    GeoInfo gi("test_resources/images/test_info_image.tif");
     CoordRectangle refRect{379545, 5963595, 389265 - 379545, 5973315 - 5963595}; // from gdalinfo
 
     Coordinate offset   = gi.geotrans.imgToProj(Coordinate(0, gi.width()));
@@ -52,7 +52,8 @@ BOOST_AUTO_TEST_CASE(geo_extents)
     std::string cornerWH     = "--corner=(13d10' 0.94\"E, 53d53'39.37\"N) -w " + std::to_string(refRect.width) + " -h " + std::to_string(refRect.height);
     std::string cornerCenter = "--corner=(13d10' 0.94\"E, 53d53'39.37\"N) --center=(13d14'33.65\"E, 53d51' 6.17\"N)";
 
-    for (std::string arg : {twoCorners, centerWH, cornerWH, cornerCenter}) {
+    std::array<std::string, 4> strings{twoCorners, centerWH, cornerWH, cornerCenter};
+    for (std::string arg : strings) {
         CoordRectangle parsedRect = parseAndConvertToProjSpace(arg, gi);
 //        std::cout << parsedRect << std::endl;
         parsedRect.x = std::round(parsedRect.x);
@@ -69,7 +70,7 @@ BOOST_AUTO_TEST_CASE(geo_extents)
 BOOST_AUTO_TEST_CASE(geo_extents_intersection)
 {
     // test image has a size of 324 x 324
-    GeoInfo gi("../test_resources/images/test_info_image.tif");
+    GeoInfo gi("test_resources/images/test_info_image.tif");
 
     std::string twoCorners = "--corner=(13d10' 0.94\"E, 53d53'39.37\"N) --corner=(13d19' 5.80\"E, 53d48'32.79\"N)"; // full image in lat/long from gdalinfo
     CoordRectangle fullRect = parseAndConvertToProjSpace(twoCorners, gi);

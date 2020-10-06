@@ -4,10 +4,10 @@
     #error "Sorry, if you want to use Parallelizer, you need to install OpenMP first."
 #endif
 
-#include "DataFusor.h"
-#include "ParallelizerOptions.h"
-#include "Image.h"
-#include "MultiResImages.h"
+#include "datafusor.h"
+#include "parallelizer_options.h"
+#include "image.h"
+#include "multiresimages.h"
 #include "exceptions.h"
 
 #include <omp.h>
@@ -81,7 +81,7 @@ namespace imagefusion {
  *
  * class ExampleFusor : public DataFusor {
  * public:
- *     void predict(int date, ConstImage const& mask = ConstImage{}) override {
+ *     void predict(int date, ConstImage const& validMask = {}, ConstImage const& predMask = {}) override {
  *         ConstImage const& src = imgs->get("src", date);
  *         CallBaseTypeFunctor::run(FusionFunctor{src, output}, src.type());
  *     }
@@ -103,7 +103,7 @@ namespace imagefusion {
  *
  * class ExampleFusor : public DataFusor {
  * public:
- *     void predict(int date, ConstImage const& mask = ConstImage{}) override {
+ *     void predict(int date, ConstImage const& validMask = {}, ConstImage const& predMask = {}) override {
  *         ConstImage const& src = imgs->get("src", date);
  *         CallBaseTypeFunctor::run(*this, src.type());
  *     }
@@ -188,7 +188,7 @@ public:
      * performance a DataFusor should check if there is an image available as result, for example
      * like this:
      * @code
-     * void predict(int date) {
+     * void predict(int date, ConstImage const& validMask, ConstImage const& predMask) {
      *     Rectangle predArea = options.getPredictionArea();
      *     if (output.size() != predArea.size() || output.type() != imgs->getAny().type())
      *         output = Image{predArea.width, predArea.height, imgs->getAny().type()}; // create a new one
@@ -197,7 +197,7 @@ public:
      * }
      * @endcode
      */
-    void predict(int date, ConstImage const& mask = ConstImage{}) override;
+    void predict(int date, ConstImage const& validMask = {}, ConstImage const& predMask = {}) override;
 
 private:
     ParallelizerOptions<AlgOpt> options;
@@ -218,7 +218,7 @@ inline ParallelizerOptions<AlgOpt> const& Parallelizer<Alg,AlgOpt>::getOptions()
 }
 
 template<class Alg, class AlgOpt>
-inline void Parallelizer<Alg,AlgOpt>::predict(int date, ConstImage const& mask) {
+inline void Parallelizer<Alg,AlgOpt>::predict(int date, ConstImage const& validMask, ConstImage const& predMask) {
     if (!imgs)
         IF_THROW_EXCEPTION(not_found_error("Parallelizer's source image collection is empty. You have to give it one via srcImages."));
 
@@ -278,7 +278,7 @@ inline void Parallelizer<Alg,AlgOpt>::predict(int date, ConstImage const& mask) 
 
         // let them work and catch exceptions to escort the last one out of the parallel section
         ex.run([&]{
-            fusors.at(i).predict(date, mask);
+            fusors.at(i).predict(date, validMask, predMask);
         });
 
         // check if the fusors used the available cropped image and if so continue

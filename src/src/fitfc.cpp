@@ -50,7 +50,7 @@ Image FitFCFusor::computeDistanceWeights() const {
 }
 
 
-void FitFCFusor::checkInputImages(ConstImage const& mask, int date2) const {
+void FitFCFusor::checkInputImages(ConstImage const& validMask, ConstImage const& predMask, int date2) const {
     if (!imgs)
         IF_THROW_EXCEPTION(logic_error("No MultiResImage object stored in FitFCFusor while predicting. This looks like a programming error."));
 
@@ -94,20 +94,35 @@ void FitFCFusor::checkInputImages(ConstImage const& mask, int date2) const {
                                       "Size is " + to_string(s) + " and factor is " + std::to_string(opt.getResolutionFactor()) + ".\n"))
                 << errinfo_size(s);
 
-    if (!mask.empty() && mask.size() != s)
-        IF_THROW_EXCEPTION(size_error("The mask has a wrong size: " + to_string(mask.size()) +
+    if (!validMask.empty() && validMask.size() != s)
+        IF_THROW_EXCEPTION(size_error("The validMask has a wrong size: " + to_string(validMask.size()) +
                                       ". It must have the same size as the images: " + to_string(s) + "."))
-                << errinfo_size(mask.size());
+                << errinfo_size(validMask.size());
 
-    if (!mask.empty() && mask.basetype() != Type::uint8)
-        IF_THROW_EXCEPTION(image_type_error("The mask has a wrong base type: " + to_string(mask.basetype()) +
+    if (!validMask.empty() && validMask.basetype() != Type::uint8)
+        IF_THROW_EXCEPTION(image_type_error("The validMask has a wrong base type: " + to_string(validMask.basetype()) +
                                             ". To represent boolean values with 0 or 255, it must have the basetype: " + to_string(Type::uint8) + "."))
-                << errinfo_image_type(mask.basetype());
+                << errinfo_image_type(validMask.basetype());
 
-    if (!mask.empty() && mask.channels() != 1 && mask.channels() != getChannels(lowType))
-        IF_THROW_EXCEPTION(image_type_error("The mask has a wrong number of channels. It has " + std::to_string(mask.channels()) + " channels while the images have "
+    if (!validMask.empty() && validMask.channels() != 1 && validMask.channels() != getChannels(lowType))
+        IF_THROW_EXCEPTION(image_type_error("The validMask has a wrong number of channels. It has " + std::to_string(validMask.channels()) + " channels while the images have "
                                             + std::to_string(getChannels(lowType)) + ". The mask should have either 1 channel or the same number of channels as the images."))
-                << errinfo_image_type(mask.type());
+                << errinfo_image_type(validMask.type());
+
+    if (!predMask.empty() && predMask.size() != s)
+        IF_THROW_EXCEPTION(size_error("The predMask has a wrong size: " + to_string(predMask.size()) +
+                                      ". It must have the same size as the images: " + to_string(s) + "."))
+                << errinfo_size(predMask.size());
+
+    if (!predMask.empty() && predMask.basetype() != Type::uint8)
+        IF_THROW_EXCEPTION(image_type_error("The predMask has a wrong base type: " + to_string(predMask.basetype()) +
+                                      ". To represent boolean values with 0 or 255, it must have the basetype: " + to_string(Type::uint8) + "."))
+                << errinfo_image_type(predMask.basetype());
+
+    if (!predMask.empty() && predMask.channels() != 1)
+        IF_THROW_EXCEPTION(image_type_error("The predMask must be a single-channel mask, but it has "
+                                            + std::to_string(predMask.channels()) + " channels."))
+                << errinfo_image_type(predMask.type());
 }
 
 
@@ -246,8 +261,8 @@ Image fitfc_impl_detail::cubic_filter(Image i, double scale) {
     return i;
 }
 
-void FitFCFusor::predict(int date2, ConstImage const& maskParam) {
-    checkInputImages(maskParam, date2);
+void FitFCFusor::predict(int date2, ConstImage const& validMask, ConstImage const& predMask) {
+    checkInputImages(validMask, predMask, date2);
     if (opt.getNumberNeighbors() > opt.getWinSize() * opt.getWinSize()) {
         std::cerr << "Warning: You acquired more neighbors (" << opt.getNumberNeighbors()
                   << ") than pixels in the window (" << (opt.getWinSize() * opt.getWinSize()) << "). Using all pixels in the window." << std::endl;
@@ -276,13 +291,14 @@ void FitFCFusor::predict(int date2, ConstImage const& maskParam) {
 
     // get input images and single-channel mask
     ConstImage sampleMask;
-    if (maskParam.empty())
-        sampleMask = maskParam.sharedCopy();
+    if (validMask.empty())
+        sampleMask = validMask.sharedCopy();
     else {
-        sampleMask = maskParam.sharedCopy(sampleArea);
-        if (maskParam.channels() > 1)
+        sampleMask = validMask.sharedCopy(sampleArea);
+        if (validMask.channels() > 1)
             sampleMask = sampleMask.createSingleChannelMaskFromRange({Interval::closed(1, 255)});
     }
+    ConstImage writeMask = predMask.empty() ? predMask.sharedCopy() : predMask.sharedCopy(sampleArea);
 
     ConstImage h1 = imgs->get(opt.getHighResTag(), opt.getPairDate()).sharedCopy(sampleArea);
     ConstImage l1 = imgs->get(opt.getLowResTag(),  opt.getPairDate()).sharedCopy(sampleArea);
@@ -294,7 +310,7 @@ void FitFCFusor::predict(int date2, ConstImage const& maskParam) {
     Image& r   = frm_and_r.second;
 
     // cubic interpolation of residual to make it fine
-    r = fitfc_impl_detail::cubic_filter(std::move(r), opt.getResolutionFactor());
+    r = fitfc_impl_detail::cubic_filter(std::move(r), opt.getResolutionFactor()); // TODO: What happens with the neighbors of invalid values (e. g. -9999)? How could this be handled better?
 
     // get distance weights
     Image distWeights = computeDistanceWeights();
@@ -307,6 +323,8 @@ void FitFCFusor::predict(int date2, ConstImage const& maskParam) {
         for (unsigned int x = predArea.x; x < xmax; ++x) {
             if (!sampleMask.empty() && !sampleMask.boolAt(x, y, 0))
                 continue;
+            if (!writeMask.empty() && !writeMask.boolAt(x, y, 0))
+                continue; // no prediction wanted, skip
 
             Rectangle window((int)x - opt.getWinSize() / 2, (int)y - opt.getWinSize() / 2, opt.getWinSize(), opt.getWinSize());
             ConstImage h1_win = h1.constSharedCopy(window);

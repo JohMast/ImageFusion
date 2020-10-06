@@ -3,12 +3,12 @@
 #include <iterator>
 #include <memory>
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include "optionparser.h"
-#include "GeoInfo.h"
-#include "Image.h"
-#include "MultiResImages.h"
+#include "geoinfo.h"
+#include "image.h"
+#include "multiresimages.h"
 #include "spstfm.h"
 #include "fileformat.h"
 
@@ -32,7 +32,7 @@ const char* usageImage =
     "\t  -c <rect>, --crop=<rect> \tOptional. Specifies the crop window, where the "
     "image will be read. A zero width or height means full width or height, respectively.\n"
     "\t<rect> requires either all of the following arguments:\v"
-    "  -c (<num> <num), --center=(<num> <num>) x and y center\v"
+    "  -c (<num> <num>), --center=(<num> <num>) x and y center\v"
     "  -w <num>, --width=<num>                 width\v"
     "  -h <num>, --height=<num>                height\v"
     "or x can be specified with:\v"
@@ -218,7 +218,7 @@ int main(int argc, char* argv[]) {
         std::string dictPath = options["LOADDICT"].back().arg;
         unsigned int chans = mri->getAny().channels();
         if (chans == 1) {
-            if (!boost::filesystem::exists(dictPath)) {
+            if (!std::filesystem::exists(dictPath)) {
                 std::cerr << "Could not find the dictionary file " << dictPath << " to load a single-channel dictionary." << std::endl;
                 return 6;
             }
@@ -233,10 +233,10 @@ int main(int argc, char* argv[]) {
                 std::cerr << "Could not load dictionary from " << dictPath << " although the file exists. Defect file? Ignoring option --load-dict." << std::endl;
         }
         else {
-            boost::filesystem::path p = dictPath;
+            std::filesystem::path p = dictPath;
             std::string extension = p.extension().string();
             std::string basename  = p.stem().string();
-            if (boost::filesystem::exists(dictPath))
+            if (std::filesystem::exists(dictPath))
                 basename.pop_back(); // drop channel number
 
             for (unsigned int c = 0; c < chans; ++c) {
@@ -244,7 +244,7 @@ int main(int argc, char* argv[]) {
                 auto outpath = p;
 
                 std::string infilename = outpath.string();
-                if (!boost::filesystem::exists(infilename)) {
+                if (!std::filesystem::exists(infilename)) {
                     std::cerr << "Could not find the dictionary file " << infilename << " to load a part of a multi-channel dictionary. "
                                  "Give either the same filename as specified with --save-dict or one of the actual files with channel number." << std::endl;
                     return 6;
@@ -312,9 +312,9 @@ int main(int argc, char* argv[]) {
             }
 
             if (pairValidSets.hasHigh)
-                pairMask = helpers::processSetMask(std::move(pairMask), mri->get(jat.highTag, datePair), pairValidSets.high);
+                pairMask = helpers::processSetMask(pairMask, mri->get(jat.highTag, datePair), pairValidSets.high);
             if (pairValidSets.hasLow)
-                pairMask = helpers::processSetMask(std::move(pairMask), mri->get(jat.lowTag,  datePair), pairValidSets.low);
+                pairMask = helpers::processSetMask(pairMask, mri->get(jat.lowTag,  datePair), pairValidSets.low);
         }
 
         // train dictionary (if there is one from a previous time series, improve it)
@@ -331,7 +331,7 @@ int main(int argc, char* argv[]) {
 
         spstfm.processOptions(spstfmOpts);
         spstfm.train(pairMask);
-        
+
         // loop over a single time series (multiple images with the same date 1 and 3)
         for (int date2 : p.second) {
             // read in prediction image
@@ -356,7 +356,7 @@ int main(int argc, char* argv[]) {
             }
 
             if (predValidSets.hasLow)
-                predMask = helpers::processSetMask(std::move(predMask), mri->get(jat.lowTag, date2), predValidSets.low);
+                predMask = helpers::processSetMask(predMask, mri->get(jat.lowTag, date2), predValidSets.low);
 
             // predict a single image with the trained dictionary
             std::cout << "Predicting for date " << date2 << std::endl;
@@ -420,7 +420,7 @@ int main(int argc, char* argv[]) {
                 std::cerr << "Could not save dictionary to " << dictPath << "." << std::endl;
         }
         else {
-            boost::filesystem::path p = dictPath;
+            std::filesystem::path p = dictPath;
             std::string extension = p.extension().string();
             std::string basename  = p.stem().string();
             for (unsigned int c = 0; c < chans; ++c) {

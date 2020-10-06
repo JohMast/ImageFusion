@@ -2,11 +2,11 @@
 #include <iomanip>
 #include <string>
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include "optionparser.h"
-#include "GeoInfo.h"
-#include "Image.h"
+#include "geoinfo.h"
+#include "image.h"
 #include "fileformat.h"
 
 #include "imggeocrop.h"
@@ -25,7 +25,7 @@ const char* usageImage =
     "\t  --crop-pix=<rect> \tOptional. Specifies the crop window in pixels, where the image will be read. This restricts the intersection window further.\n"
     "\t  --crop-proj=<rect> \tOptional. Similar as --crop-pix, but specifies the crop window in projection space (metre).\n"
     "\t<rect> requires either all of the following arguments:\v"
-    "  -c (<num> <num), --center=(<num> <num>) x and y center\v"
+    "  -c (<num> <num>), --center=(<num> <num>) x and y center\v"
     "  -w <num>, --width=<num>  width\v"
     "  -h <num>, --height=<num> height\v"
     "or x can be specified with:\v"
@@ -42,19 +42,20 @@ const char* usageImage =
     "          --img='-f \"test image.tif\" -l 0'\v"
     "          --img='-f (HDF4_EOS:EOS_GRID:\"path/MOD09GA.hdf\":MODIS_Grid_500m_2D:sur_refl_b01_1)'\n";
 
-const char* usageLatLongRect =
-    "  -c <ll-rect>, --crop-latlong=<ll-rect> \tThe extents specified in longitude / latitude limit the cutset further.\n"
+const char* usageLongLatRect =
+    "  -c <ll-rect>, --crop-longlat=<ll-rect> \tThe extents specified in longitude / latitude limit the cutset further.\n"
+    "  --crop-longlat-full=<ll-rect> \tThe rectangle specified in <ll-rect> limits the cutset further, but should be fully included in the resulting image.\n"
     "\t<ll-rect> requires a combination of some of the following arguments:\n"
     "\t  --center=(<lat/long>) \tSpecifies the center location. To define the extents, specify either --width and --height or a --corner additionally.\n"
     "\t  --corner=<lat/long> \tSpecifies one corner for cropping. Use this option once to specify the top left corner in combination with --center "
     "or --width and --height to define the extents. Or just use it exactly twice to specify opposing corners, which also defines the extents.\n"
     "\t  -h <num>, --height=<num> \tSpecifies the height in projection space unit (usually metre).\n"
     "\t  -w <num>, --width=<num> \tSpecifies the width in projection space unit (usually metre).\n"
-    "\tExamples: ... --crop-latlong=(--corner=(0d 0' 0.01\"E, 50d 0' 0.00\"N) --corner=(13d 3'14.66\"E, 40d 0' 0.00\"N)) ... \v"
-    "          ... --crop-latlong=(--center=(7d 4' 15.84\"E, 45d N) -w 10000 -h 5000) ... \v"
-    "          ... --crop-latlong=(--corner=(0d 0' 0.01\"E, 50d 0' 0.00\"N) -w 10000 -h 5000) ... \v"
-    "          ... --crop-latlong=(--corner=(0d 0' 0.01\"E, 50d 0' 0.00\"N) --center=(7d 4' 15.84\"E, 45d N)) ... \v"
-    "          ... --crop-latlong=\"--corner=(0d 0' 0.01\\\"E, 50d 0' 0.00\\\"N) --center=(7d 4' 15.84\\\"E, 45d N)\" ... \n";
+    "\tExamples: ... --crop-longlat=(--corner=(0d 0' 0.01\"E, 50d 0' 0.00\"N) --corner=(13d 3'14.66\"E, 40d 0' 0.00\"N)) ... \v"
+    "          ... --crop-longlat=(--center=(7d 4' 15.84\"E, 45d N) -w 10000 -h 5000) ... \v"
+    "          ... --crop-longlat=(--corner=(0d 0' 0.01\"E, 50d 0' 0.00\"N) -w 10000 -h 5000) ... \v"
+    "          ... --crop-longlat=(--corner=(0d 0' 0.01\"E, 50d 0' 0.00\"N) --center=(7d 4' 15.84\"E, 45d N)) ... \v"
+    "          ... --crop-longlat=\"--corner=(0d 0' 0.01\\\"E, 50d 0' 0.00\\\"N) --center=(7d 4' 15.84\\\"E, 45d N)\" ... \n";
 
 const char* usageType =
     "  -t <type>, --out-type=<type> \tThis will be used as output type and can be useful to convert an unsigned integer to a signed or vice versa. "
@@ -76,7 +77,8 @@ std::vector<Descriptor> usage{
                      "   or: imggeocrop <img> <img> [options]\n\n"
                      "The order of the options can be arbitrary, but at least two images are required for cropping. Remember to protect whitespace by quoting with '...', \"...\" or (...) or by escaping.\n"
                      "Options:"),
-    {"CROPLATLONG","",        "c", "crop-latlong",        ArgChecker::NonEmpty,       usageLatLongRect},
+    {"CROPLONGLAT","",        "c", "crop-longlat",        ArgChecker::NonEmpty,       "  -c <ll-rect>, --crop-longlat=<ll-rect> \tThe extents specified in longitude / latitude limit the cutset further.\n"},
+    {"CROPLONGLAT","FULL",    "c", "crop-longlat-full",   ArgChecker::NonEmpty,       usageLongLatRect},
     {"IMAGE",      "DISABLE", "d", "data-img",            argCheckImageProjCrop,      usageDataImage},
     {"SATURATE",   "DISABLE", "",  "disable-saturate",    ArgChecker::None,           "  --disable-saturate \tThis will leave all values as they are. Default.\n"},
     {"USENODATA",  "DISABLE", "",  "disable-use-nodata",  ArgChecker::None,           "  --disable-use-nodata \tThis will not use the nodata value as invalid range for masking.\n"},
@@ -141,20 +143,23 @@ int main(int argc, char* argv[]) {
     for (auto& o : options["GEOEXTIMG"])
         extimgargs.push_back(o.arg);
 
-    std::vector<std::string> latLongArgs;
-    for (auto const& o : options["CROPLATLONG"])
-        latLongArgs.push_back(o.arg);
+    std::vector<std::string> longLatArgs;
+    std::vector<bool> longLatFull;
+    for (auto const& o : options["CROPLONGLAT"]) {
+        longLatArgs.push_back(o.arg);
+        longLatFull.push_back(o.prop() == "FULL");
+    }
 
     // process geo infos and find intersection
-    ProcessedGI pGI = getAndProcessGeoInfo<Parse>(imgargs, extimgargs, latLongArgs);
-    if (!pGI.haveGI && (!extimgargs.empty() || !latLongArgs.empty())) {
+    ProcessedGI pGI = getAndProcessGeoInfo<Parse>(imgargs, extimgargs, longLatArgs, longLatFull);
+    if (!pGI.haveGI && (!extimgargs.empty() || !longLatArgs.empty())) {
         std::string err;
         if (!extimgargs.empty())
             err += "--" + options["GEOEXTIMG"].front().name;
         if (!err.empty())
             err += " and ";
-        if (!latLongArgs.empty())
-            err += "--" + options["CROPLATLONG"].front().name;
+        if (!longLatArgs.empty())
+            err += "--" + options["CROPLONGLAT"].front().name;
         IF_THROW_EXCEPTION(imagefusion::invalid_argument_error(
                 "At least one image does not have geo information, but you specified " + err + ", which does not make sense."));
     }
@@ -249,21 +254,21 @@ int main(int argc, char* argv[]) {
             }
         }
         else {
-            imagefusion::Coordinate tlImgCoord = pGI.targetGI.projToImg({pGI.targetGI.geotrans.offsetX, pGI.targetGI.geotrans.offsetY}, gi);
-            imagefusion::Coordinate brImgCoord = pGI.targetGI.projToImg(pGI.targetGI.geotrans.imgToProj(
-                                                                   imagefusion::Coordinate(pGI.targetGI.width(), pGI.targetGI.height())), gi);
-            if (tlImgCoord.x > brImgCoord.x)
-                swap(tlImgCoord.x, brImgCoord.x);
-            if (tlImgCoord.y > brImgCoord.y)
-                swap(tlImgCoord.y, brImgCoord.y);
+            // find target rectangle in image coordinates and read only this image part for performance reasons
+            imagefusion::CoordRectangle targetRect(pGI.targetGI.geotrans.offsetX, pGI.targetGI.geotrans.offsetY,
+                                                   pGI.targetGI.geotrans.XToX * pGI.targetGI.width(), pGI.targetGI.geotrans.YToY * pGI.targetGI.height());
+            constexpr unsigned int numPoints = 33;
+            std::vector<imagefusion::Coordinate> boundariesTarget = imagefusion::detail::makeRectBoundaryCoords(targetRect, numPoints);
+            std::vector<imagefusion::Coordinate> boundariesImg = pGI.targetGI.projToImg(boundariesTarget, gi);
 
-            // find target rectangle in image coordinates and restrict to image part
-            imagefusion::Point tlPixel{static_cast<int>(std::floor(tlImgCoord.x + 1e-8)), // one pixel oversize
-                                       static_cast<int>(std::floor(tlImgCoord.y + 1e-8))};
-            imagefusion::Point brPixel{static_cast<int>(std::ceil( brImgCoord.x - 1e-8)),
-                                       static_cast<int>(std::ceil( brImgCoord.y - 1e-8))};
-            imagefusion::Rectangle targetRect{tlPixel.x, tlPixel.y, brPixel.x - tlPixel.x, brPixel.y - tlPixel.y};
-            imagefusion::Rectangle restrictRect = targetRect & imagefusion::Rectangle(0, 0, gi.width(), gi.height());
+            imagefusion::CoordRectangle restrictCoordRect = imagefusion::detail::getRectFromBoundaryCoords(boundariesImg);
+
+            imagefusion::Rectangle restrictRect(std::floor(restrictCoordRect.x + 1e-8),  // one pixel oversize
+                                                std::floor(restrictCoordRect.y + 1e-8),
+                                                0, 0); // dummies
+            restrictRect.width = std::ceil(restrictCoordRect.br().x - 1e-8) - restrictRect.x;
+            restrictRect.height = std::ceil(restrictCoordRect.br().y - 1e-8) - restrictRect.y;
+            restrictRect &= imagefusion::Rectangle(0, 0, gi.width(), gi.height());
 
             // read image part
             i = imagefusion::Image{filename, Parse::ImageLayers(imgargs[idx]), restrictRect, /*flipH*/ false, /*flipV*/ false, Parse::ImageIgnoreColorTable(imgargs[idx])};
@@ -349,7 +354,13 @@ int main(int argc, char* argv[]) {
         if (outformat == imagefusion::FileFormat::unsupported)
             outformat = imagefusion::FileFormat::fromFile(filename);
         try {
-            std::string outfilename = helpers::outputImageFile(i, gi, filename, prefix, postfix, outformat);
+            // avoid overwriting when using the same file multiple times with different layers (e. g. visible bands and quality layers from an HDF file)
+            std::string postfixWithLayers = postfix;
+            std::vector<int> layers = Parse::ImageLayers(imgargs.at(idx));
+            for (int l : layers)
+                postfixWithLayers = "_b" + std::to_string(l) + postfixWithLayers;
+
+            std::string outfilename = helpers::outputImageFile(i, gi, filename, prefix, postfixWithLayers, outformat);
             std::cout << "Wrote file " << outfilename << "." << std::endl;
 
             // maybe output mask (if choosing a nodata value failed)
@@ -359,7 +370,7 @@ int main(int argc, char* argv[]) {
             }
         }
         catch (imagefusion::runtime_error&) {
-            std::cout << "Could not write the output of processing " << filename << ", sorry. Going on with the next one." << std::endl;
+            std::cout << "Could not write the output of processed " << filename << ", sorry. Going on with the next one." << std::endl;
         }
     }
 

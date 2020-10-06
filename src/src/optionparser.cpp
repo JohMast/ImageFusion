@@ -1,7 +1,7 @@
 #include "optionparserimpl.h"
 #include "optionparser.h"
 #include "imagefusion.h"
-#include "GeoInfo.h"
+#include "geoinfo.h"
 
 #include <boost/tokenizer.hpp>
 #include <filesystem>

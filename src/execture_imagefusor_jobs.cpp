@@ -1,15 +1,15 @@
 #include <Rcpp.h>
-#include "Starfm.h"
-#include "Estarfm.h"
+#include "starfm.h"
+#include "estarfm.h"
 #include "fitfc.h"
 #include "spstfm.h"
 #include "utils_common.h"
-#include "MultiResImages.h"
-#include "GeoInfo.h"
+#include "multiresimages.h"
+#include "geoinfo.h"
 #include <filesystem>
 #ifdef WITH_OMP
-#include "Parallelizer.h"
-#include "ParallelizerOptions.h"
+#include "parallelizer.h"
+#include "parallelizer_options.h"
 #endif /* WITH_OMP */
 
 using namespace Rcpp;

@@ -1,14 +1,14 @@
 #pragma once
 
-#include "DataFusor.h"
-#include "MultiResImages.h"
+#include "datafusor.h"
+#include "multiresimages.h"
 #include "imagefusion.h"
-#include "Type.h"
-#include "Image.h"
+#include "type.h"
+#include "image.h"
 #include "exceptions.h"
 
 #ifdef WITH_OMP
-    #include "Parallelizer.h"
+    #include "parallelizer.h"
 #endif /* WITH_OMP */
 
 #include <armadillo>
@@ -1562,6 +1562,9 @@ struct DictTrainer {
     /// This must have the same size as the source images and have only trues where sampling is allowed
     Image sampleMask;
 
+    /// This must have the same size as the source images and have only trues where prediction is desired
+    ConstImage writeMask;
+
     /// Output image for reconstructImage(). Can be a shared copy.
     Image output;
 
@@ -1815,30 +1818,52 @@ public:
      * @param date2 is the prediction date and it is used to get the right Image from `#imgs`. See
      * also \ref spstfm_image_structure "SPSTFM image structure".
      *
-     * @param mask should be an arbitrary mask in the size of the source images. It can be
-     * single-channel or multi-channel. However, this is the only mask to exclude invalid pixels
-     * for all input images.
+     * @param validMask is either empty or a mask in the size of the source images. It can be
+     * single-channel or multi-channel. Locations with zero values are not used at all and the
+     * result of the @ref outputImage() is undefined at these locations. If the argument is an
+     * empty image, all locations will be considered as valid.
+     *
+     * @param predMask is either empty or a single-channel mask in the size of the source images.
+     * It specifies the locations that should be predicted (255) and the locations that should not
+     * be predicted (0). However, since prediction is done in patches, only if all pixels in a
+     * `predMask`-patch are 0, prediction for that patch is skipped.
      *
      * Calling this method will do everything that is required for prediction. This includes
      * initialization of training data and dictionary, the training process itself and of course
      * the reconstruction (prediction).
+     *
+     * @throws logic_error if source images have not been set.
+     * @throws not_found_error if not all required images are available.
+     * @throws image_type_error if the types (basetypes or channels) of images or masks mismatch
+     * @throws size_error if the sizes of images or masks mismatch
      */
-    void predict(int date2, ConstImage const& mask = ConstImage{}) override;
+    void predict(int date2, ConstImage const& validMask = {}, ConstImage const& predMask = {}) override;
 
     /**
      * @brief Train the dictionary-pair only, without reconstructing afterwards
      *
-     * @param mask should be an arbitrary mask in the size of the source images. It can be
-     * single-channel or multi-channel. However, this is the only mask to exclude invalid pixels
-     * for all input images.
+     * @param validMask is either empty or a mask in the size of the source images. It can be
+     * single-channel or multi-channel. Locations with zero values are not used at all and the
+     * result of the @ref outputImage() is undefined at these locations. If the argument is an
+     * empty image, all locations will be considered as valid.
+     *
+     * @param predMask is either empty or a single-channel mask in the size of the source images.
+     * It specifies the locations that should be predicted (255) and the locations that should not
+     * be predicted (0). However, since prediction is done in patches, only if all pixels in a
+     * `predMask`-patch are 0, prediction for that patch is skipped.
      *
      * This will only perform the training of the dictionary using the difference of the input
      * image pair. Then, the dictionary can be saved to a file with getDictionary() and
      * [save()](http://arma.sourceforge.net/docs.html#save_load_mat) or used for reconstruction
      * with predict() combined with the option SpstfmOptions::ExistingDictionaryHandling::use in
      * SpstfmOptions::setDictionaryReuse() to avoid clearing or improving the dictionary.
+     *
+     * @throws logic_error if source images have not been set.
+     * @throws not_found_error if not all required images are available.
+     * @throws image_type_error if the types (basetypes or channels) of images or masks mismatch
+     * @throws size_error if the sizes of images or masks mismatch
      */
-    void train(ConstImage const& mask = ConstImage{});
+    void train(ConstImage const& validMask = ConstImage{}, ConstImage const& predMask = ConstImage{});
 
     /**
      * @brief Get the dictionary-pair as concatenated dictionary
@@ -1923,7 +1948,7 @@ protected:
     spstfm_impl_detail::DictTrainer t;
 
 private:
-    void checkInputImages(ConstImage const& mask, int date2 = 0, bool useDate2 = false) const;
+    void checkInputImages(ConstImage const& validMask, ConstImage const& predMask, int date2 = 0, bool useDate2 = false) const;
 };
 
 /// \cond

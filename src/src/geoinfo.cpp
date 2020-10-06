@@ -10,7 +10,7 @@
 #include <gdal_utils.h>
 #include <cpl_string.h>
 
-#include "GeoInfo.h"
+#include "geoinfo.h"
 #include "exceptions.h"
 
 namespace {
@@ -508,11 +508,15 @@ GDALDataset* GeoInfo::openVrtGdalDataset(std::vector<int> const& selChans, Inter
 }
 
 
-GeoInfo::GeoInfo(std::string const& filename, std::vector<int> const& selChans, Rectangle crop, bool flipH, bool flipV)
-    : GeoInfo(filename)
+GeoInfo::GeoInfo(std::string const& filename, std::vector<int> const& selChans, Rectangle crop, bool flipH, bool flipV, bool recurseSubdatasets)
+    : GeoInfo()
 {
-    if (hasSubdatasets())
+    readFrom(filename);
+
+    bool doRecurseSubdatasets = hasSubdatasets() && (recurseSubdatasets || !selChans.empty());
+    if (doRecurseSubdatasets) {
         channels = subdatasetsCount();
+    }
 
     if (!selChans.empty()) {
         for (int const& c : selChans)
@@ -524,7 +528,7 @@ GeoInfo::GeoInfo(std::string const& filename, std::vector<int> const& selChans, 
         channels = selChans.size();
     }
 
-    if (hasSubdatasets()) {
+    if (doRecurseSubdatasets) {
         GDALDataset* poVrtImg = openVrtGdalDataset(selChans);
         *this = GeoInfo{};
         readFrom(poVrtImg);
@@ -557,19 +561,7 @@ CoordRectangle intersectRect(GeoInfo const& refGI, CoordRectangle const& refRect
         return {};
 
     // collect source boundaries
-    std::vector<Coordinate> boundariesRef(4 * numPoints);
-    double relstep = 1. / (numPoints - 1);
-    for (unsigned int i = 0; i < numPoints; ++i) {
-        double t = i * relstep;
-        // top
-        boundariesRef.at(i)               = Coordinate(refRect.x + t * refRect.width, refRect.y);
-        // right
-        boundariesRef.at(i + numPoints)   = Coordinate(refRect.x + refRect.width,     refRect.y + t * refRect.height);
-        // bottom
-        boundariesRef.at(i + 2*numPoints) = Coordinate(refRect.x + t * refRect.width, refRect.y + refRect.height);
-        // left
-        boundariesRef.at(i + 3*numPoints) = Coordinate(refRect.x,                     refRect.y + t * refRect.height);
-    }
+    std::vector<Coordinate> boundariesRef = detail::makeRectBoundaryCoords(refRect, numPoints);
 
     // transform to other projection coordinate space and restrict by other rectangle
     std::vector<Coordinate> boundariesOther = refGI.projToProj(boundariesRef, otherGI);
@@ -584,32 +576,9 @@ CoordRectangle intersectRect(GeoInfo const& refGI, CoordRectangle const& refRect
     boundariesRef = otherGI.projToProj(boundariesOther, refGI);
 
     // intersect (enclose all points by a rectangle)
-    auto compareX = [] (imagefusion::Coordinate const& c1, imagefusion::Coordinate const& c2) {
-        return c1.x < c2.x;
-    };
-    auto compareY = [] (imagefusion::Coordinate const& c1, imagefusion::Coordinate const& c2) {
-        return c1.y < c2.y;
-    };
-    auto minmaxTopY    = std::minmax_element(std::begin(boundariesRef),               std::begin(boundariesRef) + numPoints,   compareY);
-    auto minmaxRightX  = std::minmax_element(std::begin(boundariesRef) + numPoints,   std::begin(boundariesRef) + 2*numPoints, compareX);
-    auto minmaxBottomY = std::minmax_element(std::begin(boundariesRef) + 2*numPoints, std::begin(boundariesRef) + 3*numPoints, compareY);
-    auto minmaxLeftX   = std::minmax_element(std::begin(boundariesRef) + 3*numPoints, std::begin(boundariesRef) + 4*numPoints, compareX);
-
-    assert(minmaxLeftX.first->x + minmaxLeftX.second->x < minmaxRightX.first->x  + minmaxRightX.second->x);
-    assert(minmaxTopY.first->y  + minmaxTopY.second->y  < minmaxBottomY.first->y + minmaxBottomY.second->y);
-
-    double leftX   = minmaxLeftX.first->x;
-    double rightX  = minmaxRightX.second->x;
-    double topY    = minmaxTopY.first->y;
-    double bottomY = minmaxBottomY.second->y;
-
-    // check for empty intersection
-    bool isWindowLegal = leftX < rightX && topY < bottomY;
-    if (!isWindowLegal)
-        return {};
+    CoordRectangle projectedLimitation = detail::getRectFromBoundaryCoords(boundariesRef);
 
     // the new bounds can be larger than refRect, so take refRect as limit
-    CoordRectangle projectedLimitation{leftX, topY, rightX - leftX, bottomY - topY};
     return projectedLimitation & refRect;
 }
 
@@ -625,7 +594,7 @@ void GeoInfo::intersect(GeoInfo const& other, unsigned int numCoords, bool shrin
 }
 
 void GeoInfo::setExtents(CoordRectangle const& ex, bool shrink) {
-    assert(geotrans.XToY == 0 && geotrans.YToX && "Only simple transformations supported.");
+    assert(geotrans.XToY == 0 && geotrans.YToX == 0 && "Only simple transformations supported.");
 
     // get top left and bottom right corners
     Coordinate projCornerTL = ex.tl();

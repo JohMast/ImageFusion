@@ -9,11 +9,11 @@
 #include <boost/exception/error_info.hpp>
 
 #include "imagefusion.h"
-#include "Type.h"
+#include "type.h"
 #include "exceptions.h"
 #include "iterators.h"
 #include "fileformat.h"
-#include "GeoInfo.h"
+#include "geoinfo.h"
 
 class GDALDataset;
 
@@ -44,7 +44,7 @@ enum class ColorMapping {
      * @remark A conversion from Gray to RGB is not available. Usually in such a conversion every
      * channel gets the same value. However, this can be achieved by using
      * @code
-     * rgb.merge({gray.sharedCopy(), gray.sharedCopy(), gray.sharedCopy()});
+     * Image rgb = merge({gray.sharedCopy(), gray.sharedCopy(), gray.sharedCopy()});
      * @endcode
      */
     RGB_to_Gray,
@@ -472,7 +472,53 @@ enum class ColorMapping {
      * the wavelength of Near Infrared is between 0.77 µm and 0.9 µm and the wavelength of
      * Shortwave Infrared 1 is between 1.55 µm and 1.75 µm.
      */
-    Red_NIR_SWIR_to_BU
+    Red_NIR_SWIR_to_BU,
+
+    /**
+     * @brief Convert Landsat bands to Tasseled Cap
+     *
+     * The result is
+     * \f[
+     *     brightness = ( 0.3037 b_1 + 0.2793 b_2 + 0.4743 b_3 + 0.5585 b_4 + 0.5082 b_5 + 0.1863 b_7) \cdot \frac{n}{m \cdot s} + o \cdot n
+     *     greeness   = (-0.2848 b_1 - 0.2435 b_2 - 0.5436 b_3 + 0.7243 b_4 + 0.0840 b_5 - 0.1800 b_7) \cdot \frac{n}{m \cdot s} + o \cdot n
+     *     wetness    = ( 0.1509 b_1 + 0.1973 b_2 + 0.3279 b_3 + 0.3406 b_4 - 0.7112 b_5 - 0.4572 b_7) \cdot \frac{n}{m \cdot s} + o \cdot n
+     * \f]
+     * where \f$ m \f$ is the maximum of the source image data range (see getImageRangeMax()) and
+     * \f$ n \f$ is the maximum of the result image data range (see getImageRangeMat()).
+     *  * For floating point and signed integer result images \f$ s = 1 \f$ and
+     *    \f$ o = 0 \f$. So \f$ Y \in [-n, n] \f$.
+     *  * For unsigned integer result images \f$ s = 2 \f$ and \f$ o = 0.5 \f$.
+     *    So \f$ Y \in [0, n] \f$ with round(n/2) being the zero offset.
+     *
+     * TODO: Check for which Landsat the values apply, digital numbers or reflectance factors? Describe this here.
+     *
+     * @see Crist, E. P., & Cicone, R. C. (1984).
+     * A Physically-Based Transformation of Thematic Mapper Data — The TM Tasseled Cap.
+     * IEEE Transactions on Geoscience and Remote Sensing, 22, 256−263.
+     */
+    Landsat_to_TasseledCap, // TODO: Add more satellites
+
+    /**
+     * @brief Convert Modis (NBAR) bands to Tasseled Cap
+     *
+     * The factors for the resulting three bands are in the order of the bands
+     * that is expected as channels in the image:
+     * Band name        | Red      | Near-IR | Blue    | Green   | M-IR      | M-IR      | M-IR
+     * Wavelength in nm | 620-670  | 841-876 | 459-479 | 545-565 | 1230-1250 | 1628-1652 | 2105-2155
+     * ---------------- | -------- | ------- | ------- | ------- | --------- | --------- | ---------
+     * Brightness       | +0.3956  | +0.4718 | +0.3354 | +0.3834 | +0.3946   | +0.3434   | +0.2964
+     * Greeness         | -0.3399  | +0.5952 | -0.2129 | -0.2222 | +0.4617   | -0.1037   | -0.4600
+     * Wetness          | +0.10839 | +0.0912 | +0.5065 | +0.4040 | -0.2410   | -0.4658   | -0.5306
+     *
+     * In the calculation the values are rescaled depending on the type, such that
+     *  * For floating point and signed integer result images values are \f$ \in [-n, n] \f$.
+     *  * For unsigned integer result images \f$ \in [0, n] \f$ with round(n/2) being the zero offset.
+     *
+     * @see Zhang, X., Schaaf, C., Friedl, M. A., Strahler, A., Gao, F., & Hodges, J. (2002).
+     * MODIS Tasseled Cap transformation and its utility.
+     * In Geoscience and Remote Sensing Symposium, IGARSS '02. IEEE International, 1063−1065.
+     */
+    Modis_to_TasseledCap
 };
 
 /**
@@ -506,6 +552,10 @@ inline std::string getFromString(ColorMapping map) {
         return "GeneralPositiveNegative";
     case ColorMapping::Red_NIR_SWIR_to_BU:
         return "Red-NearInfrared-ShortwaveInfrared";
+    case ColorMapping::Landsat_to_TasseledCap: // TODO: Add more color mappings
+        return "Landsat bands";
+    case ColorMapping::Modis_to_TasseledCap:
+        return "Modis bands";
     }
     assert(false && "This should not happen. Fix getFromString(ColorMapping)!");
     return "";
@@ -538,6 +588,9 @@ inline std::string getToString(ColorMapping map) {
         return "Normalized Difference Index";
     case ColorMapping::Red_NIR_SWIR_to_BU:
         return "Continuous Build-Up Index";
+    case ColorMapping::Landsat_to_TasseledCap: // TODO: Add more color mappings
+    case ColorMapping::Modis_to_TasseledCap:
+        return "Tasseled Cap (brightness, greeness, wetness)";
     }
     assert(false && "This should not happen. Fix getToString(ColorMapping)!");
     return "";
@@ -1154,7 +1207,7 @@ public:
 
 
     /**
-     * @brief Split a multi-channel image into single-channel images
+     * @brief Split the channels of a multi-channel image into separate images
      *
      * @param channels specifies the channels that are extracted. For example giving a `{2, 0}`
      * will extract channel 2 and channel 0 from the image and make two corresponding
@@ -2053,6 +2106,9 @@ public:
      * used. It is intended to be used with masks, i. e. Image%s of base type `uint8`, which only
      * contain 0's or 255's.
      *
+     * If one of the operands is an empty image, the other one is left unchanged, which is
+     * equivalent to `A & 255` or `255 & B`.
+     *
      * Move semantics are supported to reuse memory.
      *
      * @return resulting image
@@ -2069,6 +2125,9 @@ public:
      * This performs `A | B` (in C++-Syntax). For floating-point types the bit representation is
      * used. It is intended to be used with masks, i. e. Image%s of base type `uint8`, which only
      * contain 0's or 255's.
+     *
+     * If one of the operands is an empty image, the other one is left unchanged, which is
+     * equivalent to `A | 0` or `0 | B`.
      *
      * Move semantics are supported to reuse memory.
      *
@@ -2087,6 +2146,9 @@ public:
      * used. It is intended to be used with masks, i. e. Image%s of base type `uint8`, which only
      * contain 0's or 255's.
      *
+     * If one of the operands is an empty image, the other one is left unchanged, which is
+     * equivalent to `A ^ 0` or `0 ^ B`.
+     *
      * Move semantics are supported to reuse memory.
      *
      * @return resulting image
@@ -2102,6 +2164,8 @@ public:
      * This performs `~A` (in C++-Syntax). For floating-point types the bit representation is used.
      * It is intended to be used with masks, i. e. Image%s of base type `uint8`, which only contain
      * 0's or 255's.
+     *
+     * If the operand is an empty image, the result is also an empty image.
      *
      * Move semantics are supported to reuse memory.
      *
@@ -2154,6 +2218,33 @@ public:
      * mask shows no valid location 0 will be returned as mean value and standard deviation.
      */
     std::pair<std::vector<double>, std::vector<double>> meanStdDev(ConstImage const& mask = {}, bool sampleCorrection = false) const;
+
+
+    /**
+     * @brief Find unique elements of a single-channel image
+     *
+     * @param mask is a single-channel mask which marks the valid locations. The invalid locations
+     * are ignored.
+     *
+     * This finds the unique values in a single-channel image and returns them.
+     *
+     * @returns vector with unique elements
+     */
+    std::vector<double> unique(ConstImage const& mask = {}) const;
+
+
+    /**
+     * @brief Find unique elements and their number of occurences in a single-channel image
+     *
+     * @param mask is a single-channel mask which marks the valid locations. The invalid locations
+     * are ignored.
+     *
+     * This finds the unique values in a single-channel image and returns them together with their
+     * count (or frequency).
+     *
+     * @returns vector with unique elements and vector with their number of occurences
+     */
+    std::map<double, unsigned int> uniqueWithCount(ConstImage const& mask = {}) const;
 
 
     /**
@@ -3119,20 +3210,6 @@ public:
 
 
     /**
-     * @brief Merge multiple single-channel images into one multi-channel image
-     * @param images is the vector of single channel images (only read).
-     *
-     * This does the opposite of split(). It merges multiple single-channel images into the calling
-     * image, which will be a new multi-channel image afterwards.
-     *
-     * @see split
-     */
-    void merge(std::vector<Image> const& images);
-    /// \copydoc Image::merge(std::vector<Image> const& images)
-    void merge(std::vector<ConstImage> const& images);
-
-
-    /**
      * @brief Set all values in an image to a specified value
      *
      * @param val is the value to set the pixels.
@@ -3620,6 +3697,11 @@ public:
     using ConstImage::bitwise_not;
 
 
+    /// \copydoc ConstImage::unique()
+    std::vector<double> unique(ConstImage const& mask = {})&&;
+    using ConstImage::unique;
+
+
     using ConstImage::begin;
     using ConstImage::end;
 
@@ -3688,6 +3770,21 @@ public:
 
 
 /**
+ * @brief Merge multiple single-channel images into one multi-channel image
+ * @param images is the vector of single channel images.
+ *
+ * This does the opposite of Image::split(). It merges multiple single-channel images into a new
+ * multi-channel image.
+ *
+ * @see Image::split()
+ */
+Image merge(std::vector<Image> const& images);
+/// \copydoc merge(std::vector<Image> const& images)
+Image merge(std::vector<ConstImage> const& images);
+
+
+
+/**
  * @brief General inplace point operation
  * @tparam OP is the type of the operation `op`. It can be e. g. the type of a lambda function
  * @param i is the image on which the operation should be applied.
@@ -3700,7 +3797,8 @@ public:
  * This functor represents a general inplace point operation like e. g. a multiplication with a
  * fixed number or even with another image. It can modify the image `i`. Here is an example to
  * multiply the image with 5 with saturation arithmetic (saturate in case of overflow/underflow):
- * ```
+ *
+ * @code
  * // image to be modified
  * Image img = ...;
  *
@@ -3715,13 +3813,15 @@ public:
  *
  * // call the operation
  * CallBaseTypeFunctor::run(InplacePointOperationFunctor{img, mask, op}, img.type());
- * ```
+ * @endcode
+ *
  * Note: You could directly use `img = std::move(img).multiply(5);` instead to multiply the image
  * inplace with 5.
  *
  * The operation can also use the capture part to access other resources, like a vector or an
  * image. Here is an example to add two images of the same type:
- * ```
+ *
+ * @code
  * // image to be modified
  * Image img1 = ...;
  *
@@ -3739,7 +3839,8 @@ public:
  *
  * // call the operation
  * CallBaseTypeFunctor::run(InplacePointOperationFunctor{img1, mask, op}, img1.type());
- * ```
+ * @endcode
+ *
  * Note: You could directly use `img1 = std::move(img1).add(img2);` instead to add the second
  * image.
  *
@@ -3759,6 +3860,10 @@ struct InplacePointOperationFunctor {
     void operator()() {
         static_assert(getChannels(t) == 1, "This functor only accepts base type to reduce code size.");
         using type = typename DataType<t>::base_type;
+
+        if (i.empty())
+            return;
+
         int w = i.width();
         int h = i.height();
         unsigned int chans = i.channels();

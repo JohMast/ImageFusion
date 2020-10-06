@@ -4,15 +4,15 @@
 #include <string>
 #include <tuple>
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <boost/range/adaptor/reversed.hpp>
 
-#include "Type.h"
+#include "type.h"
 #include "imagefusion.h"
-#include "Image.h"
+#include "image.h"
 #include "optionparser.h"
-#include "GeoInfo.h"
-#include "MultiResImages.h"
+#include "geoinfo.h"
+#include "multiresimages.h"
 #include "fileformat.h"
 
 // annonymous namespace is important for test configuration

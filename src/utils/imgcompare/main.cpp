@@ -2,11 +2,11 @@
 #include <string>
 #include <fstream>
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include "imgcmp.h"
 #include "optionparser.h"
-#include "GeoInfo.h"
+#include "geoinfo.h"
 
 #include "utils_common.h"
 
@@ -22,7 +22,7 @@ const char* usageImage =
     "\t  -c <rect>, --crop=<rect> \tOptional. Specifies the crop window, where the "
     "image will be read. A zero width or height means full width or height, respectively.\n"
     "\t<rect> requires either all of the following arguments:\v"
-    "  -c (<num> <num), --center=(<num> <num>) x and y center\v"
+    "  -c (<num> <num>), --center=(<num> <num>) x and y center\v"
     "  -w <num>, --width=<num>  width\v"
     "  -h <num>, --height=<num> height\v"
     "or x can be specified with:\v"
@@ -197,7 +197,7 @@ int main(int argc, char* argv[]) {
     bool useNodataValue = options["USENODATA"].back().prop() == "ENABLE";
     std::array<imagefusion::IntervalSet, 2> validSets = {baseValidSet, baseValidSet};
     if (useNodataValue) {
-        for (int i : {0, 1}) {
+        for (int i = 0; i < 2; ++i) {
             if (!hasValidRanges)
                 validSets[i] += imagefusion::Interval::closed(-std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity());
 
@@ -209,9 +209,9 @@ int main(int argc, char* argv[]) {
     }
 
     if (hasValidRanges || useNodataValue) {
-        mask = helpers::processSetMask(std::move(mask), i[0], validSets[0]);
+        mask = helpers::processSetMask(mask, i[0], validSets[0]);
         if (!singleImgMode)
-            mask = helpers::processSetMask(std::move(mask), i[1], validSets[1]);
+            mask = helpers::processSetMask(mask, i[1], validSets[1]);
     }
 
     // get valid range max for stats normalization

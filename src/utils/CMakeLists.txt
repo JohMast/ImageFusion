@@ -27,6 +27,7 @@ add_subdirectory("starfm")
 add_subdirectory("estarfm")
 add_subdirectory("spstfm")
 add_subdirectory("fitfc")
+add_subdirectory("staarch")
 
 is_symbol_defined(symdef __linux__)
 if(symdef)
@@ -73,6 +74,11 @@ if(symdef)
     # install(CODE "
             # include(BundleUtilities)
             # fixup_bundle(\"${CMAKE_BINARY_DIR}/bin/fitfc.exe\" \"\" \"${CMAKE_BINARY_DIR}/bin\")"
+            # COMPONENT dependencies)
+
+    # install(CODE "
+            # include(BundleUtilities)
+            # fixup_bundle(\"${CMAKE_BINARY_DIR}/bin/staarch.exe\" \"\" \"${CMAKE_BINARY_DIR}/bin\")"
             # COMPONENT dependencies)
 
     # installation

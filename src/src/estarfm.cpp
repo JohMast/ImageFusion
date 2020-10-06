@@ -1,4 +1,4 @@
-#include "Estarfm.h"
+#include "estarfm.h"
 
 #include <boost/math/distributions/fisher_f.hpp>
 
@@ -22,7 +22,7 @@ void EstarfmFusor::processOptions(Options const& o) {
 }
 
 
-void EstarfmFusor::checkInputImages(ConstImage const& mask, int date2) const {
+void EstarfmFusor::checkInputImages(ConstImage const& validMask, ConstImage const& predMask, int date2) const {
     if (!imgs)
         IF_THROW_EXCEPTION(logic_error("No MultiResImage object stored in EstarfmFusor while predicting. This looks like a programming error."));
 
@@ -70,24 +70,39 @@ void EstarfmFusor::checkInputImages(ConstImage const& mask, int date2) const {
                                       " * " + strL3 + " " + to_string(imgs->get(opt.getLowResTag(),  opt.getDate3()).size())));
     }
 
-    if (!mask.empty() && mask.size() != s)
-        IF_THROW_EXCEPTION(size_error("The mask has a wrong size: " + to_string(mask.size()) +
+    if (!validMask.empty() && validMask.size() != s)
+        IF_THROW_EXCEPTION(size_error("The validMask has a wrong size: " + to_string(validMask.size()) +
                                       ". It must have the same size as the images: " + to_string(s) + "."))
-                << errinfo_size(mask.size());
+                << errinfo_size(validMask.size());
 
-    if (!mask.empty() && mask.basetype() != Type::uint8)
-        IF_THROW_EXCEPTION(image_type_error("The mask has a wrong base type: " + to_string(mask.basetype()) +
+    if (!validMask.empty() && validMask.basetype() != Type::uint8)
+        IF_THROW_EXCEPTION(image_type_error("The validMask has a wrong base type: " + to_string(validMask.basetype()) +
                                       ". To represent boolean values with 0 or 255, it must have the basetype: " + to_string(Type::uint8) + "."))
-                << errinfo_image_type(mask.basetype());
+                << errinfo_image_type(validMask.basetype());
 
     if (getChannels(lowType) != getChannels(highType))
         IF_THROW_EXCEPTION(image_type_error("The number of channels of the low resolution images (" + std::to_string(getChannels(lowType)) +
                                             ") are different than of the high resolution images (" + std::to_string(getChannels(highType)) + ")."));
 
-    if (!mask.empty() && mask.channels() != 1 && mask.channels() != getChannels(lowType))
-        IF_THROW_EXCEPTION(image_type_error("The mask has a wrong number of channels. It has " + std::to_string(mask.channels()) + " channels while the images have "
+    if (!validMask.empty() && validMask.channels() != 1 && validMask.channels() != getChannels(lowType))
+        IF_THROW_EXCEPTION(image_type_error("The validMask has a wrong number of channels. It has " + std::to_string(validMask.channels()) + " channels while the images have "
                                             + std::to_string(getChannels(lowType)) + ". The mask should have either 1 channel or the same number of channels as the images."))
-                << errinfo_image_type(mask.type());
+                << errinfo_image_type(validMask.type());
+
+    if (!predMask.empty() && predMask.size() != s)
+        IF_THROW_EXCEPTION(size_error("The predMask has a wrong size: " + to_string(predMask.size()) +
+                                      ". It must have the same size as the images: " + to_string(s) + "."))
+                << errinfo_size(predMask.size());
+
+    if (!predMask.empty() && predMask.basetype() != Type::uint8)
+        IF_THROW_EXCEPTION(image_type_error("The predMask has a wrong base type: " + to_string(predMask.basetype()) +
+                                      ". To represent boolean values with 0 or 255, it must have the basetype: " + to_string(Type::uint8) + "."))
+                << errinfo_image_type(predMask.basetype());
+
+    if (!predMask.empty() && predMask.channels() != 1)
+        IF_THROW_EXCEPTION(image_type_error("The predMask must be a single-channel mask, but it has "
+                                            + std::to_string(predMask.channels()) + " channels."))
+                << errinfo_image_type(predMask.type());
 }
 
 
@@ -266,8 +281,8 @@ void estarfm_impl_detail::SumAndTolHelper::operator()() {
     }
 }
 
-void EstarfmFusor::predict(int date2, ConstImage const& maskParam) {
-    checkInputImages(maskParam, date2);
+void EstarfmFusor::predict(int date2, ConstImage const& validMask, ConstImage const& predMask) {
+    checkInputImages(validMask, predMask, date2);
     Rectangle predArea = opt.getPredictionArea();
 
     // if no prediction area has been set, use full img size
@@ -293,7 +308,8 @@ void EstarfmFusor::predict(int date2, ConstImage const& maskParam) {
     ConstImage l1 = imgs->get(opt.getLowResTag(),  opt.getDate1()).sharedCopy(sampleArea);
     ConstImage l2 = imgs->get(opt.getLowResTag(),      date2).sharedCopy(sampleArea);
     ConstImage l3 = imgs->get(opt.getLowResTag(),  opt.getDate3()).sharedCopy(sampleArea);
-    ConstImage sampleMask = maskParam.empty() ? maskParam.sharedCopy() : maskParam.sharedCopy(sampleArea);
+    ConstImage sampleMask = validMask.empty() ? validMask.sharedCopy() : validMask.sharedCopy(sampleArea);
+    ConstImage writeMask = predMask.empty() ? predMask.sharedCopy() : predMask.sharedCopy(sampleArea);
 
     // init output as double type (for convenience) and get distance weights, local weights
     Image distWeights = computeDistanceWeights();
@@ -304,8 +320,8 @@ void EstarfmFusor::predict(int date2, ConstImage const& maskParam) {
     std::vector<double> tol1(l2.channels()), tol3(l2.channels()), sumL1(l2.channels()), sumL2(l2.channels()), sumL3(l2.channels());
     estarfm_impl_detail::SumAndTolHelper sum_tol{opt, h1, h3, l1, l2, l3, sampleMask, predArea};
     if (!opt.getUseLocalTol()) {
-        auto meanStdDev1 = h1_full.meanStdDev(maskParam);
-        auto meanStdDev3 = h3_full.meanStdDev(maskParam);
+        auto meanStdDev1 = h1_full.meanStdDev(validMask);
+        auto meanStdDev3 = h3_full.meanStdDev(validMask);
         for (unsigned int c = 0; c < chans; ++c) {
             tol1.at(c) = meanStdDev1.second.at(c) * (2.0 / opt.getNumberClasses());
             tol3.at(c) = meanStdDev3.second.at(c) * (2.0 / opt.getNumberClasses());
@@ -318,6 +334,9 @@ void EstarfmFusor::predict(int date2, ConstImage const& maskParam) {
     // predict with moving window
     for (unsigned int y = predArea.y; y < ymax; ++y) {
         for (unsigned int x = predArea.x; x < xmax; ++x) {
+            if (!writeMask.empty() && !writeMask.boolAt(x, y, 0))
+                continue; // no prediction wanted, skip
+
             Rectangle window((int)x - opt.getWinSize() / 2, (int)y - opt.getWinSize() / 2, opt.getWinSize(), opt.getWinSize());
             ConstImage h1_win  = h1.constSharedCopy(window);
             ConstImage h3_win  = h3.constSharedCopy(window);
@@ -364,8 +383,8 @@ void estarfm_impl_detail::PredictPixel::operator()() const {
     imgval_t const* h3c_p = &h3_win.at<imgval_t>(x_center, y_center, 0);
 
     unsigned int imgChans = h1_win.channels();
-    unsigned int ymax  = l2_win.height();
-    unsigned int xmax  = l2_win.width();
+    unsigned int xmax = l2_win.width();
+    unsigned int ymax = l2_win.height();
 
     // loop over candidates and collect information, outer vector for channels, inner for candidates
     std::vector<std::vector<imgval_t>> lowCands_vecs(imgChans);

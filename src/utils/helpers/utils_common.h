@@ -1,9 +1,9 @@
 #pragma once
 
-#include "MultiResImages.h"
+#include "multiresimages.h"
 #include "exceptions.h"
 #include "optionparser.h"
-#include "GeoInfo.h"
+#include "geoinfo.h"
 
 #include <memory>
 #include <vector>
@@ -34,6 +34,7 @@ inline imagefusion::GeoInfo
 parseGeoInfo(std::string imgArg, imagefusion::Rectangle predArea = {}) {
     auto gi = imagefusion::GeoInfo{Parse::ImageFileName(imgArg), Parse::ImageLayers(imgArg), Parse::ImageCropRectangle(imgArg)};
     if (gi.hasGeotransform()) {
+        // set to prediction area, since on of them is used for the output image
         gi.geotrans.translateImage(predArea.x, predArea.y);
         if (predArea.width != 0)
             gi.size.width = predArea.width;
@@ -185,13 +186,13 @@ combineMaskImages(std::vector<imagefusion::Image>& masks, std::vector<std::strin
                 std::vector<imagefusion::ConstImage> duplicate;
                 for (unsigned int i = 0; i < baseMask.channels(); ++i)
                     duplicate.push_back(temp_mask.constSharedCopy());
-                temp_mask.merge(duplicate);
+                temp_mask = merge(duplicate);
             }
             else if (baseMask.channels() < temp_mask.channels()) {
                 std::vector<imagefusion::ConstImage> duplicate;
                 for (unsigned int i = 0; i < temp_mask.channels(); ++i)
                     duplicate.push_back(baseMask.constSharedCopy());
-                baseMask.merge(duplicate);
+                baseMask = merge(duplicate);
             }
 
             baseMask = std::move(baseMask).bitwise_and(temp_mask);
@@ -202,7 +203,7 @@ combineMaskImages(std::vector<imagefusion::Image>& masks, std::vector<std::strin
         std::vector<imagefusion::ConstImage> duplicate;
         for (unsigned int i = 0; i < imgChans; ++i)
             duplicate.push_back(baseMask.constSharedCopy());
-        baseMask.merge(duplicate);
+        baseMask = merge(duplicate);
     }
 
     return baseMask;
@@ -331,8 +332,7 @@ getPrefixAndPostfix(std::vector<imagefusion::option::Option> const& prefixOpts,
     return {prefix, postfix};
 }
 
-imagefusion::Image processSetMask(imagefusion::Image mask, imagefusion::ConstImage const& img, imagefusion::IntervalSet const& validSet);
-
+imagefusion::Image processSetMask(imagefusion::ConstImage const& mask, imagefusion::ConstImage const& img, imagefusion::IntervalSet const& validSet, bool singleChannel = false);
 
 std::string outputImageFile(imagefusion::ConstImage const& img, imagefusion::GeoInfo gi, std::string origFileName,
                             std::string prefix, std::string postfix, imagefusion::FileFormat f = imagefusion::FileFormat::unsupported,

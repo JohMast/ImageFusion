@@ -1,6 +1,6 @@
 #pragma once
 
-#include "DataFusor.h"
+#include "datafusor.h"
 
 namespace imagefusion {
 
@@ -112,7 +112,7 @@ public:
      * @param mask is an optional mask to mark invalid image data.
      * @see DataFusor::predict(int date, ConstImage const& mask = ConstImage{})
      */
-    void predict(int date, ConstImage const& mask = ConstImage{}) override;
+    void predict(int date, ConstImage const& validMask = {}, ConstImage const& predMask = {}) override;
 
 
     /**
@@ -177,8 +177,8 @@ inline Options const& Proxy<Impl>::getOptions() const {
 }
 
 template<template <Type> class Impl>
-inline void Proxy<Impl>::predict(int date, ConstImage const& mask) {
-    df->predict(date, mask);
+inline void Proxy<Impl>::predict(int date, ConstImage const& validMask, ConstImage const& predMask) {
+    df->predict(date, validMask, predMask);
 }
 
 template<template <Type> class Impl>

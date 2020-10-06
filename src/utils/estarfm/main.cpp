@@ -3,19 +3,19 @@
 #include <iterator>
 #include <memory>
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include "optionparser.h"
-#include "GeoInfo.h"
-#include "Image.h"
-#include "MultiResImages.h"
-#include "Estarfm.h"
-#include "EstarfmOptions.h"
+#include "geoinfo.h"
+#include "image.h"
+#include "multiresimages.h"
+#include "estarfm.h"
+#include "estarfm_options.h"
 #include "fileformat.h"
 
 #ifdef WITH_OMP
-    #include "Parallelizer.h"
-    #include "ParallelizerOptions.h"
+    #include "parallelizer.h"
+    #include "parallelizer_options.h"
 #endif /* WITH_OMP */
 
 #include "utils_common.h"
@@ -38,7 +38,7 @@ const char* usageImage =
     "\t  -c <rect>, --crop=<rect> \tOptional. Specifies the crop window, where the "
     "image will be read. A zero width or height means full width or height, respectively.\n"
     "\t<rect> requires either all of the following arguments:\v"
-    "  -c (<num> <num), --center=(<num> <num>) x and y center\v"
+    "  -c (<num> <num>), --center=(<num> <num>) x and y center\v"
     "  -w <num>, --width=<num>  width\v"
     "  -h <num>, --height=<num> height\v"
     "or x can be specified with:\v"
@@ -240,38 +240,32 @@ int main(int argc, char* argv[]) {
         #endif /* WITH_OMP */
 
         imagefusion::Image pairMask = baseMask;
-        for (int datePair : pairDate_vec) {         //FIRST WE HANDLE THE P A I R DATES
+        for (int datePair : pairDate_vec) {
             // read in pair images
-            if (!mri->has(jat.highTag, datePair)) {  //if we do not aleady have highrez images for that date:
-                auto in = Parse::MRImage(imgArgs.get(jat.highTag, datePair));   //load the image for that date and rez rom the imgArgs
-                mri->set(jat.highTag, datePair, std::move(in.i));       //put that image into the mri
+            if (!mri->has(jat.highTag, datePair)) {
+                auto in = Parse::MRImage(imgArgs.get(jat.highTag, datePair));
+                mri->set(jat.highTag, datePair, std::move(in.i));
             }
-            if (!mri->has(jat.lowTag, datePair)) {//if we do not aleady have lowrez images for that date:
-                auto in = Parse::MRImage(imgArgs.get(jat.lowTag, datePair)); //load the image for that date and rez from the imgArgs
-                mri->set(jat.lowTag, datePair, std::move(in.i));    //put that image into the mri
+            if (!mri->has(jat.lowTag, datePair)) {
+                auto in = Parse::MRImage(imgArgs.get(jat.lowTag, datePair));
+                mri->set(jat.lowTag, datePair, std::move(in.i));
             }
 
             // add mask from nodata value and valid / invalid ranges for pair images base mask
-            auto pairValidSets = baseValidSets;  //starting out, our valid ranges for the pairs are our base valid ranges
-            if (useNodataValue) { //Only in case we want to include the nodatavalue
-                if (!pairValidSets.hasHigh)//If there are NO ranges given for the highrez
-                  //set high limits to entire datarange
+            auto pairValidSets = baseValidSets;
+            if (useNodataValue) {
+                if (!pairValidSets.hasHigh)
                     pairValidSets.high += imagefusion::Interval::closed(-std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity());
-                if (!pairValidSets.hasLow)//If there are NO ranges given for the lowrez
-                  //set low limits to entire datarange
+                if (!pairValidSets.hasLow)
                     pairValidSets.low  += imagefusion::Interval::closed(-std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity());
-                //Now ranges are given.
+
                 pairValidSets.hasHigh = pairValidSets.hasLow = true;
-                
-                //Then we get the NoDataValue from the GeoInfo (if there is one), make an interval of it, and subtract it from the
-                //high rez ranges
+
                 imagefusion::GeoInfo const& giHigh = gis.get(jat.highTag, datePair);
                 if (giHigh.hasNodataValue()) {
                     imagefusion::Interval nodataInt = imagefusion::Interval::closed(giHigh.getNodataValue(), giHigh.getNodataValue());
                     pairValidSets.high -= nodataInt;
                 }
-                //Then we get the NoDataValue from the GeoInfo (if there is one), make an interval of it, and subtract it from the
-                //low rez ranges
                 imagefusion::GeoInfo const& giLow = gis.get(jat.lowTag, datePair);
                 if (giLow.hasNodataValue()) {
                     imagefusion::Interval nodataInt = imagefusion::Interval::closed(giLow.getNodataValue(), giLow.getNodataValue());
@@ -279,10 +273,10 @@ int main(int argc, char* argv[]) {
                 }
             }
 
-            if (pairValidSets.hasHigh) //If there are any ranges given for the highrez (now we really should have one)
-                pairMask = helpers::processSetMask(std::move(pairMask), mri->get(jat.highTag, datePair), pairValidSets.high);
-            if (pairValidSets.hasLow) //If there are any ranges given for the lowrez (now we really should have one)
-                pairMask = helpers::processSetMask(std::move(pairMask), mri->get(jat.lowTag,  datePair), pairValidSets.low);
+            if (pairValidSets.hasHigh)
+                pairMask = helpers::processSetMask(pairMask, mri->get(jat.highTag, datePair), pairValidSets.high);
+            if (pairValidSets.hasLow)
+                pairMask = helpers::processSetMask(pairMask, mri->get(jat.lowTag,  datePair), pairValidSets.low);
         }
 
         // loop over a single time series (multiple images with the same date 1 and 3)
@@ -309,7 +303,7 @@ int main(int argc, char* argv[]) {
             }
 
             if (predValidSets.hasLow)
-                predMask = helpers::processSetMask(std::move(predMask), mri->get(jat.lowTag, date2), predValidSets.low);
+                predMask = helpers::processSetMask(predMask, mri->get(jat.lowTag, date2), predValidSets.low);
 
             // predict a single image
             std::cout << "Predicting for date " << date2 << " using pairs from dates " << date1 << " and " << date3 << "." << std::endl;

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Options.h"
+#include "options.h"
 
 namespace imagefusion {
 
@@ -107,7 +107,7 @@ public:
 
     /**
      * @brief Get the resolution tag for high resolution
-     * @return tag
+     * @return high resolution tag
      * @see setHighResTag()
      */
     std::string const& getHighResTag() const {
@@ -129,7 +129,7 @@ public:
 
     /**
      * @brief Get the resolution tag for low resolution
-     * @return tag
+     * @return low resolution tag
      * @see setLowResTag()
      */
     std::string const& getLowResTag() const {
