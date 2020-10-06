@@ -6,7 +6,7 @@ PKG_CXXFLAGS = -Iinclude -I@OPENMP_FLAG@
 CXX_STD=CXX17
 
 #########################
-SOURCES=execture_imagefusor_jobs.cpp execture_imginterp_job.cpp RcppExports.cpp utils/helpers/utils_common.cpp @SUBDIR_SOURCES@
+SOURCES=execture_imagefusor_jobs.cpp execture_imginterp_job.cpp RcppExports.cpp utils/helpers/utils_common.cpp  utils/imginterp/customopts.cpp @SUBDIR_SOURCES@
 # Obtain the object files
 OBJECTS=$(SOURCES:.cpp=.o) 
 # Make the shared object

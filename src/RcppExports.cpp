@@ -135,16 +135,12 @@ BEGIN_RCPP
 END_RCPP
 }
 // execute_imginterp_job_cpp
-void execute_imginterp_job_cpp(CharacterVector input_filenames, IntegerVector input_dates, const std::string& input_string, const std::string& MASKIMG_options, const std::string& MASKRANGE_options);
-RcppExport SEXP _ImageFusion_execute_imginterp_job_cpp(SEXP input_filenamesSEXP, SEXP input_datesSEXP, SEXP input_stringSEXP, SEXP MASKIMG_optionsSEXP, SEXP MASKRANGE_optionsSEXP) {
+void execute_imginterp_job_cpp(const std::string& input_string);
+RcppExport SEXP _ImageFusion_execute_imginterp_job_cpp(SEXP input_stringSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< CharacterVector >::type input_filenames(input_filenamesSEXP);
-    Rcpp::traits::input_parameter< IntegerVector >::type input_dates(input_datesSEXP);
     Rcpp::traits::input_parameter< const std::string& >::type input_string(input_stringSEXP);
-    Rcpp::traits::input_parameter< const std::string& >::type MASKIMG_options(MASKIMG_optionsSEXP);
-    Rcpp::traits::input_parameter< const std::string& >::type MASKRANGE_options(MASKRANGE_optionsSEXP);
-    execute_imginterp_job_cpp(input_filenames, input_dates, input_string, MASKIMG_options, MASKRANGE_options);
+    execute_imginterp_job_cpp(input_string);
     return R_NilValue;
 END_RCPP
 }
@@ -154,7 +150,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ImageFusion_execute_starfm_job_cpp", (DL_FUNC) &_ImageFusion_execute_starfm_job_cpp, 25},
     {"_ImageFusion_execute_fitfc_job_cpp", (DL_FUNC) &_ImageFusion_execute_fitfc_job_cpp, 18},
     {"_ImageFusion_execute_spstfm_job_cpp", (DL_FUNC) &_ImageFusion_execute_spstfm_job_cpp, 26},
-    {"_ImageFusion_execute_imginterp_job_cpp", (DL_FUNC) &_ImageFusion_execute_imginterp_job_cpp, 5},
+    {"_ImageFusion_execute_imginterp_job_cpp", (DL_FUNC) &_ImageFusion_execute_imginterp_job_cpp, 1},
     {NULL, NULL, 0}
 };
 
