@@ -3,6 +3,7 @@
 export(estarfm_job)
 export(fitfc_job)
 export(imagefusion_task)
+export(imginterp_task)
 export(spstfm_job)
 export(starfm_job)
 import(assertthat)
