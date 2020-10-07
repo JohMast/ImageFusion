@@ -17,3 +17,8 @@ autom4te.cache
 src/Makevars
 windows
 inst
+
+*.tif
+*.png
+*.zip
+*.rar

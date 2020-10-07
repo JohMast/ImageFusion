@@ -135,12 +135,13 @@ BEGIN_RCPP
 END_RCPP
 }
 // execute_imginterp_job_cpp
-void execute_imginterp_job_cpp(const std::string& input_string);
-RcppExport SEXP _ImageFusion_execute_imginterp_job_cpp(SEXP input_stringSEXP) {
+void execute_imginterp_job_cpp(bool verbose, const std::string& input_string);
+RcppExport SEXP _ImageFusion_execute_imginterp_job_cpp(SEXP verboseSEXP, SEXP input_stringSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
     Rcpp::traits::input_parameter< const std::string& >::type input_string(input_stringSEXP);
-    execute_imginterp_job_cpp(input_string);
+    execute_imginterp_job_cpp(verbose, input_string);
     return R_NilValue;
 END_RCPP
 }
@@ -150,7 +151,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ImageFusion_execute_starfm_job_cpp", (DL_FUNC) &_ImageFusion_execute_starfm_job_cpp, 25},
     {"_ImageFusion_execute_fitfc_job_cpp", (DL_FUNC) &_ImageFusion_execute_fitfc_job_cpp, 18},
     {"_ImageFusion_execute_spstfm_job_cpp", (DL_FUNC) &_ImageFusion_execute_spstfm_job_cpp, 26},
-    {"_ImageFusion_execute_imginterp_job_cpp", (DL_FUNC) &_ImageFusion_execute_imginterp_job_cpp, 1},
+    {"_ImageFusion_execute_imginterp_job_cpp", (DL_FUNC) &_ImageFusion_execute_imginterp_job_cpp, 2},
     {NULL, NULL, 0}
 };
 

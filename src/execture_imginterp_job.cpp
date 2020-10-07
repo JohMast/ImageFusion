@@ -102,12 +102,13 @@ std::vector<Descriptor> usage{
 //===========================================imginterp=================================
 // [[Rcpp::export]]
 void execute_imginterp_job_cpp(
+    bool verbose,
     const std::string& input_string){
   
   
   //So it begins
   using namespace imagefusion;
-  
+  if(verbose) Rcout << "Starting imginterp job" << std::endl;;
   // collect arguments for images, quality layers and masks
   imagefusion::option::OptionParser options(usage);
   
@@ -129,17 +130,20 @@ void execute_imginterp_job_cpp(
   }
   
   // collect arguments for images, quality layers and masks
+
   imagefusion::MultiResCollection<std::string> imgArgs;
   auto gis = std::make_shared<imagefusion::MultiResCollection<GeoInfo>>();
   for (auto const& o : options["IMAGE"]) {
     std::string tag = Parse::ImageHasTag(o.arg) ? Parse::ImageTag(o.arg) : "";
     int date = Parse::ImageDate(o.arg);
     std::string filename = Parse::ImageFileName(o.arg);
+    if(verbose) Rcout << "Adding Image:" << filename<< std::endl;
     imgArgs.set(tag, date, o.arg);
     gis->set(tag, date, GeoInfo{filename});
   }
   
-  // process img args (should not work as we have removed the QL options for now)
+  // process 
+  if(verbose) Rcout << "Processing Quality Layers" << std::endl;
   imagefusion::MultiResCollection<std::string> qlImgArgs;
   for (auto const& o : options["QLIMG"]) {
     std::string predefined = "";
@@ -157,6 +161,7 @@ void execute_imginterp_job_cpp(
   }
   
   //process mask args
+  if(verbose) Rcout << "Processing Masks" << std::endl;
   imagefusion::MultiResCollection<std::string> maskArgs;
   for (auto const& o : options["MASKIMG"]) {
     std::string tag = Parse::ImageHasTag(o.arg) ? Parse::ImageTag(o.arg) : "";
@@ -182,6 +187,7 @@ void execute_imginterp_job_cpp(
   
   
   //process interpolaation ranges
+  if(verbose) Rcout << "Processing Interpolation Ranges" << std::endl;
   imagefusion::IntervalSet baseInterpSet;
   bool hasInterpRanges = !options["INTERPRANGE"].empty();
   if (hasInterpRanges && options["INTERPRANGE"].front().prop() == "INVALID")
@@ -220,8 +226,13 @@ void execute_imginterp_job_cpp(
   
   
   // process tags independendly
+  if(verbose) Rcout << "Starting Interpolations" << std::endl;
   auto tags = imgArgs.getResolutionTags();
+  int i=0;
   for (auto tag : tags){
+    if(verbose) Rcout << "Processing Resolution:" << i<< std::endl;
+    i+=1;
+      
     auto imgs   = std::make_shared<imagefusion::MultiResImages>();
     auto qlImgs = std::make_shared<imagefusion::MultiResImages>();
     auto masks  = std::make_shared<imagefusion::MultiResImages>();
@@ -236,23 +247,32 @@ void execute_imginterp_job_cpp(
       std::set_union(std::begin(datesTag), std::end(datesTag), std::begin(datesNoTag), std::end(datesNoTag),
                      std::back_inserter(qlDates));
     }
+    if(verbose) Rcout << "imgDates:" << imgDates.size() <<std::endl;
+    if(verbose) Rcout << "interpDates:" << interpDates.size() << std::endl;
+    if(verbose) Rcout << "qlDates:" << qlDates.size() <<std::endl;
     
     if (!hasInterpRanges) {
       interpDates.clear();
       std::set_intersection(std::begin(qlDates), std::end(qlDates), std::begin(imgDates), std::end(imgDates),
                             std::back_inserter(interpDates));
     }
+    if(verbose) Rcout << "imgDates:" << imgDates.size() <<std::endl;
+    if(verbose) Rcout << "interpDates:" << interpDates.size() << std::endl;
+    if(verbose) Rcout << "qlDates:" << qlDates.size() <<std::endl;
     
     // interpolate each date
     for (int interpDate : interpDates) {
+      if(verbose) Rcout << "performing Interpolation"<<std::endl;
       int firstDate = interpDate - dateLimit;
       int lastDate = interpDate + dateLimit;
+      if(verbose) Rcout << "Interpolating:" << interpDate<<" between "<< firstDate<< " to "<<lastDate << std::endl;
       
       // remove previous images, masks and QLs
       auto first_it = std::lower_bound(std::begin(imgDates), std::end(imgDates), firstDate);
       auto last_it  = std::upper_bound(std::begin(imgDates), std::end(imgDates), lastDate);
       std::vector<int> currentImgDates(first_it, last_it);
       std::vector<int> beforeImgDates(std::begin(imgDates), first_it);
+      
       for (int remDate : boost::adaptors::reverse(beforeImgDates)) {
         if (!imgs->has(tag, remDate))
           break;
@@ -381,6 +401,8 @@ void execute_imginterp_job_cpp(
       }
       
       // interpolate
+      std::string const& inputfilename = Parse::ImageFileName(imgArgs.get(tag, interpDate));
+      if(verbose) Rcout << "Interpolating:" << inputfilename<<std::endl;
       bool doPreferCloudsOverNodata = options["PRIOCLOUDS"].back().prop() == "ENABLE";
       Type t = imgs->getAny().type();
       auto imgInterped_and_pixelState_and_stats = CallBaseTypeFunctor::run(Interpolator{*imgs, *qlImgs, *masks, tag, interpDate, doPreferCloudsOverNodata}, t);
@@ -394,7 +416,7 @@ void execute_imginterp_job_cpp(
         + Interval::closed(nonInterpd, nonInterpd)});
       
       // try to set nodata value in metadata and set not interpolated locations to nodata value
-      std::string const& inputfilename = Parse::ImageFileName(imgArgs.get(tag, interpDate));
+      //std::string const& inputfilename = Parse::ImageFileName(imgArgs.get(tag, interpDate));
       imagefusion::GeoInfo& gi = gis->get(tag, interpDate);
       if (!gi.hasNodataValue()) {
         double ndv = helpers::findAppropriateNodataValue(imgInterped, maskNowInvalid.bitwise_not());
@@ -519,5 +541,5 @@ void execute_imginterp_job_cpp(
   
   
   
-  
+  if(verbose) Rcout << "Ending Process" << std::endl;
   }//end function
