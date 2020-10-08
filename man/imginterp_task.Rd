@@ -2,16 +2,109 @@
 % Please edit documentation in R/imginterp_task.R
 \name{imginterp_task}
 \alias{imginterp_task}
-\title{imginterp_task}
+\title{Perform time-series image interpolation}
 \usage{
-imginterp_task()
+imginterp_task(
+  filenames,
+  dates,
+  tags = NULL,
+  layers = NULL,
+  limit_days = 5,
+  output_pixelstate = F,
+  use_nodata = T,
+  interp_invalid = T,
+  prioritize_invalid = F,
+  interp_ranges = NULL,
+  no_interp_ranges = NULL,
+  out_prefix = NULL,
+  out_postfix = NULL,
+  out_pixelstate_prefix = NULL,
+  out_pixelstate_postfix = NULL,
+  stats_filename = NULL,
+  print_stats = F,
+  ql_filenames = NULL,
+  ql_dates = NULL,
+  ql_tags = NULL,
+  ql_layers = NULL,
+  ql_bits = NULL,
+  ql_interp_ranges = NULL,
+  ql_non_interp_ranges = NULL,
+  verbose = F
+)
+}
+\arguments{
+\item{filenames}{}
+
+\item{dates}{}
+
+\item{tags}{}
+
+\item{layers}{A list of numeric (see below at \code{<num-list>}). Specifies the channels or layers, that will be read. Hereby a 0 means the first channel. Should be either matching \code{filenames} in length and order or be of length 1, in which case the selection will be applied to all images.}
+
+\item{limit_days}{}
+
+\item{output_pixelstate}{}
+
+\item{use_nodata}{}
+
+\item{interp_invalid}{}
+
+\item{prioritize_invalid}{}
+
+\item{interp_ranges}{}
+
+\item{no_interp_ranges}{}
+
+\item{out_prefix}{}
+
+\item{out_postfix}{}
+
+\item{out_pixelstate_prefix}{}
+
+\item{out_pixelstate_postfix}{}
+
+\item{stats_filename}{}
+
+\item{print_stats}{}
+
+\item{ql_filenames}{}
+
+\item{ql_dates}{}
+
+\item{ql_tags}{}
+
+\item{ql_layers}{A list of numeric (see below at \code{<num-list>}). Specifies the channels or layers, that will be read. Hereby a 0 means the first channel. Should be either matching \code{ql_filenames} in length and order or be of length 1, in which case the selection will be applied to all ql_images.}
+
+\item{ql_bits}{A list of numeric (see below at \code{<num-list>}). Specifies the bits to use. The selected bits will be extracted. from the quality layer image and then shifted to the least significant positions. If unspecified, all bits will be used. Should be either matching \code{ql_filenames} in length and order or be of length 1, in which case the selection will be applied to all ql_images.}
+
+\item{ql_interp_ranges}{A list of character (see below at \code{<range-list>}). Specifies the ranges of the shifted value that should mark the location for interpolation. Should be either matching \code{ql_filenames} in length and order or be of length 1, in which case the ranges will be applied to all ql_images.}
+
+\item{ql_non_interp_ranges}{A list of character (see below at \code{<range-list>}). Specifies the ranges of the shifted value that should mark the location for interpolation. Should be either matching \code{ql_filenames} in length and order or be of length 1, in which case the ranges will be applied to all ql_images.}
+
+\item{verbose}{}
 }
 \value{
-
+Nothing, files are written to disk.
 }
 \description{
-imginterp_task
+Simple interpolation on a given time series of remote sensing images
+}
+\details{
+This utility is developed to perform simple interpolation on a given time series of remote sensing images.
+ This utility can also perform cloud masking on satellite images with the quality layer provided using \code{ql} options. 
+ The quality layer can be a bit field image (ex. State_1km: Reflectance Data State QA layer from MODIS) or state image which 
+ provides the state of the pixel (ex. quality layer from FMASK). When a single image with a date and a quality layer with the 
+ same date is provided, this utility will fill the cloud (or whatever is specified) locations with the nodata value and output
+ the modified image. If multiple images with dates are provided with quality layers, this utility will try to interpolate the
+ bad locations linearly. When there is not enough data, the non-interpolated locations will be set to the nodata value. Note, nodata locations will not be interpolated by default.
+ \n
+ \item <num-list> must have the format '(<num>, [<num>, ...])', without commas in between or just '<num>'.
+ \item <range-list> must have the form '<range> [<range> ...]', where the brackets mean that further intervals are optional. The different ranges are related as union.
+ \item <range> should have the format '[<int>,<int>]', where the comma is optional, but the square brackets are actual characters here. Additional whitespace can be added anywhere.
 }
 \examples{
 Sorry, maybe later
+}
+\author{
+Christof Kaufmann (C++), Johannes Mast (R)
 }
