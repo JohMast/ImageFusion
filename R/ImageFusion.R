@@ -10,6 +10,7 @@
 #' \item STARFM
 #' } 
 #' More algorithms will be added over time.
+#' Also provides \link{imginterp_task}, a utility function for the linear interpolation of masked or missing values
 #' @section Implementation:
 #' The algorithms are implemented in C++ via 'GDAL', 'opencv' and 'Boost' and work from input images on disk without prior loading into R.
 #' @section Usage:
@@ -20,5 +21,5 @@
 #' @author Christof Kaufmann (C++)
 #' @author Johannes Mast (R)
 #' @useDynLib ImageFusion
-#' 
+#' @md
 NULL

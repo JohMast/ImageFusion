@@ -15,8 +15,9 @@ Implementation of Time-Series fusion.
 \item FITFC
 \item SPSTFM
 \item STARFM
-} 
+}
 More algorithms will be added over time.
+Also provides \link{imginterp_task}, a utility function for the linear interpolation of masked or missing values
 }
 
 \section{Implementation}{
