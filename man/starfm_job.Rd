@@ -67,22 +67,22 @@ starfm_job(
 
 \item{MASKIMG_options}{(Optional) A string containing information for a mask image (8-bit, boolean, i. e. consists of 0 and 255). "For all input images the pixel values at the locations where the mask is 0 is replaced by the mean value." Example: \code{--mask-img=some_image.png}}
 
-\item{MASKRANGE_options}{(Optional) Specify one or more intervals for valid values. Locations with invalid values will be masked out. Ranges should be given in the format '[<float>,<float>]', '(<float>,<float>)', '[<float>,<float>' or '<float>,<float>]'. There are a couple of options:' \itemize{
- \item{"--mask-valid-ranges"}{ Intervals which are marked as valid. Valid ranges can excluded from invalid ranges or vice versa, depending on the order of options.}
- \item{"--mask-invalid-ranges"}{ Intervals which are marked as invalid. Invalid intervals can be excluded from valid ranges or vice versa, depending on the order of options.}
- \item{"--mask-high-res-valid-ranges"}{ This is the same as --mask-valid-ranges, but is applied only for the high resolution images.}
- \item{"--mask-high-res-invalid-ranges"}{ This is the same as --mask-invalid-ranges, but is applied only for the high resolution images.}
- \item{"--mask-low-res-valid-ranges"}{ This is the same as --mask-valid-ranges, but is applied only for the low resolution images.}
- \item{"--mask-low-res-invalid-ranges"}{ This is the same as --mask-invalid-ranges, but is applied only for the low resolution images.}
+\item{MASKRANGE_options}{(Optional) Specify one or more intervals for valid values. Locations with invalid values will be masked out. Ranges should be given in the format '\link[=<float>,<float>]{<float>,<float>}', '(<float>,<float>)', '\link[=<float>,<float>' or '<float>,<float>]{<float>,<float>' or '<float>,<float>}'. There are a couple of options:' \itemize{
+\item{"--mask-valid-ranges"}{ Intervals which are marked as valid. Valid ranges can excluded from invalid ranges or vice versa, depending on the order of options.}
+\item{"--mask-invalid-ranges"}{ Intervals which are marked as invalid. Invalid intervals can be excluded from valid ranges or vice versa, depending on the order of options.}
+\item{"--mask-high-res-valid-ranges"}{ This is the same as --mask-valid-ranges, but is applied only for the high resolution images.}
+\item{"--mask-high-res-invalid-ranges"}{ This is the same as --mask-invalid-ranges, but is applied only for the high resolution images.}
+\item{"--mask-low-res-valid-ranges"}{ This is the same as --mask-valid-ranges, but is applied only for the low resolution images.}
+\item{"--mask-low-res-invalid-ranges"}{ This is the same as --mask-invalid-ranges, but is applied only for the low resolution images.}
 }}
 
 \item{output_masks}{(Optional) Write mask images to disk? Default is "false".}
 
 \item{use_nodata_value}{(Optional) Use the nodata value as invalid range for masking? Default is "true".}
 
-\item{use_strict_filtering}{(Optional) Use strict filtering, which means that candidate pixels will be accepted only if they have less temporal *and* spectral difference than the central pixel (like in the paper). Default is "false".}
+\item{use_strict_filtering}{(Optional) Use strict filtering, which means that candidate pixels will be accepted only if they have less temporal \emph{and} spectral difference than the central pixel (like in the paper). Default is "false".}
 
-\item{double_pair_mode}{(Optional) Use two dates \code{date1} and \code{date3} for prediction, instead of just \code{date1} for all predictions? Default is "true" if *all* the pred dates are in between input pairs, and "false" otherwise. Note: It may be desirable to predict in double-pair mode where possible, as in the following example: \code{[(7) 10 12 (13) 14] } , where we may wish to predict 10 and 12 in double pair mode, but can only predict 14 in single-pair mode. Do achieve this it is necessary to split the task into different jobs.}
+\item{double_pair_mode}{(Optional) Use two dates \code{date1} and \code{date3} for prediction, instead of just \code{date1} for all predictions? Default is "true" if \emph{all} the pred dates are in between input pairs, and "false" otherwise. Note: It may be desirable to predict in double-pair mode where possible, as in the following example: \code{[(7) 10 12 (13) 14] } , where we may wish to predict 10 and 12 in double pair mode, but can only predict 14 in single-pair mode. Do achieve this it is necessary to split the task into different jobs.}
 
 \item{use_temp_diff_for_weights}{(Optional) Use temporal difference in the candidates weight (like in the paper)? Default is to use temporal weighting in double pair mode, and to not use it in single pair mode.}
 
@@ -98,12 +98,12 @@ A wrapper function for \code{execute_starfm_job_cpp}. Intended to execute a sing
 }
 \details{
 Executes the STARFM algorithm to create a number of synthetic high-resolution images from either two pairs (double pair mode) or one pair (single pair mode) of matching high- and low-resolution images. Assumes that the input images already have matching size. See the original paper for details (TO DO: INSERT CHANGES WITH REGARDS TO THE ORIGINAL PAPER). \itemize{
- \item{  For the weighting (10) states: \eqn{C = S T D}  but we use  \eqn{C = (S+1)(T+1)D}, according to the reference implementation. With \code{logscale_factor}, the weighting formula can be changed to \eqn{C = ln{(Sb+2)}ln{(Tb+1)D}}}
- \item{ In addition to the temporal uncertainty \eqn{\sigma_t} (see \code{temporal_uncertainty}) and the spectral uncertainty\eqn{ \sigma_s} (see \code{spectral_uncertainty}) there will be used a *combined uncertainty* \eqn{\sigma_c := \sqrt{\sigma_t^2 + \sigma_s^2} }. This will be used in the candidate weighting: If \eqn{(S + 1) \, (T + 1) < \sigma_c }, then \eqn{C = 1 } instead of the formula above.}
- \item{Considering candidate weighting again, there is an option \code{use_tempdiff_for_weights} to not use the temporal difference for the weighting (also not for the combined uncertainty check above), i. e. T = 0 then. This is also the default behaviour.}{ }
- \item{The basic assumption of the original paper that with zero spectral or temporal difference the central pixel will be chosen is wrong since there might be multiple pixels with zero difference within one window. Also due to the addition of 1 to the spectral and temporal differences, the weight will not increase so dramatical from a zero difference. However, these assumptions can be enforced with \code{do_copy_on_zero_diff}, which is the default behaviour.}{ }
- \item{The paper states that a good candidate should satisfy (15) and (16). This can be set with use_strict_filtering, which is by default used. However the other behaviour, that a candidate should fulfill (15) or (16), as in the reference implementation, can be also be selected with that option.}
- \item{The paper uses max in (15) and (16), which would choose the largest spectral and temporal difference from all input pairs (only one or two are possible). Since this should filter out bad candidates, we believe this is a mistake and should be min instead of max, like it is done in the reference implementation. So this implementation uses min here.}
+\item{  For the weighting (10) states: \eqn{C = S T D}  but we use  \eqn{C = (S+1)(T+1)D}, according to the reference implementation. With \code{logscale_factor}, the weighting formula can be changed to \eqn{C = ln{(Sb+2)}ln{(Tb+1)D}}}
+\item{ In addition to the temporal uncertainty \eqn{\sigma_t} (see \code{temporal_uncertainty}) and the spectral uncertainty\eqn{ \sigma_s} (see \code{spectral_uncertainty}) there will be used a \emph{combined uncertainty} \eqn{\sigma_c := \sqrt{\sigma_t^2 + \sigma_s^2} }. This will be used in the candidate weighting: If \eqn{(S + 1) \, (T + 1) < \sigma_c }, then \eqn{C = 1 } instead of the formula above.}
+\item{Considering candidate weighting again, there is an option \code{use_tempdiff_for_weights} to not use the temporal difference for the weighting (also not for the combined uncertainty check above), i. e. T = 0 then. This is also the default behaviour.}{ }
+\item{The basic assumption of the original paper that with zero spectral or temporal difference the central pixel will be chosen is wrong since there might be multiple pixels with zero difference within one window. Also due to the addition of 1 to the spectral and temporal differences, the weight will not increase so dramatical from a zero difference. However, these assumptions can be enforced with \code{do_copy_on_zero_diff}, which is the default behaviour.}{ }
+\item{The paper states that a good candidate should satisfy (15) and (16). This can be set with use_strict_filtering, which is by default used. However the other behaviour, that a candidate should fulfill (15) or (16), as in the reference implementation, can be also be selected with that option.}
+\item{The paper uses max in (15) and (16), which would choose the largest spectral and temporal difference from all input pairs (only one or two are possible). Since this should filter out bad candidates, we believe this is a mistake and should be min instead of max, like it is done in the reference implementation. So this implementation uses min here.}
 }
 }
 \examples{

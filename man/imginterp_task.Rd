@@ -90,7 +90,6 @@ Nothing, files are written to disk.
 A utility function of the ImageFusion Package, which performs simple interpolation on a given time series of remote sensing images
 }
 \details{
-\deqn{a + b}
 This utility is developed to perform simple interpolation on a given time series of remote sensing images.
 This utility can also perform cloud masking on satellite images with the quality layer provided using \code{ql} options.
 The quality layer can be a bit field image (ex. State_1km: Reflectance Data State QA layer from MODIS) or state image which
@@ -98,28 +97,27 @@ provides the state of the pixel (ex. quality layer from FMASK). When a single im
 same date is provided, this utility will fill the cloud (or whatever is specified) locations with the nodata value and output
 the modified image. If multiple images with dates are provided with quality layers, this utility will try to interpolate the
 bad locations linearly. When there is not enough data, the non-interpolated locations will be set to the nodata value. Note, nodata locations will not be interpolated by default.
-\subsection{Pixelstates}{
+
+\strong{Pixelstates}
 
 Using \code{output_pixelstate} the pixelstates can be produces as an additional output. The pixelstates are 8 bit wide.
 bit 6 indicates that it was a location to interpolate before,bit 7 indicates that it is a clear pixel afterwards.
-This results in the follwing states (other bits are 0):\tabular{lccl}{
-   value \tab b7 \tab b6 \tab meaning \cr
-   0 \tab 0 \tab 0 \tab was nodata \cr
-   64 \tab 0 \tab 1 \tab could not \cr
-   192 \tab 1 \tab 1 \tab is \cr
-   128 \tab 1 \tab 0 \tab was clear \cr
-}
+This results in the follwing states (other bits are 0):
 
+\tabular{rrrr}{
+\strong{value} \tab \strong{b7} \tab \strong{b6} \tab \strong{meaning} \cr
+0\tab 0 \tab 0 \tab  Was nodata before and still is\cr
+64 \tab 0 \tab 1 \tab Could not be interpolated and is set to nodata\cr
+192 \tab 1 \tab 1 \tab Is interpolated \cr
+128 \tab 1 \tab 0 \tab Was clear before and still is.
 }
-
-\subsection{Argument Formats}{
+\strong{Specific Formats}
 
 Some arguments require inputs in a specific format.
 \itemize{
 \item <num-list> must be lists of integer vectors. Example: \code{list(c(1,3,3,7),c(4,2))}
 \item <range> must be strings. Either be a single number or have the format \code{'[<float>,<float>]'}, \code{'(<float>,<float>)'}, \code{'[<float>,<float>'} or \code{'<float>,<float>]'} where the comma and round brackets are optional, but square brackets are here actual characters. Especially for half-open intervals do not use unbalanced parentheses or escape them (maybe with two '\\'). Additional whitespace can be added anywhere. Example: \code{"(125,175)"}
 \item <range-list> must be strings that combine ranges in the form \code{ '<range> [<range> ...]'}, where the brackets mean that further intervals are optional. The different ranges are related as union. Example: \code{"(125,175) [225,275]"}
-}
 }
 }
 \examples{

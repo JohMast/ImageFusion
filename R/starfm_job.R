@@ -50,7 +50,6 @@
 ##' }
 #' @examples #
 #' @family {fusion_algorithms}
-#' 
 starfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,pred_filenames,pred_area,winsize,date1,date3,n_cores, logscale_factor,spectral_uncertainty, temporal_uncertainty, number_classes,hightag,lowtag,MASKIMG_options,MASKRANGE_options,output_masks,use_nodata_value,use_strict_filtering,double_pair_mode,use_temp_diff_for_weights,do_copy_on_zero_diff,verbose=T) {
   
   ##### A: Check all the Optional Inputs #####

@@ -18,3 +18,4 @@ Encoding: UTF-8
 RoxygenNote: 7.1.1
 SystemRequirements: libgdal-dev libopencv-dev libproj-dev
 NeedsCompilation: yes
+Roxygen: list(markdown=TRUE)
