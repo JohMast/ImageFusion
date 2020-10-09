@@ -50,6 +50,6 @@ clean:
 .PHONY: all winlibs clean
 
 
-CPPFILES = $(wildcard *.cpp src/*.cpp utils/helpers/*common.cpp)
+CPPFILES = $(wildcard *.cpp src/*.cpp utils/helpers/*common.cpp  utils/imginterp/customopts.cpp )
 SOURCES = $(CPPFILES)
 OBJECTS = $(CPPFILES:.cpp=.o)
