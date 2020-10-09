@@ -16,7 +16,7 @@ autom4te.cache
 
 src/Makevars
 windows
-inst
+#inst
 
 *.tif
 *.png
