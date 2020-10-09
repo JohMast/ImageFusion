@@ -20,6 +20,6 @@
 #' @name ImageFusion
 #' @author Christof Kaufmann (C++)
 #' @author Johannes Mast (R)
-#' @useDynLib packagename, .registration = TRUE
+#' @useDynLib ImageFusion, .registration = TRUE
 #' @md
 NULL
