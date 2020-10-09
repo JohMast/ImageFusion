@@ -11,7 +11,7 @@ PKG_CPPFLAGS = -I$(RWINLIB_GDAL)/include/gdal \
                -I../src/utils/helpers \
                -I../src/utils/imginterp \
                -DCURL_STATICLIB -DR_PACKAGE -DWITH_OMP \
-               $(SHLIB_OPENMP_CFLAGS)
+               -I-fopenmp
  
 PKG_LIBS = -lstdc++fs -L$(RWINLIB_GDAL)/lib$(R_ARCH) \
   -lgdal -lsqlite3 -lspatialite -lproj -lgeos_c -lgeos  \
@@ -27,7 +27,7 @@ PKG_LIBS = -lstdc++fs -L$(RWINLIB_GDAL)/lib$(R_ARCH) \
 	-lcomctl32 -lgdi32 -lole32 -lws2_32 -lavifil32 -lavicap32 -lwinmm -lmsvfw32 \
 	-lopengl32 -lglu32 -lcomdlg32 -lOleAut32 -luuid \
 	$(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS) \
-	$(SHLIB_OPENMP_CFLAGS)
+	-fopenmp
 
 all: clean winlibs
 
