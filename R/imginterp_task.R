@@ -245,7 +245,7 @@ imginterp_task <- function(filenames,
     string_args <- paste0(string_args, " --stats")
   }
   #Print the string one last time
-  if(verbose){string_args}
+  if(verbose){print(string_args)}
   #Run the job
   execute_imginterp_job_cpp(input_string = string_args,verbose=verbose)
 }
