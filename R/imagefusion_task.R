@@ -72,7 +72,7 @@ has_high <- has_low <- interval_pairs <- interval_ids <- pred_case  <-  interval
 #'                  dates_high = c(68,77,93,100),
 #'                  filenames_low = modis,
 #'                  dates_low = 68:93,
-#'                  dates_pred = 65:100,
+#'                  dates_pred = c(65,70,75,80,85,90,95),
 #'                  out_dir = "Outputs/")
 #' # remove the output directory
 #' unlink("Outputs",recursive = TRUE)
