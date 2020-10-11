@@ -154,6 +154,7 @@ Gao, Feng, et al. "On the blending of the Landsat and MODIS surface reflectance:
 \seealso{
 Other {fusion_algorithms}: 
 \code{\link{estarfm_job}()},
+\code{\link{fitfc_job}()},
 \code{\link{spstfm_job}()}
 }
 \author{

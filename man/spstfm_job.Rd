@@ -160,6 +160,7 @@ Huang, B., & Song, H. (2012). Spatiotemporal reflectance fusion via sparse repre
 \seealso{
 Other {fusion_algorithms}: 
 \code{\link{estarfm_job}()},
+\code{\link{fitfc_job}()},
 \code{\link{starfm_job}()}
 }
 \author{

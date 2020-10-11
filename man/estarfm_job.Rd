@@ -140,6 +140,7 @@ Zhu, X., Chen, J., Gao, F., Chen, X., & Masek, J. G. (2010). An enhanced spatial
 }
 \seealso{
 Other {fusion_algorithms}: 
+\code{\link{fitfc_job}()},
 \code{\link{spstfm_job}()},
 \code{\link{starfm_job}()}
 }
