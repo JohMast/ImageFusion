@@ -533,7 +533,6 @@ void execute_fitfc_job_cpp(CharacterVector input_filenames,
                             IntegerVector pred_area, 
                             int winsize,
                             int date1,
-                            int n_cores,
                             int n_neighbors,
                             bool output_masks,
                             bool use_nodata_value,
@@ -545,11 +544,6 @@ void execute_fitfc_job_cpp(CharacterVector input_filenames,
                             const std::string& MASKRANGE_options
 ){
   
-#ifndef WITH_OMP
-  if(n_cores>1){
-    Rcout <<"Sorry, if you want to use Parallelizer, you need to install OpenMP first."<<std::endl;
-  }
-#endif 
   using namespace imagefusion;
   //Step 1: Prepare the Input
   //create a prediction area rectangle
@@ -606,20 +600,20 @@ void execute_fitfc_job_cpp(CharacterVector input_filenames,
     
   
   //Step 3: Create the Fusor
-  //create a parallelizer options object if desired
-#ifdef WITH_OMP
-  ParallelizerOptions<FitFCOptions> po;
-  po.setNumberOfThreads(n_cores);
-  po.setAlgOptions(o);
-  Parallelizer<StarfmFusor> ffc;
-  ffc.srcImages(mri);
-  ffc.processOptions(po);
-#else /* WITH_OMP not defined */    
+  //create a parallelizer options object if desired ( at this point, not supported by FITFC,therefore ignore for now)
+// #ifdef WITH_OMP
+//   ParallelizerOptions<FitFCOptions> po;
+//   po.setNumberOfThreads(n_cores);
+//   po.setAlgOptions(o);
+//   Parallelizer<StarfmFusor> ffc;
+//   ffc.srcImages(mri);
+//   ffc.processOptions(po);
+// #else /* WITH_OMP not defined */    
   //Create the Fusor
   FitFCFusor ffc;
   ffc.srcImages(mri); 
   ffc.processOptions(o);
-#endif /* WITH_OMP */
+// #endif /* WITH_OMP */
 
 
   

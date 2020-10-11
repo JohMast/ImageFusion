@@ -73,8 +73,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // execute_fitfc_job_cpp
-void execute_fitfc_job_cpp(CharacterVector input_filenames, CharacterVector input_resolutions, IntegerVector input_dates, IntegerVector pred_dates, CharacterVector pred_filenames, IntegerVector pred_area, int winsize, int date1, int n_cores, int n_neighbors, bool output_masks, bool use_nodata_value, bool verbose, double resolution_factor, const std::string& hightag, const std::string& lowtag, const std::string& MASKIMG_options, const std::string& MASKRANGE_options);
-RcppExport SEXP _ImageFusion_execute_fitfc_job_cpp(SEXP input_filenamesSEXP, SEXP input_resolutionsSEXP, SEXP input_datesSEXP, SEXP pred_datesSEXP, SEXP pred_filenamesSEXP, SEXP pred_areaSEXP, SEXP winsizeSEXP, SEXP date1SEXP, SEXP n_coresSEXP, SEXP n_neighborsSEXP, SEXP output_masksSEXP, SEXP use_nodata_valueSEXP, SEXP verboseSEXP, SEXP resolution_factorSEXP, SEXP hightagSEXP, SEXP lowtagSEXP, SEXP MASKIMG_optionsSEXP, SEXP MASKRANGE_optionsSEXP) {
+void execute_fitfc_job_cpp(CharacterVector input_filenames, CharacterVector input_resolutions, IntegerVector input_dates, IntegerVector pred_dates, CharacterVector pred_filenames, IntegerVector pred_area, int winsize, int date1, int n_neighbors, bool output_masks, bool use_nodata_value, bool verbose, double resolution_factor, const std::string& hightag, const std::string& lowtag, const std::string& MASKIMG_options, const std::string& MASKRANGE_options);
+RcppExport SEXP _ImageFusion_execute_fitfc_job_cpp(SEXP input_filenamesSEXP, SEXP input_resolutionsSEXP, SEXP input_datesSEXP, SEXP pred_datesSEXP, SEXP pred_filenamesSEXP, SEXP pred_areaSEXP, SEXP winsizeSEXP, SEXP date1SEXP, SEXP n_neighborsSEXP, SEXP output_masksSEXP, SEXP use_nodata_valueSEXP, SEXP verboseSEXP, SEXP resolution_factorSEXP, SEXP hightagSEXP, SEXP lowtagSEXP, SEXP MASKIMG_optionsSEXP, SEXP MASKRANGE_optionsSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< CharacterVector >::type input_filenames(input_filenamesSEXP);
@@ -85,7 +85,6 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< IntegerVector >::type pred_area(pred_areaSEXP);
     Rcpp::traits::input_parameter< int >::type winsize(winsizeSEXP);
     Rcpp::traits::input_parameter< int >::type date1(date1SEXP);
-    Rcpp::traits::input_parameter< int >::type n_cores(n_coresSEXP);
     Rcpp::traits::input_parameter< int >::type n_neighbors(n_neighborsSEXP);
     Rcpp::traits::input_parameter< bool >::type output_masks(output_masksSEXP);
     Rcpp::traits::input_parameter< bool >::type use_nodata_value(use_nodata_valueSEXP);
@@ -95,7 +94,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const std::string& >::type lowtag(lowtagSEXP);
     Rcpp::traits::input_parameter< const std::string& >::type MASKIMG_options(MASKIMG_optionsSEXP);
     Rcpp::traits::input_parameter< const std::string& >::type MASKRANGE_options(MASKRANGE_optionsSEXP);
-    execute_fitfc_job_cpp(input_filenames, input_resolutions, input_dates, pred_dates, pred_filenames, pred_area, winsize, date1, n_cores, n_neighbors, output_masks, use_nodata_value, verbose, resolution_factor, hightag, lowtag, MASKIMG_options, MASKRANGE_options);
+    execute_fitfc_job_cpp(input_filenames, input_resolutions, input_dates, pred_dates, pred_filenames, pred_area, winsize, date1, n_neighbors, output_masks, use_nodata_value, verbose, resolution_factor, hightag, lowtag, MASKIMG_options, MASKRANGE_options);
     return R_NilValue;
 END_RCPP
 }
@@ -149,7 +148,7 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_ImageFusion_execute_estarfm_job_cpp", (DL_FUNC) &_ImageFusion_execute_estarfm_job_cpp, 23},
     {"_ImageFusion_execute_starfm_job_cpp", (DL_FUNC) &_ImageFusion_execute_starfm_job_cpp, 25},
-    {"_ImageFusion_execute_fitfc_job_cpp", (DL_FUNC) &_ImageFusion_execute_fitfc_job_cpp, 18},
+    {"_ImageFusion_execute_fitfc_job_cpp", (DL_FUNC) &_ImageFusion_execute_fitfc_job_cpp, 17},
     {"_ImageFusion_execute_spstfm_job_cpp", (DL_FUNC) &_ImageFusion_execute_spstfm_job_cpp, 26},
     {"_ImageFusion_execute_imginterp_job_cpp", (DL_FUNC) &_ImageFusion_execute_imginterp_job_cpp, 2},
     {NULL, NULL, 0}

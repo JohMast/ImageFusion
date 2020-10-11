@@ -14,7 +14,6 @@ fitfc_job(
   winsize,
   date1,
   date3,
-  n_cores,
   n_neighbors,
   hightag,
   lowtag,
@@ -44,8 +43,6 @@ fitfc_job(
 \item{date1}{(Optional) Set the date of the first input image pair. By default, will use the pair with the lowest date value.}
 
 \item{date3}{(Optional) For pseudo-doublepair mode: Set the date of the second input image pair. By default, will use the pair with the highest date value.}
-
-\item{n_cores}{(Optional) Set the number of cores to use when using parallelisation. Default is 1.}
 
 \item{n_neighbors}{(Optional) The number of near pixels (including the center) to use in the filtering step (spatial filtering and residual compensation). Default is 10.}
 

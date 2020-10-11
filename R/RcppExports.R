@@ -9,8 +9,8 @@ execute_starfm_job_cpp <- function(input_filenames, input_resolutions, input_dat
     invisible(.Call(`_ImageFusion_execute_starfm_job_cpp`, input_filenames, input_resolutions, input_dates, pred_dates, pred_filenames, pred_area, winsize, date1, date3, n_cores, output_masks, use_nodata_value, use_strict_filtering, use_temp_diff_for_weights, do_copy_on_zero_diff, double_pair_mode, verbose, number_classes, logscale_factor, spectral_uncertainty, temporal_uncertainty, hightag, lowtag, MASKIMG_options, MASKRANGE_options))
 }
 
-execute_fitfc_job_cpp <- function(input_filenames, input_resolutions, input_dates, pred_dates, pred_filenames, pred_area, winsize, date1, n_cores, n_neighbors, output_masks, use_nodata_value, verbose, resolution_factor, hightag, lowtag, MASKIMG_options, MASKRANGE_options) {
-    invisible(.Call(`_ImageFusion_execute_fitfc_job_cpp`, input_filenames, input_resolutions, input_dates, pred_dates, pred_filenames, pred_area, winsize, date1, n_cores, n_neighbors, output_masks, use_nodata_value, verbose, resolution_factor, hightag, lowtag, MASKIMG_options, MASKRANGE_options))
+execute_fitfc_job_cpp <- function(input_filenames, input_resolutions, input_dates, pred_dates, pred_filenames, pred_area, winsize, date1, n_neighbors, output_masks, use_nodata_value, verbose, resolution_factor, hightag, lowtag, MASKIMG_options, MASKRANGE_options) {
+    invisible(.Call(`_ImageFusion_execute_fitfc_job_cpp`, input_filenames, input_resolutions, input_dates, pred_dates, pred_filenames, pred_area, winsize, date1, n_neighbors, output_masks, use_nodata_value, verbose, resolution_factor, hightag, lowtag, MASKIMG_options, MASKRANGE_options))
 }
 
 execute_spstfm_job_cpp <- function(input_filenames, input_resolutions, input_dates, pred_dates, pred_filenames, pred_area, date1, date3, n_cores, dict_size, n_training_samples, patch_size, patch_overlap, min_train_iter, max_train_iter, output_masks, use_nodata_value, random_sampling, verbose, hightag, lowtag, MASKIMG_options, MASKRANGE_options, LOADDICT_options, SAVEDICT_options, REUSE_options) {

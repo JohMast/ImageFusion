@@ -10,7 +10,6 @@
 #' @param winsize (Optional) Window size of the rectangle around the current pixel. Default is 51.
 #' @param date1 (Optional) Set the date of the first input image pair. By default, will use the pair with the lowest date value.
 #' @param date3 (Optional) For pseudo-doublepair mode: Set the date of the second input image pair. By default, will use the pair with the highest date value.
-#' @param n_cores (Optional) Set the number of cores to use when using parallelisation. Default is 1.
 #' @param n_neighbors (Optional) The number of near pixels (including the center) to use in the filtering step (spatial filtering and residual compensation). Default is 10.
 #' @param hightag (Optional) A string which is used in \code{input_resolutions} to describe the high-resolution images. Default is "high".
 #' @param lowtag (Optional) A string which is used in \code{input_resolutions} to describe the low-resolution images.  Default is "low".
@@ -83,7 +82,7 @@
 #' # remove the output directory
 #' unlink("Outputs",recursive = TRUE)
 #' 
-fitfc_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,pred_filenames,pred_area,winsize,date1,date3,n_cores,n_neighbors,hightag,lowtag,MASKIMG_options,MASKRANGE_options,output_masks,use_nodata_value,resolution_factor,verbose=T
+fitfc_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,pred_filenames,pred_area,winsize,date1,date3,n_neighbors,hightag,lowtag,MASKIMG_options,MASKRANGE_options,output_masks,use_nodata_value,resolution_factor,verbose=T
 ){
   
   ##### A: Check all the Optional Inputs #####
@@ -200,15 +199,6 @@ fitfc_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,p
   }else{
     date3_c <- pair_dates[length(pair_dates)]
   }
-    
-  #### n_cores ####
-  if(!missing(n_cores)){
-    assert_that(class(n_cores)=="numeric"|class(n_cores)=="integer",
-                n_cores<=parallel::detectCores())
-    n_cores_c <- n_cores
-  }else{
-    n_cores_c <- 1
-  }
   
   #### n_neighbors ####
   if(!missing(n_neighbors)){
@@ -289,9 +279,6 @@ fitfc_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,p
       print("MASKRANGE Options: ")
       print(MASKRANGE_options_c)
     }
-    if(n_cores_c>1){
-      print(paste("USING PARALLELISATION WITH ", n_cores_c," CORES"))
-    }
   }
 
   
@@ -309,7 +296,6 @@ fitfc_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,p
                                       pred_area = pred_area_c,
                                       winsize = winsize_c,
                                       date1 = date1_c,
-                                      n_cores = n_cores_c,
                                       n_neighbors = n_neighbors_c,
                                       output_masks = output_masks_c,
                                       use_nodata_value = use_nodata_value_c,
@@ -335,7 +321,6 @@ fitfc_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,p
                                        pred_area = pred_area_c,
                                        winsize = winsize_c,
                                        date1 = date1_c,
-                                       n_cores = n_cores_c,
                                        n_neighbors = n_neighbors_c,
                                        output_masks = output_masks_c,
                                        use_nodata_value = use_nodata_value_c,
@@ -357,7 +342,6 @@ fitfc_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,p
                                        pred_area = pred_area_c,
                                        winsize = winsize_c,
                                        date1 = date3_c,
-                                       n_cores = n_cores_c,
                                        n_neighbors = n_neighbors_c,
                                        output_masks = output_masks_c,
                                        use_nodata_value = use_nodata_value_c,
