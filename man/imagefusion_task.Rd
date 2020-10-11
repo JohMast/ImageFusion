@@ -16,8 +16,8 @@ imagefusion_task(
   method = "starfm",
   spstfm_mode = "none",
   high_date_prediction_mode = "ignore",
-  verbose = T,
-  output_overview = T,
+  verbose = F,
+  output_overview = F,
   out_dir = "Pred_Outputs"
 )
 }
@@ -60,9 +60,9 @@ imagefusion_task(
 \item{force: Use the chosen algorithm to predicts the high resolution input images on themselves. This takes additional computation time, but ensures that the outputs are consistent with the genuinely predicted outputs.}
 }}
 
-\item{verbose}{(Optional) Output intermediate progress reports? Default is "true".}
+\item{verbose}{(Optional) Output additional intermediate progress reports? Default is "false".}
 
-\item{output_overview}{(Optional) Should a summary of the task be printed to console, and a \link[ggplot2]{ggplot} overview be returned? Default is "true".}
+\item{output_overview}{(Optional) Should a summary of the task be printed to console, and a \link[ggplot2]{ggplot} overview be returned? Default is "false".}
 
 \item{out_dir}{(Optional) A directory in which the predicted images will be saved. Will be created if it does not exist. Default: "/Pred_Outputs"}
 }
@@ -76,7 +76,39 @@ The main function of the ImageFusion Package, intended for the fusion of images 
 The function firstly seeks among the inputs for pair dates, which are dates for which have both a high resolution image and a low resolution image are available. It then splits the task into a number of self-contained \emph{jobs} which handle the fusion between these pair dates using the paired images as anchors. These jobs can also be called directly via their respective functions, see \code{method}.
 }
 \examples{
-#
+# Load required libraries
+library(ImageFusion)
+library(raster)
+# Get filesnames of high resolution images
+landsat <- list.files(
+  system.file("landsat/filled",
+              package = "ImageFusion"),
+  ".tif",
+  recursive = TRUE,
+  full.names = TRUE
+)
+
+# Get filesnames of low resolution images
+modis <- list.files(
+  system.file("modis",
+              package = "ImageFusion"),
+  ".tif",
+  recursive = TRUE,
+  full.names = TRUE
+)
+# Create output directory
+if(!dir.exists("Outputs")) dir.create("Outputs", recursive = TRUE)
+# Run the fusion on the entire time series
+imagefusion_task(filenames_high = landsat,
+                 dates_high = c(68,77,93,100),
+                 filenames_low = modis,
+                 dates_low = 68:93,
+                 dates_pred = 65:100,
+                 out_dir = "Outputs/")
+# remove the output directory
+unlink("Outputs",recursive = TRUE)
+
+
 }
 \author{
 Christof Kaufmann (C++), Johannes Mast (R)

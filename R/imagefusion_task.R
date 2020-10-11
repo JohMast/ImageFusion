@@ -21,7 +21,7 @@ has_high <- has_low <- interval_pairs <- interval_ids <- pred_case  <-  interval
 #' \item{fitfc: Fit-FC is a three-step method consisting of regression model fitting (RM fitting), spatial filtering (SF) and residual compensation (RC). It requires a relatively low amount of computation time for prediction. Supports singlepair or a pseudo-doublepair mode(For predictions between two pair dates, predictions will be done twice, once for each of the pair dates). See \link[ImageFusion]{fitfc_job}. This is the default algorithm.}
 #' \item{spstfm: SPSTFM is a dictionary learning based algorithm, which is computationally expensive in training and application, but can give good quality predictions. Only supports doublepair mode. See \link[ImageFusion]{spstfm_job}.}
 #' } 
-#' @param verbose  (Optional) Output intermediate progress reports? Default is "true".
+#' @param verbose  (Optional) Output additional intermediate progress reports? Default is "false".
 #' @param spstfm_mode  (Optional) If the spstfm \code{method} was chosen: Write and reuse dictionaries? \itemize{
 #' \item{none: No dictionary will be saved. This is the default.}
 #' \item{separate: Separate dictionaries will be saved for each job. }
@@ -32,7 +32,7 @@ has_high <- has_low <- interval_pairs <- interval_ids <- pred_case  <-  interval
 #' \item{copy: Directly copy the high resolution input images to the output path.}
 #' \item{force: Use the chosen algorithm to predicts the high resolution input images on themselves. This takes additional computation time, but ensures that the outputs are consistent with the genuinely predicted outputs.}
 #' }
-#' @param output_overview (Optional) Should a summary of the task be printed to console, and a \link[ggplot2]{ggplot} overview be returned? Default is "true".
+#' @param output_overview (Optional) Should a summary of the task be printed to console, and a \link[ggplot2]{ggplot} overview be returned? Default is "false".
 #' @param out_dir (Optional) A directory in which the predicted images will be saved. Will be created if it does not exist. Default: "/Pred_Outputs"
 #' @param ... Further arguments specific to the chosen \code{method}. See the documentation of the methods for a detailed description.
 #' @return A ggplot overview of the tasks (If \code{output_overview} is "true")
@@ -44,13 +44,44 @@ has_high <- has_low <- interval_pairs <- interval_ids <- pred_case  <-  interval
 #' @export
 #' @details The function firstly seeks among the inputs for pair dates, which are dates for which have both a high resolution image and a low resolution image are available. It then splits the task into a number of self-contained \emph{jobs} which handle the fusion between these pair dates using the paired images as anchors. These jobs can also be called directly via their respective functions, see \code{method}.
 #' @author  Christof Kaufmann (C++), Johannes Mast (R)
-#' @examples #
+#' @examples 
+#' # Load required libraries
+#' library(ImageFusion)
+#' library(raster)
+#' # Get filesnames of high resolution images
+#' landsat <- list.files(
+#'   system.file("landsat/filled",
+#'               package = "ImageFusion"),
+#'   ".tif",
+#'   recursive = TRUE,
+#'   full.names = TRUE
+#' )
+#' 
+#' # Get filesnames of low resolution images
+#' modis <- list.files(
+#'   system.file("modis",
+#'               package = "ImageFusion"),
+#'   ".tif",
+#'   recursive = TRUE,
+#'   full.names = TRUE
+#' )
+#' # Create output directory
+#' if(!dir.exists("Outputs")) dir.create("Outputs", recursive = TRUE)
+#' # Run the fusion on the entire time series
+#' imagefusion_task(filenames_high = landsat,
+#'                  dates_high = c(68,77,93,100),
+#'                  filenames_low = modis,
+#'                  dates_low = 68:93,
+#'                  dates_pred = 65:100,
+#'                  out_dir = "Outputs/")
+#' # remove the output directory
+#' unlink("Outputs",recursive = TRUE)
+#' 
+#' 
 
 
 
-
-
-imagefusion_task <- function(...,filenames_high,filenames_low,dates_high,dates_low,dates_pred,filenames_pred=NULL,singlepair_mode="ignore",method="starfm",spstfm_mode="none",high_date_prediction_mode="ignore",verbose=T,output_overview=T,out_dir="Pred_Outputs"){
+imagefusion_task <- function(...,filenames_high,filenames_low,dates_high,dates_low,dates_pred,filenames_pred=NULL,singlepair_mode="ignore",method="starfm",spstfm_mode="none",high_date_prediction_mode="ignore",verbose=F,output_overview=F,out_dir="Pred_Outputs"){
   
   ####1: Prepare Inputs####
   

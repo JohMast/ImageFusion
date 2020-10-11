@@ -87,15 +87,50 @@ Executes the FITFC Algorithm. If more than one pair is given, will perform predi
 \references{
 Wang, Qunming, and Peter M. Atkinson. "Spatio-temporal fusion for daily Sentinel-2 images." Remote Sensing of Environment 204 (2018): 31-42.
 }
-\seealso{
-Other {fusion_algorithms}: 
-\code{\link{estarfm_job}()},
-\code{\link{spstfm_job}()},
-\code{\link{starfm_job}()}
-}
 \author{
 Christof Kaufmann (C++)
 
 Johannes Mast (R)
 }
-\concept{{fusion_algorithms}}
+\concept{{fusion_algorithms}
+
+###########################fitfc ##############Load required libraries
+
+library(ImageFusion)
+library(raster)Get filesnames of high resolution images
+
+landsat <- list.files(
+system.file("landsat/filled",
+package = "ImageFusion"),
+".tif",
+recursive = TRUE,
+full.names = TRUE
+)Get filesnames of low resolution images
+
+modis <- list.files(
+system.file("modis",
+package = "ImageFusion"),
+".tif",
+recursive = TRUE,
+full.names = TRUE
+)
+
+#Select the first two landsat images
+landsat_sel <- landsat\link{1:2}
+#Select some corresponding modis images
+modis_sel <- modis\link{1:12}Create output directory
+
+if(!dir.exists("Outputs")) dir.create("Outputs", recursive = TRUE)
+#Run the job, fusing two images
+fitfc_job(input_filenames = c(landsat_sel,modis_sel),
+input_resolutions = c("high","high",
+"low","low","low",
+"low","low","low",
+"low","low","low",
+"low","low","low"),
+input_dates = c(68,77,68,69,70,71,72,73,74,75,76,77,78,79),
+pred_dates = c(71,79),
+pred_filenames = c("Outputs/fitfc_71.tif",
+"Outputs/fitfc_79.tif"))remove the output directory
+
+unlink("Outputs",recursive = TRUE)}

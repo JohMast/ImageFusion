@@ -32,7 +32,6 @@ imginterp_task(
   ql_interp_ranges = NULL,
   ql_non_interp_ranges = NULL,
   mask_filenames = NULL,
-  mask_dates = NULL,
   mask_layers = NULL,
   mask_bits = NULL,
   mask_valid_ranges = NULL,
@@ -153,19 +152,19 @@ landsat_with_gaps <- list.files(system.file("landsat/unfilled",
                                 recursive = TRUE,
                                 full.names = TRUE)
 # Create output Directory
-if(!dir.exists("Outputs")) dir.create("Outputs", recursive = T)
+if(!dir.exists("Outputs")) dir.create("Outputs", recursive = TRUE)
 # Interpolate into output directory
-# imginterp_task(filenames = landsat_with_gaps,
+imginterp_task(filenames = landsat_with_gaps,
               dates = c(68,77,93,100),limit_days = 15,
                invalid_ranges = "[-inf,-1]",
                out_prefix = "Outputs/")
 # Get filenames of interpolated images
-landsat_without_gaps <- list.files("Outputs",pattern = ".tif$",full.names = T)
+landsat_without_gaps <- list.files("Outputs",pattern = ".tif$",full.names = TRUE)
 # Count the number of NAs before and after the interpolation
 sum(is.na(getValues(stack(landsat_with_gaps[2]))))
 sum(is.na(getValues(stack(landsat_without_gaps[2]))))
 # remove the output directory
-unlink("Outputs",recursive = T)
+unlink("Outputs",recursive = TRUE)
 
 
 }

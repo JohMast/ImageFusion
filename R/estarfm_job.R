@@ -39,8 +39,49 @@
 #' @author Christof Kaufmann (C++)
 #' @author Johannes Mast (R)
 #' @details Executes the ESTARFM algorithm to create a number of synthetic high-resolution images from two pairs of matching high- and low-resolution images.  Assumes that the input images already have matching size. See the original paper for details (Note: There is a difference to the algorithm as described in the paper though. The regression for R is now done with all candidates of one window. This complies to the reference implementation, but not to the paper, since there the regression is done only for the candidates that belong to one single coarse pixel. However, the coarse grid is not known at prediction and not necessarily trivial to find out (e. g. in case of higher order interpolation). 
-#' @examples #
+#' @examples 
+#' # Load required libraries
+#' library(ImageFusion)
+#' library(raster)
+#' # Get filesnames of high resolution images
+#' landsat <- list.files(
+#'   system.file("landsat/filled",
+#'               package = "ImageFusion"),
+#'   ".tif",
+#'   recursive = TRUE,
+#'   full.names = TRUE
+#' )
+#' 
+#' # Get filesnames of low resolution images
+#' modis <- list.files(
+#'   system.file("modis",
+#'               package = "ImageFusion"),
+#'   ".tif",
+#'   recursive = TRUE,
+#'   full.names = TRUE
+#' )
+#'
+#' #Select the first two landsat images 
+#' landsat_sel <- landsat[1:2]
+#' #Select the corresponding modis images
+#' modis_sel <- modis[1:10]
+#' # Create output directory
+#' if(!dir.exists("Outputs")) dir.create("Outputs", recursive = TRUE)
+#' #Run the job, fusing two images
+#' estarfm_job(input_filenames = c(landsat_sel,modis_sel),
+#'             input_resolutions = c("high","high",
+#'                                   "low","low","low",
+#'                                   "low","low","low",
+#'                                   "low","low","low","low"),
+#'             input_dates = c(68,77,68,69,70,71,72,73,74,75,76,77),
+#'             pred_dates = c(72,74),
+#'             pred_filenames = c("Outputs/estarfm_72.tif",
+#'                                "Outputs/estarfm_74.tif"))
+#' 
+#' # remove the output directory
+#' unlink("Outputs",recursive = TRUE)
 #' @family {fusion_algorithms}
+#' 
 
 
 estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,pred_filenames,pred_area,winsize,date1,date3,n_cores,data_range_min, data_range_max, uncertainty_factor,number_classes,hightag,lowtag,MASKIMG_options,MASKRANGE_options,use_local_tol,use_quality_weighted_regression,output_masks,use_nodata_value,verbose=T
@@ -205,14 +246,14 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
   pair_dates <- as.numeric(names(table(c(unique(high_dates),unique(low_dates))))[which(table(c(unique(high_dates),unique(low_dates)))>=2)])
   
   if(!missing(date1)){
-    assert_that(class(date1)=="numeric")
+    assert_that(class(date1)=="numeric"|class(date1)=="integer")
     date1_c <- date1
   }else{
     date1_c <- pair_dates[1]
   }
   
   if(!missing(date3)){
-    assert_that(class(date3)=="numeric")
+    assert_that(class(date3)=="numeric"|class(date3)=="integer")
     date3_c <- date3
   }else{
     date3_c <- pair_dates[length(pair_dates)]
@@ -220,7 +261,7 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
   
   #### n_cores ####
   if(!missing(n_cores)){
-    assert_that(class(n_cores)=="numeric",
+    assert_that(class(n_cores)=="numeric"|class(date3)=="integer",
                 n_cores<=parallel::detectCores())
     n_cores_c <- n_cores
   }else{
@@ -236,9 +277,9 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
   #Some basic Assertions about the types of the inputs
   assert_that(
     class(input_filenames)=="character",
-    class(input_dates)=="numeric",
+    class(input_dates)=="numeric"|class(input_dates)=="integer",
     class(input_resolutions)=="character",
-    class(pred_dates)=="numeric",
+    class(pred_dates)=="numeric"|class(pred_dates)=="integer",
     class(pred_filenames)=="character"
   )
   

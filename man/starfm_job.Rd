@@ -82,7 +82,7 @@ starfm_job(
 
 \item{use_strict_filtering}{(Optional) Use strict filtering, which means that candidate pixels will be accepted only if they have less temporal \emph{and} spectral difference than the central pixel (like in the paper). Default is "false".}
 
-\item{double_pair_mode}{(Optional) Use two dates \code{date1} and \code{date3} for prediction, instead of just \code{date1} for all predictions? Default is "true" if \emph{all} the pred dates are in between input pairs, and "false" otherwise. Note: It may be desirable to predict in double-pair mode where possible, as in the following example: \code{[(7) 10 12 (13) 14] } , where we may wish to predict 10 and 12 in double pair mode, but can only predict 14 in single-pair mode. Do achieve this it is necessary to split the task into different jobs.}
+\item{double_pair_mode}{(Optional) Use two dates \code{date1} and \code{date3} for prediction, instead of just \code{date1} for all predictions? Default is "true" if \emph{all} the pred dates are in between input pairs, and "false" otherwise. Note: It may be desirable to predict in double-pair mode where possible, as in the following example: \code{[(7) 10 12 (13) 14] } , where we may wish to predict 10 and 12 in double pair mode, but can only predict 14 in single-pair mode. Do achieve this it is necessary to split the task into different jobs. Default is "true" if all pred_dates are between pair dates and "false" otherwise.}
 
 \item{use_temp_diff_for_weights}{(Optional) Use temporal difference in the candidates weight (like in the paper)? Default is to use temporal weighting in double pair mode, and to not use it in single pair mode.}
 
@@ -107,7 +107,46 @@ Executes the STARFM algorithm to create a number of synthetic high-resolution im
 }
 }
 \examples{
-#
+# Load required libraries
+library(ImageFusion)
+library(raster)
+# Get filesnames of high resolution images
+landsat <- list.files(
+  system.file("landsat/filled",
+              package = "ImageFusion"),
+  ".tif",
+  recursive = TRUE,
+  full.names = TRUE
+)
+
+# Get filesnames of low resolution images
+modis <- list.files(
+  system.file("modis",
+              package = "ImageFusion"),
+  ".tif",
+  recursive = TRUE,
+  full.names = TRUE
+)
+
+#Select the first two landsat images 
+landsat_sel <- landsat[1:2]
+#Select the corresponding modis images
+modis_sel <- modis[1:10]
+# Create output directory
+if(!dir.exists("Outputs")) dir.create("Outputs", recursive = TRUE)
+#Run the job, fusing two images
+starfm_job(input_filenames = c(landsat_sel,modis_sel),
+           input_resolutions = c("high","high",
+                                 "low","low","low",
+                                 "low","low","low",
+                                 "low","low","low","low"),
+           input_dates = c(68,77,68,69,70,71,72,73,74,75,76,77),
+           pred_dates = c(73,77),
+           pred_filenames = c("Outputs/starfm_73.tif",
+                              "Outputs/starfm_77.tif"))
+
+# remove the output directory
+unlink("Outputs",recursive = TRUE)
 }
 \references{
 Gao, Feng, et al. "On the blending of the Landsat and MODIS surface reflectance: Predicting daily Landsat surface reflectance." IEEE Transactions on Geoscience and Remote sensing 44.8 (2006): 2207-2218.
@@ -115,7 +154,6 @@ Gao, Feng, et al. "On the blending of the Landsat and MODIS surface reflectance:
 \seealso{
 Other {fusion_algorithms}: 
 \code{\link{estarfm_job}()},
-\code{\link{fitfc_job}()},
 \code{\link{spstfm_job}()}
 }
 \author{

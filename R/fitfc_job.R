@@ -39,6 +39,50 @@
 #' @examples #
 #' @family {fusion_algorithms}
 #' 
+#' 
+#' ###########################fitfc ##############
+#' # Load required libraries
+#' library(ImageFusion)
+#' library(raster)
+#' # Get filesnames of high resolution images
+#' landsat <- list.files(
+#'   system.file("landsat/filled",
+#'               package = "ImageFusion"),
+#'   ".tif",
+#'   recursive = TRUE,
+#'   full.names = TRUE
+#' )
+#' 
+#' # Get filesnames of low resolution images
+#' modis <- list.files(
+#'   system.file("modis",
+#'               package = "ImageFusion"),
+#'   ".tif",
+#'   recursive = TRUE,
+#'   full.names = TRUE
+#' )
+#' 
+#' #Select the first two landsat images 
+#' landsat_sel <- landsat[1:2]
+#' #Select some corresponding modis images
+#' modis_sel <- modis[1:12]
+#' # Create output directory
+#' if(!dir.exists("Outputs")) dir.create("Outputs", recursive = TRUE)
+#' #Run the job, fusing two images
+#' fitfc_job(input_filenames = c(landsat_sel,modis_sel),
+#'           input_resolutions = c("high","high",
+#'                                 "low","low","low",
+#'                                 "low","low","low",
+#'                                 "low","low","low",
+#'                                 "low","low","low"),
+#'           input_dates = c(68,77,68,69,70,71,72,73,74,75,76,77,78,79),
+#'           pred_dates = c(71,79),
+#'           pred_filenames = c("Outputs/fitfc_71.tif",
+#'                              "Outputs/fitfc_79.tif"))
+#' 
+#' # remove the output directory
+#' unlink("Outputs",recursive = TRUE)
+#' 
 fitfc_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,pred_filenames,pred_area,winsize,date1,date3,n_cores,n_neighbors,hightag,lowtag,MASKIMG_options,MASKRANGE_options,output_masks,use_nodata_value,resolution_factor,verbose=T
 ){
   
@@ -144,14 +188,14 @@ fitfc_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,p
   pair_dates <- as.numeric(names(table(c(unique(high_dates),unique(low_dates))))[which(table(c(unique(high_dates),unique(low_dates)))>=2)])
   
   if(!missing(date1)){
-    assert_that(class(date1)=="numeric")
+    assert_that(class(date1)=="numeric"|class(date1)=="integer")
     date1_c <- date1
   }else{
     date1_c <- pair_dates[1]
   }
   #Note: If only one pair was given, Date1 and Date3 should be identical.
   if(!missing(date3)){
-    assert_that(class(date3)=="numeric")
+    assert_that(class(date3)=="numeric"|class(date3)=="integer")
     date3_c <- date3
   }else{
     date3_c <- pair_dates[length(pair_dates)]
@@ -159,7 +203,7 @@ fitfc_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,p
     
   #### n_cores ####
   if(!missing(n_cores)){
-    assert_that(class(n_cores)=="numeric",
+    assert_that(class(n_cores)=="numeric"|class(n_cores)=="integer",
                 n_cores<=parallel::detectCores())
     n_cores_c <- n_cores
   }else{
@@ -168,7 +212,7 @@ fitfc_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,p
   
   #### n_neighbors ####
   if(!missing(n_neighbors)){
-    assert_that(class(n_neighbors)=="numeric")
+    assert_that(class(n_neighbors)=="numeric"|class(n_neighbors)=="integer")
     n_neighbors_c <- n_neighbors
   }else{
     n_neighbors_c <- 10
@@ -180,9 +224,9 @@ fitfc_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,p
   #Some basic Assertions about the types of the inputs
   assert_that(
     class(input_filenames)=="character",
-    class(input_dates)=="numeric",
+    class(input_dates)=="numeric"|class(input_dates)=="integer",
     class(input_resolutions)=="character",
-    class(pred_dates)=="numeric",
+    class(pred_dates)=="numeric"|class(pred_dates)=="integer",
     class(pred_filenames)=="character"
   )
   
@@ -203,7 +247,6 @@ fitfc_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,p
   
   
   #Some further Assertions
-  #2DO ADJUST FOR SINGLE PAIR MODE
   assert_that(
     length(pair_dates)>=1,             #At least one pair in singlepair mode?
     all(input_resolutions %in% c(hightag_c, lowtag_c)) #Resolutions given consistent with hightag and lowtag
@@ -246,7 +289,7 @@ fitfc_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,p
       print("MASKRANGE Options: ")
       print(MASKRANGE_options_c)
     }
-    if(n_cores>1){
+    if(n_cores_c>1){
       print(paste("USING PARALLELISATION WITH ", n_cores_c," CORES"))
     }
   }

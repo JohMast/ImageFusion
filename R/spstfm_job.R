@@ -49,6 +49,48 @@
 #' @author Johannes Mast (R)
 #' @details Executes the SPSTFM algorithm to create a number of synthetic high-resolution images from two pairs of matching high- and low-resolution images.  Assumes that the input images already have matching size. For a detailed explanation how SPSTFM works there is the original paper and the thesis, which yielded this implementation. The latter explains also all available options and shows some test results. However, the default options should give good results.
 #' @examples #
+#' ###########################fitfc ##############
+#' # Load required libraries
+#' library(ImageFusion)
+#' library(raster)
+#' # Get filesnames of high resolution images
+#' landsat <- list.files(
+#'   system.file("landsat/filled",
+#'               package = "ImageFusion"),
+#'   ".tif",
+#'   recursive = TRUE,
+#'   full.names = TRUE
+#' )
+#' 
+#' # Get filesnames of low resolution images
+#' modis <- list.files(
+#'   system.file("modis",
+#'               package = "ImageFusion"),
+#'   ".tif",
+#'   recursive = TRUE,
+#'   full.names = TRUE
+#' )
+#' 
+#' #Select the first two landsat images 
+#' landsat_sel <- landsat[1:2]
+#' #Select some corresponding modis images
+#' modis_sel <- modis[1:10]
+#' # Create output directory
+#' if(!dir.exists("Outputs")) dir.create("Outputs", recursive = TRUE)
+#' #Run the job, fusing two images
+#' spstfm_job(input_filenames = c(landsat_sel,modis_sel),
+#'            input_resolutions = c("high","high",
+#'                                  "low","low","low",
+#'                                  "low","low","low",
+#'                                  "low","low","low",
+#'                                  "low"),
+#'            input_dates = c(68,77,68,69,70,71,72,73,74,75,76,77),
+#'            pred_dates = c(74,76),
+#'            pred_filenames = c("Outputs/spstfm_74.tif",
+#'                               "Outputs/spstfm_76.tif"))
+#' 
+#' # remove the output directory
+#' unlink("Outputs",recursive = TRUE)
 #' @family {fusion_algorithms}
 
 
@@ -171,14 +213,14 @@ spstfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,
   pair_dates <- as.numeric(names(table(c(unique(high_dates),unique(low_dates))))[which(table(c(unique(high_dates),unique(low_dates)))>=2)])
   
   if(!missing(date1)){
-    assert_that(class(date1)=="numeric")
+    assert_that(class(date1)=="numeric"|class(date1)=="integer")
     date1_c <- date1
   }else{
     date1_c <- pair_dates[1]
   }
   
   if(!missing(date3)){
-    assert_that(class(date3)=="numeric")
+    assert_that(class(date3)=="numeric"|class(date3)=="integer")
     date3_c <- date3
   }else{
     date3_c <- pair_dates[length(pair_dates)]
@@ -186,7 +228,7 @@ spstfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,
   
   #### n_cores ####
   if(!missing(n_cores)){
-    assert_that(class(n_cores)=="numeric",
+    assert_that(class(n_cores)=="numeric"|class(n_cores)=="integer",
                 n_cores<=parallel::detectCores())
     n_cores_c <- n_cores
   }else{
@@ -203,7 +245,7 @@ spstfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,
   
   #### n_training_samples ####
   if(!missing(n_training_samples)){
-    assert_that(class(n_training_samples)=="numeric")
+    assert_that(class(n_training_samples)=="numeric"|class(n_training_samples)=="integer")
     n_training_samples_c <- n_training_samples
   }else{
     n_training_samples_c <- 2000
@@ -220,20 +262,20 @@ spstfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,
   
   #### patch_overlap ####
   if(!missing(patch_overlap)){
-    assert_that(class(patch_overlap)=="numeric")
+    assert_that(class(patch_overlap)=="numeric"|class(patch_overlap)=="integer")
     patch_overlap_c <- patch_overlap
   }else{
     patch_overlap_c <- 2
   }
   #### min and max train iter ####
   if(!missing(min_train_iter)){
-    assert_that(class(min_train_iter)=="numeric")
+    assert_that(class(min_train_iter)=="numeric"|class(min_train_iter)=="integer")
     min_train_iter_c <- min_train_iter
   }else{
     min_train_iter_c <- 10
   }
   if(!missing(max_train_iter)){
-    assert_that(class(max_train_iter)=="numeric")
+    assert_that(class(max_train_iter)=="numeric"|class(max_train_iter)=="integer")
     max_train_iter_c <- max_train_iter
   }else{
     max_train_iter_c <- 20
@@ -248,9 +290,9 @@ spstfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,
   #Some basic Assertions about the types of the inputs
   assert_that(
     class(input_filenames)=="character",
-    class(input_dates)=="numeric",
+    class(input_dates)=="numeric"|class(input_dates)=="integer",
     class(input_resolutions)=="character",
-    class(pred_dates)=="numeric",
+    class(pred_dates)=="numeric"|class(pred_dates)=="integer",
     class(pred_filenames)=="character"
   )
   
@@ -312,8 +354,8 @@ spstfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,
       print("MASKRANGE Options: ")
       print(MASKRANGE_options_c)
     }
-    if(n_cores>1){
-      print(paste("PARALLELISATION WITH ", n_cores_c," CORES NOT SUPPORTED IN SPSTFM"))
+    if(n_cores_c>1){
+      print(paste("PARALLELISATION WITH ", n_cores_c," CORES ATTEMPTED. PARALLELISATION IS NOT SUPPORTED IN SPSTFM"))
     }
   }
   

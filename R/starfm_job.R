@@ -29,7 +29,7 @@
 #' @param output_masks  (Optional) Write mask images to disk? Default is "false".
 #' @param use_nodata_value (Optional) Use the nodata value as invalid range for masking? Default is "true".
 #' @param use_strict_filtering (Optional) Use strict filtering, which means that candidate pixels will be accepted only if they have less temporal *and* spectral difference than the central pixel (like in the paper). Default is "false".
-#' @param double_pair_mode (Optional) Use two dates \code{date1} and \code{date3} for prediction, instead of just \code{date1} for all predictions? Default is "true" if *all* the pred dates are in between input pairs, and "false" otherwise. Note: It may be desirable to predict in double-pair mode where possible, as in the following example: \code{[(7) 10 12 (13) 14] } , where we may wish to predict 10 and 12 in double pair mode, but can only predict 14 in single-pair mode. Do achieve this it is necessary to split the task into different jobs.
+#' @param double_pair_mode (Optional) Use two dates \code{date1} and \code{date3} for prediction, instead of just \code{date1} for all predictions? Default is "true" if *all* the pred dates are in between input pairs, and "false" otherwise. Note: It may be desirable to predict in double-pair mode where possible, as in the following example: \code{[(7) 10 12 (13) 14] } , where we may wish to predict 10 and 12 in double pair mode, but can only predict 14 in single-pair mode. Do achieve this it is necessary to split the task into different jobs. Default is "true" if all pred_dates are between pair dates and "false" otherwise.
 #' @param use_temp_diff_for_weights (Optional) Use temporal difference in the candidates weight (like in the paper)? Default is to use temporal weighting in double pair mode, and to not use it in single pair mode.
 #' @param do_copy_on_zero_diff (Optional) Predict for all pixels, even for pixels with zero temporal or spectral difference (behaviour of the reference implementation). Default is "false".
 #' @param verbose (Optional) Print progress updates to console? Default is "true".
@@ -48,7 +48,47 @@
 ##'  \item{The paper states that a good candidate should satisfy (15) and (16). This can be set with use_strict_filtering, which is by default used. However the other behaviour, that a candidate should fulfill (15) or (16), as in the reference implementation, can be also be selected with that option.}
 ##'  \item{The paper uses max in (15) and (16), which would choose the largest spectral and temporal difference from all input pairs (only one or two are possible). Since this should filter out bad candidates, we believe this is a mistake and should be min instead of max, like it is done in the reference implementation. So this implementation uses min here.}
 ##' }
-#' @examples #
+#' @examples 
+#' # Load required libraries
+#' library(ImageFusion)
+#' library(raster)
+#' # Get filesnames of high resolution images
+#' landsat <- list.files(
+#'   system.file("landsat/filled",
+#'               package = "ImageFusion"),
+#'   ".tif",
+#'   recursive = TRUE,
+#'   full.names = TRUE
+#' )
+#' 
+#' # Get filesnames of low resolution images
+#' modis <- list.files(
+#'   system.file("modis",
+#'               package = "ImageFusion"),
+#'   ".tif",
+#'   recursive = TRUE,
+#'   full.names = TRUE
+#' )
+#' 
+#' #Select the first two landsat images 
+#' landsat_sel <- landsat[1:2]
+#' #Select the corresponding modis images
+#' modis_sel <- modis[1:10]
+#' # Create output directory
+#' if(!dir.exists("Outputs")) dir.create("Outputs", recursive = TRUE)
+#' #Run the job, fusing two images
+#' starfm_job(input_filenames = c(landsat_sel,modis_sel),
+#'            input_resolutions = c("high","high",
+#'                                  "low","low","low",
+#'                                  "low","low","low",
+#'                                  "low","low","low","low"),
+#'            input_dates = c(68,77,68,69,70,71,72,73,74,75,76,77),
+#'            pred_dates = c(73,77),
+#'            pred_filenames = c("Outputs/starfm_73.tif",
+#'                               "Outputs/starfm_77.tif"))
+#' 
+#' # remove the output directory
+#' unlink("Outputs",recursive = TRUE)
 #' @family {fusion_algorithms}
 starfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,pred_filenames,pred_area,winsize,date1,date3,n_cores, logscale_factor,spectral_uncertainty, temporal_uncertainty, number_classes,hightag,lowtag,MASKIMG_options,MASKRANGE_options,output_masks,use_nodata_value,use_strict_filtering,double_pair_mode,use_temp_diff_for_weights,do_copy_on_zero_diff,verbose=T) {
   
@@ -229,14 +269,14 @@ starfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,
   pair_dates <- as.numeric(names(table(c(unique(high_dates),unique(low_dates))))[which(table(c(unique(high_dates),unique(low_dates)))>=2)])
   
   if(!missing(date1)){
-    assert_that(class(date1)=="numeric")
+    assert_that(class(date1)=="numeric"|class(date1)=="integer")
     date1_c <- date1
   }else{
     date1_c <- pair_dates[1]
   }
   
   if(!missing(date3)){
-    assert_that(class(date3)=="numeric")
+    assert_that(class(date3)=="numeric"|class(date3)=="integer")
     date3_c <- date3
   }else{
     date3_c <- pair_dates[length(pair_dates)]
@@ -244,7 +284,7 @@ starfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,
   
   #### n_cores ####
   if(!missing(n_cores)){
-    assert_that(class(n_cores)=="numeric",
+    assert_that(class(n_cores)=="numeric"|class(n_cores)=="integer",
                 n_cores<=parallel::detectCores())
     n_cores_c <- n_cores
   }else{
@@ -258,9 +298,9 @@ starfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,
   #Some basic Assertions about the types of the inputs
   assert_that(
     class(input_filenames)=="character",
-    class(input_dates)=="numeric",
+    class(input_dates)=="numeric"|class(input_dates)=="integer",
     class(input_resolutions)=="character",
-    class(pred_dates)=="numeric",
+    class(pred_dates)=="numeric"|class(pred_dates)=="integer",
     class(pred_filenames)=="character"
   )
   
@@ -331,7 +371,7 @@ starfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,
       print("MASKRANGE Options: ")
       print(MASKRANGE_options_c)
     }
-    if(n_cores>1){
+    if(n_cores_c>1){
       print(paste("USING PARALLELISATION WITH ", n_cores_c," CORES"))
     }
   }

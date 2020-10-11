@@ -94,14 +94,52 @@ A wrapper function for \code{execute_estarfm_job_cpp}. Intended to execute a sin
 Executes the ESTARFM algorithm to create a number of synthetic high-resolution images from two pairs of matching high- and low-resolution images.  Assumes that the input images already have matching size. See the original paper for details (Note: There is a difference to the algorithm as described in the paper though. The regression for R is now done with all candidates of one window. This complies to the reference implementation, but not to the paper, since there the regression is done only for the candidates that belong to one single coarse pixel. However, the coarse grid is not known at prediction and not necessarily trivial to find out (e. g. in case of higher order interpolation).
 }
 \examples{
-#
+# Load required libraries
+library(ImageFusion)
+library(raster)
+# Get filesnames of high resolution images
+landsat <- list.files(
+  system.file("landsat/filled",
+              package = "ImageFusion"),
+  ".tif",
+  recursive = TRUE,
+  full.names = TRUE
+)
+
+# Get filesnames of low resolution images
+modis <- list.files(
+  system.file("modis",
+              package = "ImageFusion"),
+  ".tif",
+  recursive = TRUE,
+  full.names = TRUE
+)
+
+#Select the first two landsat images 
+landsat_sel <- landsat[1:2]
+#Select the corresponding modis images
+modis_sel <- modis[1:10]
+# Create output directory
+if(!dir.exists("Outputs")) dir.create("Outputs", recursive = TRUE)
+#Run the job, fusing two images
+estarfm_job(input_filenames = c(landsat_sel,modis_sel),
+            input_resolutions = c("high","high",
+                                  "low","low","low",
+                                  "low","low","low",
+                                  "low","low","low","low"),
+            input_dates = c(68,77,68,69,70,71,72,73,74,75,76,77),
+            pred_dates = c(72,74),
+            pred_filenames = c("Outputs/estarfm_72.tif",
+                               "Outputs/estarfm_74.tif"))
+
+# remove the output directory
+unlink("Outputs",recursive = TRUE)
 }
 \references{
 Zhu, X., Chen, J., Gao, F., Chen, X., & Masek, J. G. (2010). An enhanced spatial and temporal adaptive reflectance fusion model for complex heterogeneous regions. Remote Sensing of Environment, 114(11), 2610-2623.
 }
 \seealso{
 Other {fusion_algorithms}: 
-\code{\link{fitfc_job}()},
 \code{\link{spstfm_job}()},
 \code{\link{starfm_job}()}
 }

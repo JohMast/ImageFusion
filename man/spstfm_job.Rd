@@ -111,6 +111,48 @@ Executes the SPSTFM algorithm to create a number of synthetic high-resolution im
 }
 \examples{
 #
+###########################fitfc ##############
+# Load required libraries
+library(ImageFusion)
+library(raster)
+# Get filesnames of high resolution images
+landsat <- list.files(
+  system.file("landsat/filled",
+              package = "ImageFusion"),
+  ".tif",
+  recursive = TRUE,
+  full.names = TRUE
+)
+
+# Get filesnames of low resolution images
+modis <- list.files(
+  system.file("modis",
+              package = "ImageFusion"),
+  ".tif",
+  recursive = TRUE,
+  full.names = TRUE
+)
+
+#Select the first two landsat images 
+landsat_sel <- landsat[1:2]
+#Select some corresponding modis images
+modis_sel <- modis[1:10]
+# Create output directory
+if(!dir.exists("Outputs")) dir.create("Outputs", recursive = TRUE)
+#Run the job, fusing two images
+spstfm_job(input_filenames = c(landsat_sel,modis_sel),
+           input_resolutions = c("high","high",
+                                 "low","low","low",
+                                 "low","low","low",
+                                 "low","low","low",
+                                 "low"),
+           input_dates = c(68,77,68,69,70,71,72,73,74,75,76,77),
+           pred_dates = c(74,76),
+           pred_filenames = c("Outputs/spstfm_74.tif",
+                              "Outputs/spstfm_76.tif"))
+
+# remove the output directory
+unlink("Outputs",recursive = TRUE)
 }
 \references{
 Huang, B., & Song, H. (2012). Spatiotemporal reflectance fusion via sparse representation. IEEE Transactions on Geoscience and Remote Sensing, 50(10), 3707-3716.
@@ -118,7 +160,6 @@ Huang, B., & Song, H. (2012). Spatiotemporal reflectance fusion via sparse repre
 \seealso{
 Other {fusion_algorithms}: 
 \code{\link{estarfm_job}()},
-\code{\link{fitfc_job}()},
 \code{\link{starfm_job}()}
 }
 \author{
