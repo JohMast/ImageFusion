@@ -28,11 +28,11 @@ imagefusion_task(
 
 \item{filenames_low}{A character vector of the filenames of the low resolution input images.}
 
-\item{dates_high}{An integer vector of the dates associated with the \code{filenames_high}. Must match \code{filenames_high} in length and order.}
+\item{dates_high}{Numeric. An integer vector of the dates associated with the \code{filenames_high}. Must match \code{filenames_high} in length and order.}
 
-\item{dates_low}{An integer vector of the dates associated with the \code{filenames_low}. Must match \code{filenames_low} in length and order.}
+\item{dates_low}{Numeric. An integer vector of the dates associated with the \code{filenames_low}. Must match \code{filenames_low} in length and order.}
 
-\item{dates_pred}{An integer vector dates for which an output should be generated.}
+\item{dates_pred}{Numeric. An integer vector dates for which an output should be generated.}
 
 \item{filenames_pred}{(Optional) A character vector of the filenames for the predicted images. If unspecified, filenames will be created from \code{out_dir} and \code{pred_dates}.}
 

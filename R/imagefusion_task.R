@@ -7,9 +7,9 @@ has_high <- has_low <- interval_pairs <- interval_ids <- pred_case  <-  interval
 #' @description The main function of the ImageFusion Package, intended for the fusion of images based on a time-series of inputs. 
 #' @param filenames_high A character vector of the filenames of the high resolution input images.
 #' @param filenames_low A character vector of the filenames of the low resolution input images.
-#' @param dates_high An integer vector of the dates associated with the \code{filenames_high}. Must match \code{filenames_high} in length and order.
-#' @param dates_low An integer vector of the dates associated with the \code{filenames_low}. Must match \code{filenames_low} in length and order.
-#' @param dates_pred An integer vector dates for which an output should be generated.
+#' @param dates_high Numeric. An integer vector of the dates associated with the \code{filenames_high}. Must match \code{filenames_high} in length and order.
+#' @param dates_low Numeric. An integer vector of the dates associated with the \code{filenames_low}. Must match \code{filenames_low} in length and order.
+#' @param dates_pred Numeric. An integer vector dates for which an output should be generated.
 #' @param filenames_pred (Optional) A character vector of the filenames for the predicted images. If unspecified, filenames will be created from \code{out_dir} and \code{pred_dates}. 
 #' @param singlepair_mode  (Optional) How should singlepair predictions (those \code{dates_pred}, which do not lie between two dates with a high&low pair) be handled? \itemize{
 #' \item{ignore: No prediction will be performed for those dates. This is the default.}
