@@ -22,11 +22,17 @@
 #' @param ql_filenames (Optional) A character vector of the filenames of the images use as quality layers. By default, no quality layer will be used.
 #' @param ql_dates (Optional, only used if any \code{ql_filenames} were provided.) An integer vector of the dates associated with the \code{ql_filenames}. Must match \code{ql_filenames} in length and order.
 #' @param ql_tags (Optional, only used if any \code{ql_filenames} were provided.) A character vector of the resolution tags associated with the \code{ql_filenames}.
-#' @param ql_layers (Optional, only used if any \code{ql_filenames} were provided.) A list of numeric (see below at \code{<num-list>}). Specifies the channels or layers, that will be read. Hereby a 0 means the first channel. Should be either matching \code{ql_filenames} in length and order or be of length 1, in which case the selection will be applied to all ql_images.
+#' @param ql_layers (Optional, only used if any \code{ql_filenames} were provided.) A list of numeric vectors (see below at \code{<num-list>}). Specifies the channels or layers, that will be read. Hereby a 0 means the first channel. Should be either matching \code{ql_filenames} in length and order or be of length 1, in which case the selection will be applied to all ql_images.
 #' @param ql_interp_ranges (Optional, only used if any \code{ql_filenames} were provided.) A list of character (specifically a list of range-lists, see below at \code{<range-list>}). Specifies the ranges of the shifted value that should mark the location for interpolation. Should be either matching \code{ql_filenames} in length and order or be of length 1, in which case the ranges will be applied to all ql_images.
 #' @param ql_non_interp_ranges (Optional, only used if any \code{ql_filenames} were provided.) A list of character (specifically a list of range-lists, see below at \code{<range-list>}). Specifies the ranges of the shifted value that should mark the location for interpolation. Should be either matching \code{ql_filenames} in length and order or be of length 1, in which case the ranges will be applied to all ql_images.
 #' @param ql_bits  (Optional, only used if any \code{ql_filenames} were provided.) A list of numeric (see below at \code{<num-list>}). Specifies the bits to use. The selected bits will be extracted. from the quality layer image and then shifted to the least significant positions. If unspecified, all bits will be used. Should be either matching \code{ql_filenames} in length and order or be of length 1, in which case the selection will be applied to all ql_images.
-#'
+#' @param mask_filenames  (Optional) A character vector of the filenames of the images use as Mask image (8-bit, boolean, i. e. consists of 0 and 255). By default, no mask image will be used.
+#' @param mask_layers (Optional, only used if any \code{mask_filenames} were provided.) A list of numeric vectors(see below at \code{<num-list>}). Specifies the channels or layers, that will be read. Hereby a 0 means the first channel. Should be either matching \code{mask_filenames} in length and order or be of length 1, in which case the selection will be applied to all mask_images.Should be either matching \code{mask_filenames} in length and order or be of length 1, in which case the selection will be applied to all mask_images.
+#' @param mask_valid_ranges (Optional) A list of character (specifically a list of range-lists, see below at \code{<range-list>}). Specifies the ranges of the shifted value that should mark the location as valid (true; 255).  Should be either matching \code{mask_filenames} in length and order or be of length 1, in which case the ranges will be applied to all ql_images.
+#' @param mask_bits  (Optional, only used if any \code{mask_filenames} were provided.) A list of numeric (see below at \code{<num-list>}). Specifies the bits to use. The selected bits will be sorted (so the order is irrelevant), extracted from the quality layer image and then shifted to the least significant positions. By default all bits will be used.
+#' @param mask_invalid_ranges  A list of character (specifically a list of range-lists, see below at \code{<range-list>}). Specifies the ranges of the shifted value that should mark the location as invalid (false; 0). Should be either matching \code{mask_filenames} in length and order or be of length 1, in which case the ranges will be applied to all ql_images.
+#' @param invalid_ranges (Optional) Character (specifically a range-list, see below at \code{<range-list>}). Specify one or more intervals for invalid values. These will be masked out. 
+#' @param valid_ranges  (Optional) Character (specifically a range-list, see below at \code{<range-list>}). Specify one or more intervals for valid values. Locations with invalid values will be masked out.
 #' @return Nothing, files are written to disk.
 #' @export
 #' @details  
@@ -62,7 +68,32 @@
 #'  \item <range-list> must be strings that combine ranges in the form \code{ '<range> [<range> ...]'}, where the brackets mean that further intervals are optional. The different ranges are related as union. Example: \code{"(125,175) [225,275]"}
 #'  }
 #' @author  Christof Kaufmann (C++), Johannes Mast (R)
-#' @examples #
+#' @examples 
+#' # Load required libraries
+#' library(ImageFusion)
+#' library(raster)
+#' # Get filesnames of images with gaps
+#' landsat_with_gaps <- list.files(system.file("landsat/unfilled",
+#'                                             package = "ImageFusion"),
+#'                                 ".tif",
+#'                                 recursive = TRUE,
+#'                                 full.names = TRUE)
+#' # Create output Directory
+#' if(!dir.exists("Outputs")) dir.create("Outputs", recursive = T)
+#' # Interpolate into output directory
+#' # imginterp_task(filenames = landsat_with_gaps,
+#'               dates = c(68,77,93,100),limit_days = 15,
+#'                invalid_ranges = "[-inf,-1]",
+#'                out_prefix = "Outputs/")
+#' # Get filenames of interpolated images
+#' landsat_without_gaps <- list.files("Outputs",pattern = ".tif$",full.names = T)
+#' # Count the number of NAs before and after the interpolation
+#' sum(is.na(getValues(stack(landsat_with_gaps[2]))))
+#' sum(is.na(getValues(stack(landsat_without_gaps[2]))))
+#' # remove the output directory
+#' unlink("Outputs",recursive = T)
+#' 
+#' 
 imginterp_task <- function(filenames,
                            dates,
                            tags=NULL,
@@ -74,6 +105,8 @@ imginterp_task <- function(filenames,
                            prioritize_invalid=F,
                            interp_ranges=NULL,
                            no_interp_ranges=NULL,
+                           valid_ranges=NULL,
+                           invalid_ranges=NULL,
                            out_prefix=NULL,
                            out_postfix=NULL,
                            out_pixelstate_prefix=NULL,
@@ -87,10 +120,17 @@ imginterp_task <- function(filenames,
                            ql_bits=NULL,
                            ql_interp_ranges=NULL,
                            ql_non_interp_ranges=NULL,
+                           mask_filenames=NULL,
+                           mask_dates=NULL,
+                           mask_layers=NULL,
+                           mask_bits=NULL,
+                           mask_valid_ranges=NULL,
+                           mask_invalid_ranges=NULL,
                            verbose=F){
 
   #combine the filenames and dates into image strings
   string_imgargs <- paste0(" --img='-f ",filenames," -d ",dates)
+  string_imgargs <- paste0(" --img='-f ",'"',filenames,'"'," -d ",dates)
   if(!is.null(tags)){
     string_imgargs <- paste0(string_imgargs," -t ",tags)
   }
@@ -127,10 +167,10 @@ imginterp_task <- function(filenames,
     #Add arguments for ql_layers to the ql_image strings if any were given
     if(!is.null(ql_layers)){
       if(length(ql_layers)==1){
-        layerstring <- rep(ql_layers,length(filenames))
+        layerstring <- rep(ql_layers,length(ql_filenames))
         layerstring <- lapply(layerstring,FUN =  paste,collapse=",")
         layerstring <- do.call(c,layerstring)
-      }else if(length(ql_layers)==length(filenames)){
+      }else if(length(ql_layers)==length(ql_filenames)){
         layerstring <- lapply(ql_layers,FUN =  paste,collapse=",")
         layerstring <- do.call(c,layerstring)
       }else{
@@ -141,10 +181,10 @@ imginterp_task <- function(filenames,
     #Add arguments for ql_bits to the ql_image strings if any were given
     if(!is.null(ql_bits)){
       if(length(ql_bits)==1){
-        bitstring <- rep(ql_bits,length(filenames))
+        bitstring <- rep(ql_bits,length(ql_filenames))
         bitstring <- lapply(bitstring,FUN =  paste,collapse=",")
         bitstring <- do.call(c,bitstring)
-      }else if(length(ql_bits)==length(filenames)){
+      }else if(length(ql_bits)==length(ql_filenames)){
         bitstring <- lapply(ql_bits,FUN =  paste,collapse=",")
         bitstring <- do.call(c,bitstring)
       }else{
@@ -155,9 +195,9 @@ imginterp_task <- function(filenames,
     #Add arguments for ql_interp_ranges to the ql_image strings if any were given
     if(!is.null(ql_interp_ranges)){
       if(length(ql_interp_ranges)==1){
-        interprangestring <- rep(ql_interp_ranges,length(filenames))
+        interprangestring <- rep(ql_interp_ranges,length(ql_filenames))
         interprangestring <- do.call(c,interprangestring)
-      }else if(length(ql_interp_ranges)==length(filenames)){
+      }else if(length(ql_interp_ranges)==length(ql_filenames)){
         interprangestring <- do.call(c,ql_interp_ranges)
       }else{
         print("ql_layers must be a list of length 1 or the same length as ql_filenames.")
@@ -167,9 +207,9 @@ imginterp_task <- function(filenames,
     #Add arguments for ql_non-interp_ranges to the ql_image strings if any were given
     if(!is.null(ql_non_interp_ranges)){
       if(length(ql_non_interp_ranges)==1){
-        noninterprangestring <- rep(ql_non_interp_ranges,length(filenames))
+        noninterprangestring <- rep(ql_non_interp_ranges,length(ql_filenames))
         noninterprangestring <- do.call(c,noninterprangestring)
-      }else if(length(ql_non_interp_ranges)==length(filenames)){
+      }else if(length(ql_non_interp_ranges)==length(ql_filenames)){
         noninterprangestring <- do.call(c,ql_non_interp_ranges)
       }else{
         print("ql_layers must be a list of length 1 or the same length as ql_filenames.")
@@ -184,6 +224,84 @@ imginterp_task <- function(filenames,
     string_args <- paste0(string_args, string_qlargs)
   }
   
+  
+  
+
+  
+  #Ifmask image filenames were given, add them (with a similar syntax to the imgargs)
+  if(!is.null(mask_filenames)){
+    #combine the filenames and dates into image strings
+    string_mask_imgargs <- paste0(" --m='-f ",mask_filenames)
+
+    #Add arguments for mask_layers to the mask_image strings if any were given
+    if(!is.null(mask_layers)){
+      if(length(mask_layers)==1){
+        layerstring <- rep(mask_layers,length(mask_filenames))
+        layerstring <- lapply(layerstring,FUN =  paste,collapse=",")
+        layerstring <- do.call(c,layerstring)
+      }else if(length(mask_layers)==length(mask_filenames)){
+        layerstring <- lapply(mask_layers,FUN =  paste,collapse=",")
+        layerstring <- do.call(c,layerstring)
+      }else{
+        print("mask_layers must be a list of length 1 or the same length as mask_filenames.")
+      }
+      paste0(string_mask_imgargs," -l ",layerstring)
+    }
+    #Add arguments for mask_bits to the mask_image strings if any were given
+    if(!is.null(mask_bits)){
+      if(length(mask_bits)==1){
+        bitstring <- rep(mask_bits,length(mask_filenames))
+        bitstring <- lapply(bitstring,FUN =  paste,collapse=",")
+        bitstring <- do.call(c,bitstring)
+      }else if(length(mask_bits)==length(mask_filenames)){
+        bitstring <- lapply(mask_bits,FUN =  paste,collapse=",")
+        bitstring <- do.call(c,bitstring)
+      }else{
+        print("mask_bits must be a list of length 1 or the same length as mask_filenames.")
+      }
+      paste0(string_mask_imgargs," -b ",bitstring)
+    }
+    #Add arguments for mask_valid_ranges to the mask_image strings if any were given
+    if(!is.null(mask_valid_ranges)){
+      if(length(mask_valid_ranges)==1){
+        validrangestring <- rep(mask_valid_ranges,length(mask_filenames))
+        validrangestring <- do.call(c,validrangestring)
+      }else if(length(mask_valid_ranges)==length(mask_filenames)){
+        validrangestring <- do.call(c,mask_valid_ranges)
+      }else{
+        print("mask_layers must be a list of length 1 or the same length as mask_filenames.")
+      }
+      string_mask_imgargs <- paste0(string_mask_imgargs,"  --valid-ranges= ",validrangestring)
+    }
+    #Add arguments for mask_non-interp_ranges to the mask_image strings if any were given
+    if(!is.null(mask_invalid_ranges)){
+      if(length(mask_invalid_ranges)==1){
+        ivalidrangestring <- rep(mask_invalid_ranges,length(mask_filenames))
+        ivalidrangestring <- do.call(c,ivalidrangestring)
+      }else if(length(mask_invalid_ranges)==length(mask_filenames)){
+        ivalidrangestring <- do.call(c,mask_invalid_ranges)
+      }else{
+        print("mask_layers must be a list of length 1 or the same length as mask_filenames.")
+      }
+      string_mask_imgargs <- paste0(string_mask_imgargs,"  --invalid-ranges= ",ivalidrangestring)
+    }
+    #End each mask image string with a '
+    string_mask_imgargs <- paste0(string_mask_imgargs,"'")
+    #combine the mask image strings to one string
+    string_maskargs <- paste0(string_mask_imgargs,collapse="")
+    #add them to the string args
+    string_args <- paste0(string_args, string_maskargs)
+  }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   #Add string for the day limit
   string_args <- paste0(string_args, " --limit-days=",limit_days)
 
@@ -197,6 +315,15 @@ imginterp_task <- function(filenames,
   if(!is.null(no_interp_ranges)){
     string_args <- paste0(string_args, " --no-interp-ranges=",no_interp_ranges)
   }
+  #If valid-ranges are given, add them, otherwise use a faux range that means no values will be interpolated
+  if(!is.null(valid_ranges)){
+    string_args <- paste0(string_args, " --mask-valid-ranges=",valid_ranges)
+  }
+  #If invalid-ranges are given, add them
+  if(!is.null(invalid_ranges)){
+    string_args <- paste0(string_args, " --mask-invalid-ranges=",invalid_ranges)
+  }
+  
   #IF desired, use nodata
   if(use_nodata){
     string_args <- paste0(string_args, " --enable-use-nodata  ")

@@ -16,6 +16,8 @@ imginterp_task(
   prioritize_invalid = F,
   interp_ranges = NULL,
   no_interp_ranges = NULL,
+  valid_ranges = NULL,
+  invalid_ranges = NULL,
   out_prefix = NULL,
   out_postfix = NULL,
   out_pixelstate_prefix = NULL,
@@ -29,6 +31,12 @@ imginterp_task(
   ql_bits = NULL,
   ql_interp_ranges = NULL,
   ql_non_interp_ranges = NULL,
+  mask_filenames = NULL,
+  mask_dates = NULL,
+  mask_layers = NULL,
+  mask_bits = NULL,
+  mask_valid_ranges = NULL,
+  mask_invalid_ranges = NULL,
   verbose = F
 )
 }
@@ -55,6 +63,10 @@ imginterp_task(
 
 \item{no_interp_ranges}{(Optional) Character (specifically a range-list, see below at \code{<range-list>}). Specify one or more intervals for values that should not be interpolated. No-interp-ranges can be excluded from interp-ranges. By default is empty.}
 
+\item{valid_ranges}{(Optional) Character (specifically a range-list, see below at \code{<range-list>}). Specify one or more intervals for valid values. Locations with invalid values will be masked out.}
+
+\item{invalid_ranges}{(Optional) Character (specifically a range-list, see below at \code{<range-list>}). Specify one or more intervals for invalid values. These will be masked out.}
+
 \item{out_prefix}{(Optional) Character. This string will be prepended to the output filenames and can also be used to specify an output filepath.  By default is empty.}
 
 \item{out_postfix}{(Optional) Character. This string will be appended to the output filenames. Default is "interpolated_".}
@@ -73,13 +85,23 @@ imginterp_task(
 
 \item{ql_tags}{(Optional, only used if any \code{ql_filenames} were provided.) A character vector of the resolution tags associated with the \code{ql_filenames}.}
 
-\item{ql_layers}{(Optional, only used if any \code{ql_filenames} were provided.) A list of numeric (see below at \code{<num-list>}). Specifies the channels or layers, that will be read. Hereby a 0 means the first channel. Should be either matching \code{ql_filenames} in length and order or be of length 1, in which case the selection will be applied to all ql_images.}
+\item{ql_layers}{(Optional, only used if any \code{ql_filenames} were provided.) A list of numeric vectors (see below at \code{<num-list>}). Specifies the channels or layers, that will be read. Hereby a 0 means the first channel. Should be either matching \code{ql_filenames} in length and order or be of length 1, in which case the selection will be applied to all ql_images.}
 
 \item{ql_bits}{(Optional, only used if any \code{ql_filenames} were provided.) A list of numeric (see below at \code{<num-list>}). Specifies the bits to use. The selected bits will be extracted. from the quality layer image and then shifted to the least significant positions. If unspecified, all bits will be used. Should be either matching \code{ql_filenames} in length and order or be of length 1, in which case the selection will be applied to all ql_images.}
 
 \item{ql_interp_ranges}{(Optional, only used if any \code{ql_filenames} were provided.) A list of character (specifically a list of range-lists, see below at \code{<range-list>}). Specifies the ranges of the shifted value that should mark the location for interpolation. Should be either matching \code{ql_filenames} in length and order or be of length 1, in which case the ranges will be applied to all ql_images.}
 
 \item{ql_non_interp_ranges}{(Optional, only used if any \code{ql_filenames} were provided.) A list of character (specifically a list of range-lists, see below at \code{<range-list>}). Specifies the ranges of the shifted value that should mark the location for interpolation. Should be either matching \code{ql_filenames} in length and order or be of length 1, in which case the ranges will be applied to all ql_images.}
+
+\item{mask_filenames}{(Optional) A character vector of the filenames of the images use as Mask image (8-bit, boolean, i. e. consists of 0 and 255). By default, no mask image will be used.}
+
+\item{mask_layers}{(Optional, only used if any \code{mask_filenames} were provided.) A list of numeric vectors(see below at \code{<num-list>}). Specifies the channels or layers, that will be read. Hereby a 0 means the first channel. Should be either matching \code{mask_filenames} in length and order or be of length 1, in which case the selection will be applied to all mask_images.Should be either matching \code{mask_filenames} in length and order or be of length 1, in which case the selection will be applied to all mask_images.}
+
+\item{mask_bits}{(Optional, only used if any \code{mask_filenames} were provided.) A list of numeric (see below at \code{<num-list>}). Specifies the bits to use. The selected bits will be sorted (so the order is irrelevant), extracted from the quality layer image and then shifted to the least significant positions. By default all bits will be used.}
+
+\item{mask_valid_ranges}{(Optional) A list of character (specifically a list of range-lists, see below at \code{<range-list>}). Specifies the ranges of the shifted value that should mark the location as valid (true; 255).  Should be either matching \code{mask_filenames} in length and order or be of length 1, in which case the ranges will be applied to all ql_images.}
+
+\item{mask_invalid_ranges}{A list of character (specifically a list of range-lists, see below at \code{<range-list>}). Specifies the ranges of the shifted value that should mark the location as invalid (false; 0). Should be either matching \code{mask_filenames} in length and order or be of length 1, in which case the ranges will be applied to all ql_images.}
 
 \item{verbose}{(Optional) Logical. Output intermediate progress reports? Default is "true".}
 }
@@ -121,7 +143,31 @@ Some arguments require inputs in a specific format.
 }
 }
 \examples{
-#
+# Load required libraries
+library(ImageFusion)
+library(raster)
+# Get filesnames of images with gaps
+landsat_with_gaps <- list.files(system.file("landsat/unfilled",
+                                            package = "ImageFusion"),
+                                ".tif",
+                                recursive = TRUE,
+                                full.names = TRUE)
+# Create output Directory
+if(!dir.exists("Outputs")) dir.create("Outputs", recursive = T)
+# Interpolate into output directory
+# imginterp_task(filenames = landsat_with_gaps,
+              dates = c(68,77,93,100),limit_days = 15,
+               invalid_ranges = "[-inf,-1]",
+               out_prefix = "Outputs/")
+# Get filenames of interpolated images
+landsat_without_gaps <- list.files("Outputs",pattern = ".tif$",full.names = T)
+# Count the number of NAs before and after the interpolation
+sum(is.na(getValues(stack(landsat_with_gaps[2]))))
+sum(is.na(getValues(stack(landsat_without_gaps[2]))))
+# remove the output directory
+unlink("Outputs",recursive = T)
+
+
 }
 \author{
 Christof Kaufmann (C++), Johannes Mast (R)

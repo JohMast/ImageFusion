@@ -19,8 +19,8 @@ windows
 inst/gdal
 inst/proj
 inst/share
-
-.tif
+*.xml
+#.tif
 *.png
 *.zip
 *.rar
