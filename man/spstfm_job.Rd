@@ -149,6 +149,7 @@ spstfm_job(input_filenames = c(landsat_sel,modis_sel),
            input_dates = c(68,77,68,69,70,71,72,73,74,75,76,77),
            pred_dates = c(74),
            pred_filenames = c("Outputs/spstfm_74.tif")
+           )
 
 # remove the output directory
 unlink("Outputs",recursive = TRUE)
