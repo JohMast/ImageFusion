@@ -41,7 +41,19 @@ checking compiled code ... NOTE
 
 This is presumably a local issue with our compiler.
 
-
+checking compiled code ... NOTE
+  File ‘ImageFusion/libs/ImageFusion.so’:
+    Found ‘_ZSt4cerr’, possibly from ‘std::cerr’ (C++)
+      Objects: ‘execture_imagefusor_jobs.o’,
+        ‘utils/helpers/utils_common.o’, ‘src/fitfc.o’, ‘src/geoinfo.o’,
+        ‘src/image.o’, ‘src/optionparser.o’, ‘src/spstfm.o’,
+        ‘src/spstfm_impl.o’
+    Found ‘_ZSt4cout’, possibly from ‘std::cout’ (C++)
+      Objects: ‘execture_imagefusor_jobs.o’, ‘execture_imginterp_job.o’,
+        ‘utils/helpers/utils_common.o’, ‘src/image.o’, ‘src/spstfm.o’,
+        ‘src/spstfm_impl.o’, ‘src/staarch.o’
+  
+  
 ## Downstream dependencies
 
 There are no downstreams dependencies yet, although our intent is to produce some in the future.
