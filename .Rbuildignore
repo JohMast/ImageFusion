@@ -4,3 +4,4 @@
 ^cran-comments\.md$
 
 ^.cran_comments\.md$
+^Readme\.md$
