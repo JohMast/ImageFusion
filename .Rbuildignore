@@ -1,4 +1,6 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
-^.cran_comments\.md$
+
 ^cran-comments\.md$
+
+^.cran_comments\.md$

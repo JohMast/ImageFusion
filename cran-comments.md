@@ -6,15 +6,15 @@
 
 ## R CMD check results
 
-###ERRORS
+### ERRORS
 
 There were no ERRORs.
 
-###WARNINGS
+### WARNINGS
 
 There were no WARNINGs.
 
-###NOTES
+### NOTES
 checking installed package size ... NOTE
     installed size is 103.6Mb
     sub-directories of 1Mb or more:
@@ -35,20 +35,10 @@ Examples with CPU (user + system) or elapsed time > 10s
            user system elapsed
 spstfm_job 10.4   0.03   10.43
 
+
 The algorithm is fairly slow.We could reduce the example, but prefer to keep it as similar as possible to the examples
 of the other functions(estarfm_job, starfm_job, fitfc_job), using the same format and data. This will allow the user to compare the algorithms more fairly.
 
-checking compiled code ... NOTE
-  File ‘ImageFusion/libs/ImageFusion.so’:
-    Found ‘_ZSt4cerr’, possibly from ‘std::cerr’ (C++)
-      Objects: ‘execture_imagefusor_jobs.o’,
-        ‘utils/helpers/utils_common.o’, ‘src/fitfc.o’, ‘src/geoinfo.o’,
-        ‘src/image.o’, ‘src/optionparser.o’, ‘src/spstfm.o’,
-        ‘src/spstfm_impl.o’
-    Found ‘_ZSt4cout’, possibly from ‘std::cout’ (C++)
-      Objects: ‘execture_imagefusor_jobs.o’, ‘execture_imginterp_job.o’,
-        ‘utils/helpers/utils_common.o’, ‘src/image.o’, ‘src/spstfm.o’,
-        ‘src/spstfm_impl.o’, ‘src/staarch.o’
   
   
 ## Downstream dependencies
