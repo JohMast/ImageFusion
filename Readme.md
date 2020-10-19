@@ -32,6 +32,7 @@ devtools::install_github("JohMast/ImageFusion")
 
 ## Usage
 
+
 ### Jobs
 
 The core of the package are functions for the algorithms ESTARFM, FITFC, SPSTFM and STARFM. 
