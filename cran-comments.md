@@ -1,11 +1,20 @@
 ## Test environments
 * local windows 10, R 4.0.2
 * local ubuntu 20.04, R 4.0.2
-* win-builder (devel and release)
+* win-builder  R 4.0.3
+* win-builder  R Under development (unstable) (2020-10-15 r79342)
 
 ## R CMD check results
-There were no ERRORs or WARNINGs. 
 
+###ERRORS
+
+There were no ERRORs.
+
+###WARNINGS
+
+There were no WARNINGs.
+
+###NOTES
 checking installed package size ... NOTE
     installed size is 103.6Mb
     sub-directories of 1Mb or more:
@@ -21,27 +30,27 @@ this. We hope to solve this problem and provide a suitable alternative, however,
 have not been successful so far.
 
     
+** running examples for arch 'i386' ... [24s] NOTE
+Examples with CPU (user + system) or elapsed time > 10s
+           user system elapsed
+spstfm_job 10.4   0.03   10.43
+
+The algorithm is fairly slow.We could reduce the example, but prefer to keep it as similar as possible to the examples
+of the other functions(estarfm_job, starfm_job, fitfc_job), using the same format and data. This will allow the user to compare the algorithms more fairly.
+
 checking compiled code ... NOTE
-  Warnung in read_symbols_from_dll(so, rarch)
-    this requires 'objdump.exe' to be on the PATH
-  Warnung in read_symbols_from_dll(so, rarch)
-    this requires 'objdump.exe' to be on the PATH
-  Warnung in read_symbols_from_dll(so, rarch)
-    this requires 'objdump.exe' to be on the PATH
-  Warnung in read_symbols_from_dll(so, rarch)
-    this requires 'objdump.exe' to be on the PATH
-  Warnung in read_symbols_from_dll(so, rarch)
-    this requires 'objdump.exe' to be on the PATH
-  Warnung in read_symbols_from_dll(so, rarch)
-    this requires 'objdump.exe' to be on the PATH
-  File 'ImageFusion/libs/i386/ImageFusion.dll':
-    Found no calls to: 'R_registerRoutines', 'R_useDynamicSymbols'
-  File 'ImageFusion/libs/x64/ImageFusion.dll':
-    Found no calls to: 'R_registerRoutines', 'R_useDynamicSymbols'
-
-This is presumably a local issue with our compiler.
-
-
+  File ‘ImageFusion/libs/ImageFusion.so’:
+    Found ‘_ZSt4cerr’, possibly from ‘std::cerr’ (C++)
+      Objects: ‘execture_imagefusor_jobs.o’,
+        ‘utils/helpers/utils_common.o’, ‘src/fitfc.o’, ‘src/geoinfo.o’,
+        ‘src/image.o’, ‘src/optionparser.o’, ‘src/spstfm.o’,
+        ‘src/spstfm_impl.o’
+    Found ‘_ZSt4cout’, possibly from ‘std::cout’ (C++)
+      Objects: ‘execture_imagefusor_jobs.o’, ‘execture_imginterp_job.o’,
+        ‘utils/helpers/utils_common.o’, ‘src/image.o’, ‘src/spstfm.o’,
+        ‘src/spstfm_impl.o’, ‘src/staarch.o’
+  
+  
 ## Downstream dependencies
 
 There are no downstreams dependencies yet, although our intent is to produce some in the future.
