@@ -73,8 +73,8 @@ All functions in `ImageFusion`operate from disk to disk - Input images are read 
 
 ## Performance
 
-Imagefusion is expensive and can take a long time for long time series using large images. `ImageFusion` is intended to allow the processing to be done in a reasonable time. The core algorithms are implemented in C++, exposed to R via [Rcpp](http://rcpp.org/). If [OPENMP](https://www.openmp.org/) support is available, it can be used for parallelisation. 
+Fusion is expensive and can take a long time for long time series using large images. `ImageFusion` is intended to allow the processing to be done in a reasonable time. The core algorithms are implemented in C++, exposed to R via [Rcpp](http://rcpp.org/). If [OPENMP](https://www.openmp.org/) support is available, it can be used for parallelization. 
 
 ## Outlook
 
-Additional packages are in development for the 
+Additional packages are in development for the preprocessing before the fusion and the visualization and analysis of the fused time series. Check [our website](http://remote-sensing.org/) for latest developments.
