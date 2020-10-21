@@ -21,6 +21,6 @@ inst/proj
 inst/share
 *.xml
 #.tif
-*.png
+#*.png
 *.zip
 *.rar
