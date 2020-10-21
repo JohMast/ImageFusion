@@ -81,12 +81,12 @@ has_high <- has_low <- interval_pairs <- interval_ids <- pred_case  <-  interval
 
 
 
-imagefusion_task <- function(...,filenames_high,filenames_low,dates_high,dates_low,dates_pred,filenames_pred=NULL,singlepair_mode="ignore",method="starfm",spstfm_mode="none",high_date_prediction_mode="ignore",verbose=F,output_overview=F,out_dir="Pred_Outputs"){
+imagefusion_task <- function(...,filenames_high,filenames_low,dates_high,dates_low,dates_pred,filenames_pred=NULL,singlepair_mode="ignore",method="starfm",spstfm_mode="none",high_date_prediction_mode="ignore",verbose=FALSE,output_overview=FALSE,out_dir="Pred_Outputs"){
   
   ####1: Prepare Inputs####
   
   #Check output folder
-  if(ifelse(!dir.exists(out_dir), dir.create(out_dir,recursive = T), FALSE)){
+  if(ifelse(!dir.exists(out_dir), dir.create(out_dir,recursive = TRUE), FALSE)){
     if(verbose){
       print(paste("Creating output directory:",out_dir)) ##attemo
     }#end if verbose
@@ -173,9 +173,9 @@ if(!all(sapply(all_extents, identical, all_extents[[1]]))){
 
 ####2: Find and prepare the jobs####
 #Make one data frame for the high images and one for the low images
-high_df <- data.frame(date = dates_high, has_high = rep(TRUE,length(filenames_high)), files_high = filenames_high,row.names = NULL,stringsAsFactors = F)
-low_df <- data.frame(date = dates_low, has_low = rep(TRUE,length(filenames_low)), files_low = filenames_low,row.names = NULL,stringsAsFactors = F)
-pred_df <- data.frame(date = dates_pred, predict= rep(TRUE,length(filenames_pred)), files_pred = filenames_pred,row.names = NULL,stringsAsFactors = F)
+high_df <- data.frame(date = dates_high, has_high = rep(TRUE,length(filenames_high)), files_high = filenames_high,row.names = NULL,stringsAsFactors = FALSE)
+low_df <- data.frame(date = dates_low, has_low = rep(TRUE,length(filenames_low)), files_low = filenames_low,row.names = NULL,stringsAsFactors = FALSE)
+pred_df <- data.frame(date = dates_pred, predict= rep(TRUE,length(filenames_pred)), files_pred = filenames_pred,row.names = NULL,stringsAsFactors = FALSE)
 
 #Find special cases
 pairs <- inner_join(x = high_df,y = low_df, by = "date")%>% arrange(date)
@@ -202,8 +202,8 @@ all <- full_join(x = high_df,y = low_df,by=c("date")) %>%
 
 if(singlepair_mode=="ignore"){
   all <- all %>% 
-    mutate(interval_pairs = cut(date,breaks = c(-Inf,pairs$date,Inf),right = T,include.lowest = T)) %>% 
-    mutate(interval_ids = cut(date,breaks = c(-Inf,pairs$date,Inf),labels = F,right = T,include.lowest = T)) %>% 
+    mutate(interval_pairs = cut(date,breaks = c(-Inf,pairs$date,Inf),right = TRUE,include.lowest = TRUE)) %>% 
+    mutate(interval_ids = cut(date,breaks = c(-Inf,pairs$date,Inf),labels = FALSE,right = TRUE,include.lowest = TRUE)) %>% 
     mutate(interval_startpair = suppressWarnings(apply(cbind(lower = as.numeric( sub("\\((.+),.*", "\\1", interval_pairs) ),
                                                              upper = as.numeric( sub("[^,]*,([^]]*)\\]", "\\1", interval_pairs))), 1, function(x) min(x[!(is.infinite(x)|is.na(x))])))) %>% 
     mutate(interval_endpair = suppressWarnings(apply(cbind(lower = as.numeric( sub("\\((.+),.*", "\\1", interval_pairs) ),
@@ -211,14 +211,14 @@ if(singlepair_mode=="ignore"){
     group_by(interval_ids) %>%
     mutate(interval_start = min(date)-1) %>% 
     mutate(interval_end = max(date))%>% 
-    mutate(interval_npred = sum(predict[pred_case==1],na.rm = T)) %>% 
+    mutate(interval_npred = sum(predict[pred_case==1],na.rm = TRUE)) %>% 
     ungroup
   
 }
 if(singlepair_mode=="mixed"){
   all <- all %>% 
-    mutate(interval_pairs = cut(date,breaks = c(-Inf,pairs$date,Inf),right = T,include.lowest = T)) %>% 
-    mutate(interval_ids = cut(date,breaks = c(-Inf,pairs$date,Inf),labels = F,right = T,include.lowest = T)) %>%
+    mutate(interval_pairs = cut(date,breaks = c(-Inf,pairs$date,Inf),right = TRUE,include.lowest = TRUE)) %>% 
+    mutate(interval_ids = cut(date,breaks = c(-Inf,pairs$date,Inf),labels = FALSE,right = TRUE,include.lowest = TRUE)) %>%
     mutate(interval_startpair = suppressWarnings(apply(cbind(lower = as.numeric( sub("\\((.+),.*", "\\1", interval_pairs) ),
                                                              upper = as.numeric( sub("[^,]*,([^]]*)\\]", "\\1", interval_pairs))), 1, function(x) min(x[!(is.infinite(x)|is.na(x))])))) %>% 
     mutate(interval_endpair = suppressWarnings(apply(cbind(lower = as.numeric( sub("\\((.+),.*", "\\1", interval_pairs) ),
@@ -227,7 +227,7 @@ if(singlepair_mode=="mixed"){
     group_by(interval_ids) %>%
     mutate(interval_start = min(date)-1) %>% 
     mutate(interval_end = max(date))%>% 
-    mutate(interval_npred = sum(predict[pred_case==1 | pred_case==2],na.rm = T)) %>% 
+    mutate(interval_npred = sum(predict[pred_case==1 | pred_case==2],na.rm = TRUE)) %>% 
     ungroup
   
 }
@@ -242,7 +242,7 @@ if(singlepair_mode=="all"){
     group_by(interval_ids) %>%
     mutate(interval_start = min(date)-1) %>% 
     mutate(interval_end = max(date)) %>% 
-    mutate(interval_npred = sum(predict[pred_case==1 | pred_case==2],na.rm = T)) %>% 
+    mutate(interval_npred = sum(predict[pred_case==1 | pred_case==2],na.rm = TRUE)) %>% 
     ungroup
 }
 
@@ -352,18 +352,18 @@ for(i in 1:nrow(valid_job_table)){ #For every job
     #SPSTFM
     if(method=="spstfm"){
       if(spstfm_mode=="separate"){
-        SAVEDICT_options = file.path(out_dir,paste0("Spstfm_dict_job",i))
+        SAVEDICT_options  <-  file.path(out_dir,paste0("Spstfm_dict_job",i))
         print("Not saving dictionary")
       }
       if(spstfm_mode=="iterative"){
         if(i>1){
-          LOADDICT_options = file.path(out_dir,paste0("Spstfm_dict_job",i-1))
+          LOADDICT_options  <-  file.path(out_dir,paste0("Spstfm_dict_job",i-1))
           print(paste("Building on previously save dictionary: ",LOADDICT_options ))}
-        REUSE_options="improve"
-        SAVEDICT_options = file.path(out_dir,paste0("Spstfm_dict_job",i))
+        REUSE_options <- "improve"
+        SAVEDICT_options  <-  file.path(out_dir,paste0("Spstfm_dict_job",i))
       }
       if(spstfm_mode=="none"){
-        SAVEDICT_options = ""
+        SAVEDICT_options <-  ""
         REUSE_options="use"
         print("Not saving dictionary")
       }

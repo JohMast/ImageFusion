@@ -6,7 +6,7 @@ self_predict <- function(...,src_im,dst_im,method){
                          input_dates = c(1,1,1),
                          pred_dates = 1,
                          pred_filenames =  dst_im,
-                         verbose=F,
+                         verbose=FALSE,
                          ...
                          )
   }
@@ -16,7 +16,7 @@ self_predict <- function(...,src_im,dst_im,method){
                          input_dates = c(1,1,2,2,1),
                          pred_dates = 1,
                          pred_filenames =  dst_im,
-                         verbose=F,
+                         verbose=FALSE,
                          min_train_iter = 0,
                          max_train_iter = 0,
                          LOADDICT_options = "",
@@ -31,7 +31,7 @@ self_predict <- function(...,src_im,dst_im,method){
                            input_dates = c(1,1,2,2,1),
                          pred_dates = 1,
                          pred_filenames =  dst_im,
-                         verbose=F,
+                         verbose=FALSE,
                          ...
   )
   }
@@ -41,7 +41,7 @@ self_predict <- function(...,src_im,dst_im,method){
                          input_dates = c(1,1,1),
                          pred_dates = 1,
                          pred_filenames =  dst_im,
-                         verbose=F,
+                         verbose=FALSE,
                          ...
   )
   }
