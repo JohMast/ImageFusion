@@ -90,7 +90,7 @@
 #' # remove the output directory
 #' unlink("Outputs",recursive = TRUE)
 #' @family {fusion_algorithms}
-starfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,pred_filenames,pred_area,winsize,date1,date3,n_cores, logscale_factor,spectral_uncertainty, temporal_uncertainty, number_classes,hightag,lowtag,MASKIMG_options,MASKRANGE_options,output_masks,use_nodata_value,use_strict_filtering,double_pair_mode,use_temp_diff_for_weights,do_copy_on_zero_diff,verbose=T) {
+starfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,pred_filenames,pred_area,winsize,date1,date3,n_cores, logscale_factor,spectral_uncertainty, temporal_uncertainty, number_classes,hightag,lowtag,MASKIMG_options,MASKRANGE_options,output_masks,use_nodata_value,use_strict_filtering,double_pair_mode,use_temp_diff_for_weights,do_copy_on_zero_diff,verbose=TRUE) {
   
   ##### A: Check all the Optional Inputs #####
   #These are variables which are optional 
@@ -232,9 +232,9 @@ starfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,
     low_dates <- input_dates[input_resolutions==lowtag_c]
     pair_dates <- as.numeric(names(table(c(unique(high_dates),unique(low_dates))))[which(table(c(unique(high_dates),unique(low_dates)))>=2)])
     if(length(pair_dates)>=2 & any(!pred_dates>max(pair_dates)) & any(!pred_dates<min(pair_dates))){
-      double_pair_mode_c = TRUE
+      double_pair_mode_c  <-  TRUE
     }else{
-      double_pair_mode_c = FALSE
+      double_pair_mode_c  <-  FALSE
     }
   }
   #### use_temp_diff_for_weights ####
