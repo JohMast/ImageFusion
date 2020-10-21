@@ -5,3 +5,4 @@
 
 ^.cran_comments\.md$
 ^Readme\.md$
+^\.img$

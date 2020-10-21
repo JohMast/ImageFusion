@@ -1,5 +1,8 @@
+# ImageFusion
+
+<img src=".img/logo.png" align="right" src="doc/images/logo.png">
 ## Introduction
-Temporal fusion of raster image time-Series. R interface for the ImageFusion framework, which provides implementation of the FITFC, ESTARFM, SPSTFM and STARFM algorithms in C++. 
+Temporal fusion of raster image time-Series. R interface for the imagefusion framework, which provides implementation of the FITFC, ESTARFM, SPSTFM and STARFM algorithms in C++. 
 
 
 ### Background
