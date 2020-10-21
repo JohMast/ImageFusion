@@ -1,5 +1,7 @@
 Dear CRAN-Team,
+
 This is my first submission of our ImageFusion package. 
+
 We have done our best to thoroughly test our code and follow all best practices.
 Thank you for your support.
 
