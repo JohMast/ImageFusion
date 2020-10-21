@@ -13,7 +13,7 @@ This is a rough categorization, and the capabilities and number of platforms is 
 
 Fusion is a process by which we can combine information from two temporally overlapping time series to create a single time series with the temporal resolution of the *Low-Resolution* inputs and the spatial resolution of the *High-Resolution* inputs, resulting in an output time series with high spatial *and* high temporal resolution.
 
-The basic principle is to seek **pair-dates** on which images for both time series are available, and finding the relation between both images on that date. The relation is then applied to those dates for which only *Low_Resolution* images are available. The details vary depending on the fusion algorithm. A variety of algorithms exist, and the ImageFusion framework is intended to be continuously extended by users and scientists. 
+The basic principle is to seek *pair-dates* on which images for both time series are available, and finding the relation between both images on that date. The relation is then applied to those dates for which only *Low_Resolution* images are available. The details vary depending on the fusion algorithm. A variety of algorithms exist, and the ImageFusion framework is intended to be continuously extended by users and scientists. 
 
 So far, the following algorithms are implemented:
 
@@ -37,7 +37,9 @@ devtools::install_github("JohMast/ImageFusion")
 
 The core of the package are functions for the algorithms ESTARFM, FITFC, SPSTFM and STARFM. 
 
-Individual *jobs* can be executed using the `estarfm_job`, `fitfc_job`, `spstfm_job` and `starfm_job` functions. These jobs require one or two "pair dates"" on which both high and low resolution images are available and offer the fusion of images for all dates for which only low resolution images are available.
+Individual *jobs* can be executed using the `estarfm_job`, `fitfc_job`, `spstfm_job` and `starfm_job` functions. These jobs require one or two *pair dates* on which both high and low resolution images are available. The *pair dates* support an interval and the job offer the fusion of images for all dates within this interval for which only low resolution images are available.
+
+Some algorithms also offer a *singlepair mode* which allows fusion based on only a single pair. The FITFC algorithm operates exclusively in singlepair mode.
 ```r
 estarfm_job(input_filenames = list_of_input_filenames,
             input_resolutions = c("high","high","low","low","low","low",
@@ -57,7 +59,7 @@ imagefusion_task(filenames_high = list_of_high_resolution_filenames,
                  dates_low = 68:93,
                  dates_pred = c(65,70,75,80,85,90,95))
 ```
-For the creation of a task, we pass the high and low filenames and dates seperately. Note that here we have multiple high-resolution images (68,77,93,100) and multiple pair dates (68,77,93). The task will therefore be split up into different jobs, one for each interval.
+For the creation of a task, we pass the high and low filenames and dates seperately. Note that here we have multiple high-resolution images (68, 77, 93, 100) and multiple pair dates (68, 77, 93). The task will therefore be split up into different jobs, one for each interval.
 
 ### Utilities
 
