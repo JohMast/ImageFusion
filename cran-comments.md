@@ -83,8 +83,11 @@ by Rcpp. We do not use Rcout for the c++ code, even if it would be as trivial as
 replacing all instances of cout with Rcout.
 Our aim is to wrap around this c++ code without making any changes to the c++ code,
 as we want to keep the library and our R package synchronized. 
-We hope our reasoning is correct and understandable. We will also be very thankful
-for any suggestions on how to best handle this situation.
+We hope our reasoning is correct and understandable. 
+In the future we are planning to replace the cout calls with dedicated logging
+using the [spdlog](https://github.com/gabime/spdlog) library. However, we wish to
+keep this initial release as simple as possible.
+We will also be very thankfulfor any other suggestions on how to best handle this situation.
 ## Downstream dependencies
 
 There are no downstreams dependencies yet, although our intent is to produce some in the future.
