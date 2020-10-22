@@ -10,10 +10,10 @@ imginterp_task(
   tags = NULL,
   layers = NULL,
   limit_days = 5,
-  output_pixelstate = F,
-  use_nodata = T,
-  interp_invalid = T,
-  prioritize_invalid = F,
+  output_pixelstate = FALSE,
+  use_nodata = TRUE,
+  interp_invalid = TRUE,
+  prioritize_invalid = FALSE,
   interp_ranges = NULL,
   no_interp_ranges = NULL,
   valid_ranges = NULL,
@@ -23,7 +23,7 @@ imginterp_task(
   out_pixelstate_prefix = NULL,
   out_pixelstate_postfix = NULL,
   stats_filename = NULL,
-  print_stats = F,
+  print_stats = FALSE,
   ql_filenames = NULL,
   ql_dates = NULL,
   ql_tags = NULL,
@@ -36,7 +36,7 @@ imginterp_task(
   mask_bits = NULL,
   mask_valid_ranges = NULL,
   mask_invalid_ranges = NULL,
-  verbose = F
+  verbose = FALSE
 )
 }
 \arguments{

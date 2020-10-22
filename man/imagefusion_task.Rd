@@ -16,8 +16,8 @@ imagefusion_task(
   method = "starfm",
   spstfm_mode = "none",
   high_date_prediction_mode = "ignore",
-  verbose = F,
-  output_overview = F,
+  verbose = FALSE,
+  output_overview = FALSE,
   out_dir = "Pred_Outputs"
 )
 }

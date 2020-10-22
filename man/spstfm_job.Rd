@@ -31,7 +31,7 @@ spstfm_job(
   output_masks,
   use_nodata_value,
   random_sampling,
-  verbose = T
+  verbose = TRUE
 )
 }
 \arguments{

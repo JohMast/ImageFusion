@@ -22,7 +22,7 @@ fitfc_job(
   output_masks,
   use_nodata_value,
   resolution_factor,
-  verbose = T
+  verbose = TRUE
 )
 }
 \arguments{

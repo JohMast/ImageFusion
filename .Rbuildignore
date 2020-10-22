@@ -1,6 +1,6 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
-
+^LICENSE\.md$
 ^cran-comments\.md$
 
 ^.cran_comments\.md$

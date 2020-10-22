@@ -29,7 +29,7 @@ starfm_job(
   double_pair_mode,
   use_temp_diff_for_weights,
   do_copy_on_zero_diff,
-  verbose = T
+  verbose = TRUE
 )
 }
 \arguments{

@@ -27,7 +27,7 @@ estarfm_job(
   use_quality_weighted_regression,
   output_masks,
   use_nodata_value,
-  verbose = T
+  verbose = TRUE
 )
 }
 \arguments{
