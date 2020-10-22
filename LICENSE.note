@@ -1,0 +1,7 @@
+The ImageFusion package as a whole is distributed under a BSD_3 license.
+
+The ImageFusion package wraps around parts the imagefusion framework contained in src/src src/include and src/utils
+
+The imagefusion framework is also licensed under a BSD_3 license.
+
+The original license of the imagefusion code can be found in src/LICENSE_imagefusion.txt
