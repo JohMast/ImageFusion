@@ -49,7 +49,6 @@ Examples with CPU (user + system) or elapsed time > 10s
            user system elapsed
 spstfm_job 10.4   0.03   10.43
 
-
 The SPSTFM algorithm is fairly slow compared to the other algorithms implemented.
 We considered reduce the example, but prefer to keep it as similar as possible to the examples
 of the other functions(estarfm_job, starfm_job, fitfc_job), using the same format and data. This will allow the user to compare the algorithms more fairly.
@@ -58,24 +57,6 @@ of the other functions(estarfm_job, starfm_job, fitfc_job), using the same forma
 checking compiled code ... NOTE
 File 'ImageFusion/libs/i386/ImageFusion.dll':
   Found '_ZSt4cerr', possibly from 'std::cerr' (C++)
-    Objects: 'execture_imagefusor_jobs.o', 'src/geoinfo.o',
-      'src/spstfm_impl.o', 'src/spstfm.o', 'src/image.o',
-      'src/fitfc.o', 'src/optionparser.o',
-      'utils/helpers/utils_common.o'
-  Found '_ZSt4cout', possibly from 'std::cout' (C++)
-    Objects: 'execture_imagefusor_jobs.o', 'execture_imginterp_job.o',
-      'src/staarch.o', 'src/spstfm_impl.o', 'src/spstfm.o',
-      'src/image.o', 'utils/helpers/utils_common.o'
-File 'ImageFusion/libs/x64/ImageFusion.dll':
-  Found '_ZSt4cerr', possibly from 'std::cerr' (C++)
-    Objects: 'execture_imagefusor_jobs.o', 'src/geoinfo.o',
-      'src/spstfm_impl.o', 'src/spstfm.o', 'src/image.o',
-      'src/fitfc.o', 'src/optionparser.o',
-      'utils/helpers/utils_common.o'
-  Found '_ZSt4cout', possibly from 'std::cout' (C++)
-    Objects: 'execture_imagefusor_jobs.o', 'execture_imginterp_job.o',
-      'src/staarch.o', 'src/spstfm_impl.o', 'src/spstfm.o',
-      'src/image.o', 'utils/helpers/utils_common.o'
 
 The c++ library we are building on utilizes std::cout and std::cerr.
 In the wrapper functions for the c++ library, we use Rcout and Rcerr provided
@@ -87,7 +68,7 @@ We hope our reasoning is correct and understandable.
 In the future we are planning to replace the cout calls with dedicated logging
 using the [spdlog](https://github.com/gabime/spdlog) library. However, we wish to
 keep this initial release as simple as possible.
-We will also be very thankfulfor any other suggestions on how to best handle this situation.
+We will also be very thankful for any other suggestions on how to best handle this situation.
 ## Downstream dependencies
 
 There are no downstreams dependencies yet, although our intent is to produce some in the future.
