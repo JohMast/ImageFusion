@@ -49,7 +49,6 @@
 #' @author Johannes Mast (R)
 #' @details Executes the SPSTFM algorithm to create a number of synthetic high-resolution images from two pairs of matching high- and low-resolution images.  Assumes that the input images already have matching size. For a detailed explanation how SPSTFM works there is the original paper and the thesis, which yielded this implementation. The latter explains also all available options and shows some test results. However, the default options should give good results.
 #' @examples #
-#' ###########################fitfc ##############
 #' # Load required libraries
 #' library(ImageFusion)
 #' library(raster)
@@ -86,7 +85,8 @@
 #'                                  "low"),
 #'            input_dates = c(68,77,68,69,70,71,72,73,74,75,76,77),
 #'            pred_dates = c(74),
-#'            pred_filenames = c("Outputs/spstfm_74.tif")
+#'            pred_filenames = c("Outputs/spstfm_74.tif"),
+#'            n_training_samples = 5000
 #'            )
 #' 
 #' # remove the output directory

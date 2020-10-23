@@ -80,7 +80,6 @@ Executes the FITFC Algorithm. If more than one pair is given, will perform predi
 }
 \examples{
  
-###########################fitfc ##############
 # Load required libraries
 library(ImageFusion)
 library(raster)

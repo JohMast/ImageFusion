@@ -111,7 +111,6 @@ Executes the SPSTFM algorithm to create a number of synthetic high-resolution im
 }
 \examples{
 #
-###########################fitfc ##############
 # Load required libraries
 library(ImageFusion)
 library(raster)
@@ -148,7 +147,8 @@ spstfm_job(input_filenames = c(landsat_sel,modis_sel),
                                  "low"),
            input_dates = c(68,77,68,69,70,71,72,73,74,75,76,77),
            pred_dates = c(74),
-           pred_filenames = c("Outputs/spstfm_74.tif")
+           pred_filenames = c("Outputs/spstfm_74.tif"),
+           n_training_samples = 5000
            )
 
 # remove the output directory

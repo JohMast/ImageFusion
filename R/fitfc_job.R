@@ -36,7 +36,6 @@
 #' @author Johannes Mast (R)
 #' @details Executes the FITFC Algorithm. If more than one pair is given, will perform prediction for the pred dates twice, once for each of the input pairs.
 #' @examples  
-#' ###########################fitfc ##############
 #' # Load required libraries
 #' library(ImageFusion)
 #' library(raster)
