@@ -44,16 +44,6 @@ this.
 We hope to solve this problem and, in time, provide a suitable alternative.
 
 #### NOTE 3:
-** running examples for arch 'i386' ... [24s] NOTE
-Examples with CPU (user + system) or elapsed time > 10s
-           user system elapsed
-spstfm_job 10.4   0.03   10.43
-
-The SPSTFM algorithm is fairly slow compared to the other algorithms implemented.
-We considered reduce the example, but prefer to keep it as similar as possible to the examples
-of the other functions(estarfm_job, starfm_job, fitfc_job), using the same format and data. This will allow the user to compare the algorithms more fairly.
-
-#### NOTE 4:
 checking compiled code ... NOTE
 File 'ImageFusion/libs/i386/ImageFusion.dll':
   Found '_ZSt4cerr', possibly from 'std::cerr' (C++)
@@ -69,6 +59,7 @@ In the future we are planning to replace the cout calls with dedicated logging
 using the [spdlog](https://github.com/gabime/spdlog) library. However, we wish to
 keep this initial release as simple as possible.
 We will also be very thankful for any other suggestions on how to best handle this situation.
+
 ## Downstream dependencies
 
 There are no downstreams dependencies yet, although our intent is to produce some in the future.
