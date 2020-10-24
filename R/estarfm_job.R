@@ -80,7 +80,6 @@
 #' 
 #' # remove the output directory
 #' unlink("Outputs",recursive = TRUE)
-#' @family {fusion_algorithms}
 #' 
 
 

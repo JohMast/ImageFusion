@@ -44,7 +44,6 @@
 #' @export
 #' @importFrom raster stack
 #' @importFrom assertthat assert_that 
-#'
 #' @author Christof Kaufmann (C++)
 #' @author Johannes Mast (R)
 #' @details Executes the SPSTFM algorithm to create a number of synthetic high-resolution images from two pairs of matching high- and low-resolution images.  Assumes that the input images already have matching size. For a detailed explanation how SPSTFM works there is the original paper and the thesis, which yielded this implementation. The latter explains also all available options and shows some test results. However, the default options should give good results.
@@ -91,7 +90,7 @@
 #' 
 #' # remove the output directory
 #' unlink("Outputs",recursive = TRUE)
-#' @family {fusion_algorithms}
+
 
 
 spstfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,pred_filenames,pred_area,winsize,date1,date3,n_cores,dict_size,

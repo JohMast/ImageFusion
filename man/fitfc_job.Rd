@@ -125,15 +125,8 @@ unlink("Outputs",recursive = TRUE)
 \references{
 Wang, Qunming, and Peter M. Atkinson. "Spatio-temporal fusion for daily Sentinel-2 images." Remote Sensing of Environment 204 (2018): 31-42.
 }
-\seealso{
-Other {fusion_algorithms}: 
-\code{\link{estarfm_job}()},
-\code{\link{spstfm_job}()},
-\code{\link{starfm_job}()}
-}
 \author{
 Christof Kaufmann (C++)
 
 Johannes Mast (R)
 }
-\concept{{fusion_algorithms}}
