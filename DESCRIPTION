@@ -9,7 +9,7 @@ Authors@R: c(
     person("Thorsten", "Dahms", email = "thorsten.dahms@uni-wuerzburg.de", role = "sad",comment = c(ORCID = "0000-0002-7073-5075")),
     person("Jakob", "Schwalb-Willmann", email = "movevis@schwalb-willmann.de", role = "sad",comment = c(ORCID = "0000-0003-2665-1509")),
     person("Dinesh", "Kumar Babu", email = "dinesh.kumar-babu@adwaiseo.eu", role = "ctb"))
-Description: Temporal fusion of raster image time-Series. Provides implementation of the FITFC, ESTARFM, SPSTFM and STARFM algorithms in c++.
+Description: Temporal fusion of raster image time-Series. Provides implementation of various fusion algorithms in c++.
 License: BSD_3_clause + file LICENSE
 Imports: Rcpp (>= 1.0.2), raster, rgdal, parallel, ggplot2, assertthat, foreach, dplyr, magrittr
 LinkingTo: Rcpp, RcppArmadillo, BH
