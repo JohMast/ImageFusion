@@ -16,6 +16,7 @@ using namespace Rcpp;
 
 using  std::vector;
 
+std::streambuf* stdoutbuf = std::cout.rdbuf(Rcpp::Rcout.rdbuf());
 //===========================================estarfm=================================
 // [[Rcpp::export]]
 void execute_estarfm_job_cpp(CharacterVector input_filenames, 
