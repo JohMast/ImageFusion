@@ -41,7 +41,7 @@ The great size mostly due to our inclusion of the gdal library, which is require
 
 Other packages handling raster files, such as [sf](https://cran.r-project.org/web/packages/sf/index.html) or [gdalcubes](https://cran.r-project.org/web/packages/gdalcubes/index.html), also suffer from 
 this.
-We hope to solve this problem and, in time, provide a suitable alternative.
+Do you have any ideas on how to solve this note, as we have no influence over the size of the GDAL library.
 
 #### NOTE 3:
 checking compiled code ... NOTE
@@ -55,10 +55,8 @@ replacing all instances of cout with Rcout.
 Our aim is to wrap around this c++ code without making any changes to the c++ code,
 as we want to keep the library and our R package synchronized. 
 We hope our reasoning is correct and understandable. 
-In the future we are planning to replace the cout calls with dedicated logging
-using the [spdlog](https://github.com/gabime/spdlog) library. However, we wish to
-keep this initial release as simple as possible.
-We will also be very thankful for any other suggestions on how to best handle this situation.
+We implement a solution discussed in [this thread](http://lists.r-forge.r-project.org/pipermail/rcpp-devel/2018-October/010162.html), which does not remove the NOTE, but adresses the issue.
+We will also be very thankful for any other suggestions on how to best handle this issue.
 
 ## Downstream dependencies
 

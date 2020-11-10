@@ -35,9 +35,7 @@
 #' @param valid_ranges  (Optional) Character (specifically a range-list, see below at \code{<range-list>}). Specify one or more intervals for valid values. Locations with invalid values will be masked out.
 #' @return Nothing, files are written to disk.
 #' @export
-#' @details  
-#' 
-#'  This utility is developed to perform simple interpolation on a given time series of remote sensing images.
+#' @details This utility is developed to perform simple interpolation on a given time series of remote sensing images.
 #'  This utility can also perform cloud masking on satellite images with the quality layer provided using \code{ql} options. 
 #'  The quality layer can be a bit field image (ex. State_1km: Reflectance Data State QA layer from MODIS) or state image which 
 #'  provides the state of the pixel (ex. quality layer from FMASK). When a single image with a date and a quality layer with the 
