@@ -55,7 +55,7 @@ replacing all instances of cout with Rcout.
 Our aim is to wrap around this c++ code without making any changes to the c++ code,
 as we want to keep the library and our R package synchronized. 
 We hope our reasoning is correct and understandable. 
-We implement a solution discussed in [this thread](http://lists.r-forge.r-project.org/pipermail/rcpp-devel/2018-October/010162.html), which does not remove the NOTE, but adresses the issue.
+We implement a solution discussed in [this thread](http://lists.r-forge.r-project.org/pipermail/rcpp-devel/2018-October/010162.html), which does not remove the NOTE, but adresses the issue. With this solution we redirect everything going to cout to rcout without having to modify the c++ code.
 We will also be very thankful for any other suggestions on how to best handle this issue.
 
 ## Downstream dependencies

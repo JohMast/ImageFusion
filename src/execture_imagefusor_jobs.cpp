@@ -17,6 +17,9 @@ using namespace Rcpp;
 using  std::vector;
 
 std::streambuf* stdoutbuf = std::cout.rdbuf(Rcpp::Rcout.rdbuf());
+std::streambuf* stderrbuf = std::cerr.rdbuf(Rcpp::Rcerr.rdbuf());
+
+
 //===========================================estarfm=================================
 // [[Rcpp::export]]
 void execute_estarfm_job_cpp(CharacterVector input_filenames, 
@@ -45,6 +48,7 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames,
 )
 {
   std::streambuf* stdoutbuf = std::cout.rdbuf(Rcpp::Rcout.rdbuf());
+  std::streambuf* stderrbuf = std::cerr.rdbuf(Rcpp::Rcerr.rdbuf());
 #ifndef WITH_OMP
   if(n_cores>1){
     Rcout <<"Sorry, if you want to use Parallelizer, you need to install OpenMP first."<<std::endl;
@@ -285,6 +289,7 @@ void execute_starfm_job_cpp(CharacterVector input_filenames,
                             const std::string& MASKRANGE_options
 ){
   std::streambuf* stdoutbuf = std::cout.rdbuf(Rcpp::Rcout.rdbuf());
+  std::streambuf* stderrbuf = std::cerr.rdbuf(Rcpp::Rcerr.rdbuf());
 
 #ifndef WITH_OMP
   if(n_cores>1){
@@ -546,6 +551,7 @@ void execute_fitfc_job_cpp(CharacterVector input_filenames,
                             const std::string& MASKRANGE_options
 ){
   std::streambuf* stdoutbuf = std::cout.rdbuf(Rcpp::Rcout.rdbuf());
+  std::streambuf* stderrbuf = std::cerr.rdbuf(Rcpp::Rcerr.rdbuf());
   using namespace imagefusion;
   //Step 1: Prepare the Input
   //create a prediction area rectangle
@@ -780,6 +786,8 @@ void execute_spstfm_job_cpp(CharacterVector input_filenames,
 )
 {
   std::streambuf* stdoutbuf = std::cout.rdbuf(Rcpp::Rcout.rdbuf());
+  std::streambuf* stderrbuf = std::cerr.rdbuf(Rcpp::Rcerr.rdbuf());
+  
 #ifndef WITH_OMP
   if(n_cores>1){
     Rcout <<"Sorry, if you want to use Parallelizer, you need to install OpenMP first."<<std::endl;

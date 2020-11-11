@@ -104,8 +104,8 @@ std::vector<Descriptor> usage{
 void execute_imginterp_job_cpp(
     bool verbose,
     const std::string& input_string){
-  
-  
+  std::streambuf* stdoutbuf = std::cout.rdbuf(Rcpp::Rcout.rdbuf());
+  std::streambuf* stderrbuf = std::cerr.rdbuf(Rcpp::Rcerr.rdbuf());
   //So it begins
   using namespace imagefusion;
   if(verbose) Rcout << "Starting imginterp job" << std::endl;;
