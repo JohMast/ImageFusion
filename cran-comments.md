@@ -11,7 +11,7 @@ Johannes Mast (Package Maintainer)
 * local windows 10, R 4.0.2
 * local ubuntu 20.04, R 4.0.2
 * win-builder  R 4.0.3
-* win-builder  R Under development (unstable) (2020-10-15 r79342)
+* win-builder  R Under development (unstable) (2020-12-09 r79601)
 
 ## R CMD check results
 
