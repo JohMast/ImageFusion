@@ -8,7 +8,7 @@ Thank you for your support.
 Johannes Mast (Package Maintainer)
 
 ## Test environments
-* local windows 10, R 4.0.2
+* local windows 10, R 4.0.3
 * local ubuntu 20.04, R 4.0.2
 * win-builder  R 4.0.3
 * win-builder  R Under development (unstable) (2020-12-09 r79601)
@@ -45,8 +45,12 @@ Do you have any ideas on how to solve this note, as we have no influence over th
 
 #### NOTE 3:
 checking compiled code ... NOTE
-File 'ImageFusion/libs/i386/ImageFusion.dll':
-  Found '_ZSt4cerr', possibly from 'std::cerr' (C++)
+  Compiled code should not call entry points which might terminate R nor
+  write to stdout/stderr instead of to the console, nor use Fortran I/O
+  nor system RNGs. The detected symbols are linked into the code but
+  might come from libraries and not actually be called.
+  
+  See 'Writing portable packages' in the 'Writing R Extensions' manual.
 
 The c++ library we are building on utilizes std::cout and std::cerr.
 In the wrapper functions for the c++ library, we use Rcout and Rcerr provided

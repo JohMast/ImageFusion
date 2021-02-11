@@ -256,7 +256,7 @@ public:
 #else
 #define IF_THROW_EXCEPTION(ex) \
     throw ex \
-    << boost::throw_function(BOOST_THROW_EXCEPTION_CURRENT_FUNCTION) \
+    << boost::throw_function(BOOST_CURRENT_FUNCTION ) \
     << boost::throw_file(__FILE__) \
     << boost::throw_line((int)__LINE__)
 #endif /* defined(__GNUC__) && (__GNUC__ < 5) */
