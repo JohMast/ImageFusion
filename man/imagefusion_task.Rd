@@ -103,7 +103,7 @@ imagefusion_task(filenames_high = landsat,
                  dates_high = c(68,77,93,100),
                  filenames_low = modis,
                  dates_low = 68:93,
-                 dates_pred = c(65,70,75,80,85,90,95),
+                 dates_pred = c(65,70,75,80),
                  out_dir = "Outputs/")
 # remove the output directory
 unlink("Outputs",recursive = TRUE)
