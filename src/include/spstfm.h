@@ -2421,7 +2421,6 @@ double testSetError(arma::mat const& highTestSamples, arma::mat const& lowTestSa
  * @code
  * // element indices:              0, 1, 2, 3, 4, 5
  * for (auto i : sort_indices<int>({5, 3, 4, 0, 2, 1}))
- *     std::cout << i << " ";
  * @endcode
  * will print "0 2 1 4 5 3". It is used in the mostVariance() functions to return the patch indices
  * sorted by their variance.
