@@ -152,17 +152,17 @@ std::vector<Stats> computeStats(imagefusion::ConstImage const& img, imagefusion:
  * @param add2 is the string to add after "): ". For example space.
  */
 void printPixel(imagefusion::ConstImage const& i, int x, int y, std::string add1 = "", std::string add2 = "") {
-    std::cout << "Pixel " << add1 << "at (" << x << ", " << y << "): " << add2;
+    Rcpp::Rcout << "Pixel " << add1 << "at (" << x << ", " << y << "): " << add2;
     if (i.channels() > 1)
-        std::cout << "[";
+        Rcpp::Rcout << "[";
     for (unsigned int c = 0; c < i.channels(); ++c) {
-        std::cout << i.doubleAt(x, y, c);
+        Rcpp::Rcout << i.doubleAt(x, y, c);
         if (c + 1 < i.channels())
-            std::cout << ", ";
+            Rcpp::Rcout << ", ";
     }
     if (i.channels() > 1)
-        std::cout << "]";
-    std::cout << std::endl;
+        Rcpp::Rcout << "]";
+    Rcpp::Rcout << std::endl;
 }
 
 
@@ -182,7 +182,7 @@ bool isFirstSmaller(imagefusion::Image& i0, imagefusion::Image& i1) {
     if ((i0.width() < i1.width() && i0.height() > i1.height()) ||
         (i0.width() > i1.width() && i0.height() < i1.height()))
     {
-        std::cerr << "The images have incompatible sizes: "
+        Rcpp::Rcerr << "The images have incompatible sizes: "
                   << i0.size() << " and " << i1.size()
                   << ". None of them fits into the other." << std::endl;
         std::exit(1);
@@ -255,16 +255,16 @@ std::array<std::vector<bool>, 2> findStringDiffs(const std::string& s1, const st
                                  d[i - 1][j - 1] + (s1[i - 1] == s2[j - 1] ? 0 : 1) });
 
     // print the table (without shortest path)
-//    std::cout << "     ";
+//    Rcpp::Rcout << "     ";
 //    for (auto c : s1)
-//        std::cout << c << "  ";
-//    std::cout << std::endl;
+//        Rcpp::Rcout << c << "  ";
+//    Rcpp::Rcout << std::endl;
 //    std::string s = " " + s2 + " ";
 //    for (unsigned int j = 0; j < len2 + 1; ++j) {
-//        std::cout << s[j];
+//        Rcpp::Rcout << s[j];
 //        for (unsigned int i = 0; i < len1 + 1; ++i)
-//            std::cout << std::setw(2) << d[i][j] << " ";
-//        std::cout << std::endl;
+//            Rcpp::Rcout << std::setw(2) << d[i][j] << " ";
+//        Rcpp::Rcout << std::endl;
 //    }
 
     // traverse the table from bottom right through the minimum values and note differences
@@ -303,15 +303,15 @@ std::array<std::vector<bool>, 2> findStringDiffs(const std::string& s1, const st
     }
 
     // print differences
-//    std::cout << s1 << std::endl;
+//    Rcpp::Rcout << s1 << std::endl;
 //    for (bool b : diff1)
-//        std::cout << (b ? "|" : " ");
-//    std::cout << std::endl;
+//        Rcpp::Rcout << (b ? "|" : " ");
+//    Rcpp::Rcout << std::endl;
 
-//    std::cout << s2 << std::endl;
+//    Rcpp::Rcout << s2 << std::endl;
 //    for (bool b : diff2)
-//        std::cout << (b ? "|" : " ");
-//    std::cout << std::endl;
+//        Rcpp::Rcout << (b ? "|" : " ");
+//    Rcpp::Rcout << std::endl;
 
     return {diff1, diff2};
 }
@@ -446,12 +446,12 @@ private:
                 unsigned int npresDel = std::accumulate(pres.begin() + currentIdx, pres.begin() + currentIdx + ndelete, 0u,
                                                         [] (int s, bool d) { return s + (d ? 1 : 0); });
                 ++currentIdx;
-//                std::cout << "currentIdx: " << (currentIdx-1) << ", ncommon: " << ncommon << ", npres: " << npres << ", pres deleted: " << npresDel << std::endl;
+//                Rcpp::Rcout << "currentIdx: " << (currentIdx-1) << ", ncommon: " << ncommon << ", npres: " << npres << ", pres deleted: " << npresDel << std::endl;
                 if (npresDel == npres)
                 {
                     next = s;
                     next.replace(currentIdx-1, ndelete, "...");
-//                    std::cout << "currentIdx: " << (currentIdx-1) << ", ncommon: " << ncommon << ", npres: " << npres << ", next cand: " << next << ", pres deleted: " << npresDel << std::endl;
+//                    Rcpp::Rcout << "currentIdx: " << (currentIdx-1) << ", ncommon: " << ncommon << ", npres: " << npres << ", next cand: " << next << ", pres deleted: " << npresDel << std::endl;
                     return;
                 }
             }
@@ -499,16 +499,16 @@ std::array<std::string, 2> shorten(std::string s1, std::string s2, std::function
             CandidateFactory cf{s[i].substr(keepFront, len - keepFront - keepBack), diff};
             while (cf.hasNext()) {
                 s[i] = start + cf.getNext() + end;
-//                std::cout << "next: " << s[i] << " (length: " << s[i].size() << ")" << std::endl;
+//                Rcpp::Rcout << "next: " << s[i] << " (length: " << s[i].size() << ")" << std::endl;
                 if (isShortEnough(s[i])) {
-//                    std::cout << "accepted." << std::endl;
+//                    Rcpp::Rcout << "accepted." << std::endl;
                     break;
                 }
             }
         }
     }
-//    std::cout << "shortened0: " << s[0] << std::endl;
-//    std::cout << "shortened1: " << s[1] << std::endl << std::endl;
+//    Rcpp::Rcout << "shortened0: " << s[0] << std::endl;
+//    Rcpp::Rcout << "shortened1: " << s[1] << std::endl << std::endl;
     return s;
 }
 

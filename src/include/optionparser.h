@@ -95,7 +95,7 @@ namespace option {
  *          the following code
  *          @code
  *          for (auto& opt : options.nonOptionArgs) {
- *              std::cout << opt.arg << std::endl;
+ *              Rcpp::Rcout << opt.arg << std::endl;
  *          }
  *          @endcode
  *          would output
@@ -189,10 +189,10 @@ namespace option {
  *         imagefusion::Size s = Parse::Size(o.arg);
  *         sum += s.width * s.height;
  *     }
- *     std::cout << "Sum: " << sum << std::endl;
+ *     Rcpp::Rcout << "Sum: " << sum << std::endl;
  *
  *     for (std::string& nop : options.nonOptionArgs)
- *         std::cout << "Non-option: " << nop << std::endl;
+ *         Rcpp::Rcout << "Non-option: " << nop << std::endl;
  *
  *     return 0;
  * }
@@ -3253,12 +3253,12 @@ public:
      * std::istringstream iss2("1 2  3  4   5");
      *
      * while (iss1 >> tok || !tok.empty())
-     *     std::cout << "<" << tok << "> ";
-     * std::cout << std::endl;
+     *     Rcpp::Rcout << "<" << tok << "> ";
+     * Rcpp::Rcout << std::endl;
      *
      * while (iss2 >> tok || !tok.empty())
-     *     std::cout << "<" << tok << "> ";
-     * std::cout << std::endl;
+     *     Rcpp::Rcout << "<" << tok << "> ";
+     * Rcpp::Rcout << std::endl;
      * @endcode
      */
     std::string sep;
@@ -3674,7 +3674,7 @@ public:
      *     options.unknownOptionArgCheck = ArgChecker::None;  // accept unknown options, but without argument
      *     options.parse(argc, argv);
      *     for (auto& o : options.unknown)
-     *         std::cout << "Unknown option: " << o << std::endl;
+     *         Rcpp::Rcout << "Unknown option: " << o << std::endl;
      *     return 0;
      * }
      * @endcode
@@ -4386,7 +4386,7 @@ void printUsageBackend(IStringWriter& write, std::vector<Descriptor> const& usag
  *
  * Example:
  * @code
- * printUsage(std::cerr, usage)
+ * printUsage(Rcpp::Rcerr, usage)
  *
  * std::ostringstream sstr;
  * printUsage(sstr, usage);
@@ -4783,7 +4783,7 @@ void printUsage(Function* prn, Stream* stream, std::vector<Descriptor> const& us
 inline void printUsage(std::vector<Descriptor> const& usage, int width,
                 int last_column_min_percent, int last_column_own_line_max_percent)
 {
-    //**Commented couts and cerr until a fix is found* OStreamWriter<std::ostream> write(std::cout);
+    //**Commented couts and cerr until a fix is found* OStreamWriter<std::ostream> write(Rcpp::Rcout);
     //printUsageBackend(write, usage, width, last_column_min_percent, last_column_own_line_max_percent);
 }
 

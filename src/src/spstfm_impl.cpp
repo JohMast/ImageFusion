@@ -167,7 +167,7 @@ arma::vec gpsr(arma::mat const& y, arma::mat const& A, imagefusion::SpstfmOption
             // compute new alpha
             double dd = arma::dot(du,du) + arma::dot(dv,dv);
             if (dGd <= 0) {
-//                std::cerr << "dgd = " << dGd << ", nonpositive curvature detected" << std::endl;
+//                Rcpp::Rcerr << "dgd = " << dGd << ", nonpositive curvature detected" << std::endl;
                 alpha = alphamax;
             }
             else

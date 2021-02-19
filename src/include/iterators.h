@@ -19,7 +19,7 @@ namespace imagefusion {
  * @code
  * Image img{5, 6, Type::uint16x2};
  * for (auto it = img.begin<std::array<uint16_t,2>>(), it_end = img.end<std::array<uint16_t,2>>(); it != it_end; ++it)
- *     std::cout << it->at(0) << ", " << (*it)[1] << std::endl;
+ *     Rcpp::Rcout << it->at(0) << ", " << (*it)[1] << std::endl;
  * @endcode
  *
  * Note, for @ref PixelIterator you need to know the full type (including number of channels) at
@@ -34,7 +34,7 @@ namespace imagefusion {
  * @code
  * Image img{5, 6, Type::uint16x2};
  * for (auto it = img.begin<uint16_t>(0), it_end = img.end<uint16_t>(0); it != it_end; ++it)
- *     std::cout << *it << std::endl;
+ *     Rcpp::Rcout << *it << std::endl;
  * @endcode
  *
  * Note, for ChannelValueIterator you need to know the base type (but not the number of channels)

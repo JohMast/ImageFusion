@@ -805,7 +805,7 @@ void execute_spstfm_job_cpp(CharacterVector input_filenames,
   // check spelling of reuse dictionary option
   std::string reuseOpt = REUSE_options;
   if (reuseOpt != "improve" && reuseOpt != "clear" && reuseOpt != "use") {
-    std::cerr << "For --dict-reuse you must either give 'improve', 'clear' or 'use'. You gave " << reuseOpt << "." << std::endl;
+    Rcpp::Rcerr << "For --dict-reuse you must either give 'improve', 'clear' or 'use'. You gave " << reuseOpt << "." << std::endl;
   }
   
   // find the gi the first pair high image 
@@ -901,7 +901,7 @@ void execute_spstfm_job_cpp(CharacterVector input_filenames,
     unsigned int chans = mri->getAny().channels();
     if (chans == 1) {
       if (!std::filesystem::exists(dictPath)) {
-        std::cerr << "Could not find the dictionary file " << dictPath << " to load a single-channel dictionary." << std::endl;
+        Rcpp::Rcerr << "Could not find the dictionary file " << dictPath << " to load a single-channel dictionary." << std::endl;
       }
       
       arma::mat dict;
@@ -911,7 +911,7 @@ void execute_spstfm_job_cpp(CharacterVector input_filenames,
         spsf.setDictionary(dict);
       }
       else
-        std::cerr << "Could not load dictionary from " << dictPath << " although the file exists. Defect file? Ignoring option --load-dict." << std::endl;
+        Rcpp::Rcerr << "Could not load dictionary from " << dictPath << " although the file exists. Defect file? Ignoring option --load-dict." << std::endl;
     }
     else {
       std::filesystem::path p = dictPath;
@@ -926,7 +926,7 @@ void execute_spstfm_job_cpp(CharacterVector input_filenames,
         
         std::string infilename = outpath.string();
         if (!std::filesystem::exists(infilename)) {
-          std::cerr << "Could not find the dictionary file " << infilename << " to load a part of a multi-channel dictionary. "
+          Rcpp::Rcerr << "Could not find the dictionary file " << infilename << " to load a part of a multi-channel dictionary. "
           "Give either the same filename as specified with --save-dict or one of the actual files with channel number." << std::endl;
         }
         
@@ -937,7 +937,7 @@ void execute_spstfm_job_cpp(CharacterVector input_filenames,
           spsf.setDictionary(dict, c);
         }
         else {
-          std::cerr << "Could not load dictionary from " << infilename << " although the file exists. Defect file? Ignoring option --load-dict completely." << std::endl;
+          Rcpp::Rcerr << "Could not load dictionary from " << infilename << " although the file exists. Defect file? Ignoring option --load-dict completely." << std::endl;
           // remove eventual dictionaries set to previous channels
           for (unsigned int i = 0; i < chans; ++i)
             spsf.setDictionary(dict, i);
@@ -1073,7 +1073,7 @@ void execute_spstfm_job_cpp(CharacterVector input_filenames,
       if (success)
         if(verbose){Rcout  << "Saved dictionary to " << dictPath << "." << std::endl;}
       else
-        std::cerr << "Could not save dictionary to " << dictPath << "." << std::endl;
+        Rcpp::Rcerr << "Could not save dictionary to " << dictPath << "." << std::endl;
     }
     else {
       std::filesystem::path p = dictPath;
