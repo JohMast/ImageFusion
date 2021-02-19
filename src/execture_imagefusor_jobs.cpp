@@ -17,8 +17,8 @@ using namespace Rcpp;
 using  std::vector;
 
 // Alternative fix to rcout issue, kept here as a reminder
-// std::streambuf* stdoutbuf = std::cout.rdbuf(Rcpp::Rcout.rdbuf());
-// std::streambuf* stderrbuf = std::cerr.rdbuf(Rcpp::Rcerr.rdbuf());
+//  
+//  
 
 
 //===========================================estarfm=================================
@@ -290,8 +290,8 @@ void execute_starfm_job_cpp(CharacterVector input_filenames,
                             const std::string& MASKIMG_options,
                             const std::string& MASKRANGE_options
 ){
-  std::streambuf* stdoutbuf = std::cout.rdbuf(Rcpp::Rcout.rdbuf());
-  std::streambuf* stderrbuf = std::cerr.rdbuf(Rcpp::Rcerr.rdbuf());
+   
+   
 
 #ifndef WITH_OMP
   if(n_cores>1){
@@ -552,8 +552,8 @@ void execute_fitfc_job_cpp(CharacterVector input_filenames,
                             const std::string& MASKIMG_options,
                             const std::string& MASKRANGE_options
 ){
-  std::streambuf* stdoutbuf = std::cout.rdbuf(Rcpp::Rcout.rdbuf());
-  std::streambuf* stderrbuf = std::cerr.rdbuf(Rcpp::Rcerr.rdbuf());
+   
+   
   using namespace imagefusion;
   //Step 1: Prepare the Input
   //create a prediction area rectangle
@@ -787,8 +787,8 @@ void execute_spstfm_job_cpp(CharacterVector input_filenames,
                              
 )
 {
-  std::streambuf* stdoutbuf = std::cout.rdbuf(Rcpp::Rcout.rdbuf());
-  std::streambuf* stderrbuf = std::cerr.rdbuf(Rcpp::Rcerr.rdbuf());
+   
+   
   
 #ifndef WITH_OMP
   if(n_cores>1){
