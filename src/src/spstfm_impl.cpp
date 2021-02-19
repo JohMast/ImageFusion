@@ -19,6 +19,7 @@
 #include "type.h"
 #include "image.h"
 #include "spstfm.h"
+#include <Rcpp.h>
 namespace imagefusion {
 namespace spstfm_impl_detail {
 
@@ -112,7 +113,7 @@ arma::vec gpsr(arma::mat const& y, arma::mat const& A, imagefusion::SpstfmOption
                             finaltau});
             if (tau == finaltau)
                 tola = opt.tolA;
-//            std::cout << "Changed tau to " << tau << std::endl;
+//            Rcpp::Rcerr << "Changed tau to " << tau << std::endl;
         }
 
         // main loop
@@ -132,14 +133,14 @@ arma::vec gpsr(arma::mat const& y, arma::mat const& A, imagefusion::SpstfmOption
             double dGd = arma::dot(Adx, Adx);
             double lambda = - (arma::dot(gradu, du) + arma::dot(gradv, dv)) / (std::numeric_limits<double>::denorm_min() + dGd);
             if (lambda < 0) {
-                std::cout << "lambda < 0. Debug info:" << std::endl;
-                std::cout << "gradu: " << gradu << std::endl;
-                std::cout << "du: " << du << std::endl;
-                std::cout << "gradv: " << gradv << std::endl;
-                std::cout << "dv: " << dv << std::endl;
-                std::cout << "dGd: " << dGd << std::endl;
-                std::cout << "alpha: " << alpha << std::endl;
-                std::cout << "setting lambda to 1 and continuing." << std::endl;
+                Rcpp::Rcerr << "lambda < 0. Debug info:" << std::endl;
+                Rcpp::Rcerr << "gradu: " << gradu << std::endl;
+                Rcpp::Rcerr << "du: " << du << std::endl;
+                Rcpp::Rcerr << "gradv: " << gradv << std::endl;
+                Rcpp::Rcerr << "dv: " << dv << std::endl;
+                Rcpp::Rcerr << "dGd: " << dGd << std::endl;
+                Rcpp::Rcerr << "alpha: " << alpha << std::endl;
+                Rcpp::Rcerr << "setting lambda to 1 and continuing." << std::endl;
                 lambda = 1;
             }
 //            assert(lambda >= 0 && "lambda is negative. Abort.");
@@ -172,7 +173,7 @@ arma::vec gpsr(arma::mat const& y, arma::mat const& A, imagefusion::SpstfmOption
             else
                 alpha = std::min(std::max(alphamin, dd / dGd), alphamax);
 
-//            std::cout << "It: " << it << ", obj: " << f_val << ", alpha: " << alpha << ", nnz: " << nnz << std::endl;
+//            Rcpp::Rcerr << "It: " << it << ", obj: " << f_val << ", alpha: " << alpha << ", nnz: " << nnz << std::endl;
             ++it;
         } while(it <= opt.minIterA || (std::abs(f_val - f_val_old) / f_val_old > tola && it <= opt.maxIterA));
     } while (tau > finaltau);
@@ -219,7 +220,7 @@ arma::vec gpsr(arma::mat const& y, arma::mat const& A, imagefusion::SpstfmOption
             ++it;
         } while (it < opt.minIterD || (rTr > converge && it < opt.maxIterD));
     }
-//    std::cout << "done " << it << " debias iterations." << std::endl;
+//    Rcpp::Rcerr << "done " << it << " debias iterations." << std::endl;
     return x;
 }
 
@@ -529,7 +530,7 @@ std::vector<size_t> duplicatesPatches(imagefusion::ConstImage const& img, imagef
             ++first;
         }
     }
-//    std::cout << "Calculated " << num_sums << " sums and compared " << num_comparisons << " patches." << std::endl;
+//    Rcpp::Rcerr << "Calculated " << num_sums << " sums and compared " << num_comparisons << " patches." << std::endl;
     return duplicate_patches;
 }
 
@@ -584,7 +585,7 @@ std::vector<size_t> getOrderedPatchIndices(imagefusion::SpstfmOptions::SamplingS
     std::vector<size_t> invalid     = mostlyInvalidPatches(mask, maskInvalidTol, patchSize, patchOverlap, sampleArea, channel);
 //    steady_clock::time_point end = steady_clock::now();
 //    duration<double> time = duration_cast<duration<double>>(end - start);
-//    std::cout << "deduplication time: " << time.count() << std::endl;
+//    Rcpp::Rcerr << "deduplication time: " << time.count() << std::endl;
 
 
     size_t nP = patch_indices.size();
@@ -593,7 +594,7 @@ std::vector<size_t> getOrderedPatchIndices(imagefusion::SpstfmOptions::SamplingS
     for (size_t pi : invalid)
         patch_indices.erase(std::remove(patch_indices.begin(), patch_indices.end(), pi), patch_indices.end());
     if (!toBeRemoved.empty() || !invalid.empty())
-        std::cout << "Found " << toBeRemoved.size() << " duplicate patches (duplicate in low-res diff image) and "
+        Rcpp::Rcerr << "Found " << toBeRemoved.size() << " duplicate patches (duplicate in low-res diff image) and "
                   << invalid.size() << " patches with too many invalid pixels. Removed " << (nP - patch_indices.size()) << " in total." << std::endl;
 
     return patch_indices;

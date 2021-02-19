@@ -1,3 +1,4 @@
+
 #include "optionparserimpl.h"
 #include "optionparser.h"
 #include "imagefusion.h"
@@ -13,7 +14,6 @@
 #include <iostream>
 #include <cctype>
 #include <algorithm>
-
 
 namespace imagefusion {
 namespace option {
@@ -1819,8 +1819,8 @@ bool expandOptFiles(std::vector<std::string>& options, std::string const& optNam
         }
     }
 
-    for (std::string const& s : filesNotOpened)
-        std::cerr << "Warning: " << s << std::endl;
+    // for (std::string const& s : filesNotOpened)
+        //**Commented couts and cerr until a fix is found* std::cerr << "Warning: " << s << std::endl;
 
 //        std::cout << "Arguments from file:" << std::endl;
 //        for (std::string const& s : options)

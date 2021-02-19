@@ -1,7 +1,6 @@
 #include "utils_common.h"
-
 #include <filesystem>
-
+#include <Rcpp.h>
 namespace helpers {
 
 const char* usageValidRanges =
@@ -128,7 +127,7 @@ std::map<std::vector<int>, std::vector<int>> getJobs(std::vector<int> const& pai
         }
 
         if (!outDatesStr.empty())
-            std::cerr << "Warning: Removed low resolution images with dates " << outDatesStr << "because they are not surrounded by pair dates. Only interpolation-style prediction is supported." << std::endl;
+            Rcpp::Rcerr << "Warning: Removed low resolution images with dates " << outDatesStr << "because they are not surrounded by pair dates. Only interpolation-style prediction is supported." << std::endl;
     }
 
     if (predDates.empty())

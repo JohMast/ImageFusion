@@ -16,8 +16,9 @@ using namespace Rcpp;
 
 using  std::vector;
 
-std::streambuf* stdoutbuf = std::cout.rdbuf(Rcpp::Rcout.rdbuf());
-std::streambuf* stderrbuf = std::cerr.rdbuf(Rcpp::Rcerr.rdbuf());
+// Alternative fix to rcout issue, kept here as a reminder
+// std::streambuf* stdoutbuf = std::cout.rdbuf(Rcpp::Rcout.rdbuf());
+// std::streambuf* stderrbuf = std::cerr.rdbuf(Rcpp::Rcerr.rdbuf());
 
 
 //===========================================estarfm=================================
@@ -47,8 +48,9 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames,
                              const std::string& MASKRANGE_options
 )
 {
-  std::streambuf* stdoutbuf = std::cout.rdbuf(Rcpp::Rcout.rdbuf());
-  std::streambuf* stderrbuf = std::cerr.rdbuf(Rcpp::Rcerr.rdbuf());
+  // Alternative fix to rcout issue, kept here as a reminder
+  //std::streambuf* stdoutbuf = std::cout.rdbuf(Rcpp::Rcout.rdbuf());
+  //std::streambuf* stderrbuf = std::cerr.rdbuf(Rcpp::Rcerr.rdbuf());
 #ifndef WITH_OMP
   if(n_cores>1){
     Rcout <<"Sorry, if you want to use Parallelizer, you need to install OpenMP first."<<std::endl;

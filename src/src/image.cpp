@@ -13,7 +13,7 @@
 
 #include "image.h"
 #include "geoinfo.h"
-
+#include <Rcpp.h>
 namespace {
 
 template <typename Imgtype>
@@ -295,7 +295,7 @@ void Image::read(std::string const& filename,
             ++targetChannels;
 
         if (ct->GetPaletteInterpretation() == GPI_RGB) {
-            std::cout << "Note, interpreted the RGBA color table of " << filename << " as "
+            Rcpp::Rcout << "Note, interpreted the RGBA color table of " << filename << " as "
                       << (isGray ? "Gray scale (since all used entries are gray) " : "RGB (since there are non-gray colors) ")
                       << (hasAlpha ? "with Alpha channel (since the alpha values vary)." : "without Alpha channel (since the alpha values are all 255).")
                       << " This results in " << targetChannels << " channel(s) in the converted image." << std::endl;
@@ -304,7 +304,7 @@ void Image::read(std::string const& filename,
         cv_type = CV_MAKETYPE(toCVType(Type::uint8), targetChannels);
 
         cv::Mat indexed = img;
-//        std::cout << "indexed:\n" << img << std::endl;
+//        Rcpp::Rcout << "indexed:\n" << img << std::endl;
         img.create(r.height, r.width, cv_type);
         GDALColorEntry black{0, 0, 0, 255};
         for (int y = 0; y < r.height; ++y) {
@@ -312,7 +312,7 @@ void Image::read(std::string const& filename,
                 int i = indexed.at<uint8_t>(/*cv order*/ y, x);
                 GDALColorEntry const* ce;
                 if (i >= ctsize) {
-                    std::cout << "WARNING: Cannot convert the indexed values at (" << x << ", " << y << "), because it is too large: "
+                    Rcpp::Rcout << "WARNING: Cannot convert the indexed values at (" << x << ", " << y << "), because it is too large: "
                               << i << " >= " << ctsize << " = table size. (Maybe you read out of bounds?) Using black instead." << std::endl;
                     ce = &black;
                 }
@@ -334,7 +334,7 @@ void Image::read(std::string const& filename,
                 }
             }
         }
-//        std::cout << "converted:\n" << img << std::endl;
+//        Rcpp::Rcout << "converted:\n" << img << std::endl;
     }
 
     GDALClose(gdal_img);
@@ -579,7 +579,7 @@ Image ConstImage::warp(GeoInfo const& from, GeoInfo const& to, InterpMethod meth
         CPLFree(projStr);
         CPLAssert(eErr == CE_None);
 
-//        std::cout << "suggested... width: " << widthOut << ", height: " << heightOut
+//        Rcpp::Rcout << "suggested... width: " << widthOut << ", height: " << heightOut
 //                  << ", extents: (" << extentsOut[0] << ", " << extentsOut[1] << "), (" << extentsOut[2] << ", " << extentsOut[3] << ")" << std::endl;
 
         Coordinate c1 = to.geotrans.projToImg({extentsOut[0], extentsOut[1]});
@@ -1630,7 +1630,7 @@ static std::array<std::vector<double>,2> fixBounds(std::vector<Interval> const& 
     else { // floating point image. We do not support real open intervals, since cv::inRange handles only closed intervals. So we handle it as closed intervals.
         for (Interval const& i : channelRanges) {
             if (i.bounds().left() == boost::icl::interval_bounds::open() || i.bounds().right() == boost::icl::interval_bounds::open())
-                std::cerr << "Warning: Currently open intervals, like " << i << ", are not supported for floating point images. Converted it to closed interval. Maybe use a flip operation on intervals, if appropriate." << std::endl;
+                Rcpp::Rcerr << "Warning: Currently open intervals, like " << i << ", are not supported for floating point images. Converted it to closed interval. Maybe use a flip operation on intervals, if appropriate." << std::endl;
             lowBounds.push_back(i.lower());
             highBounds.push_back(i.upper());
         }

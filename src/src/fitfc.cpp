@@ -1,5 +1,5 @@
 #include "fitfc.h"
-
+#include <Rcpp.h>
 namespace imagefusion {
 
 void FitFCFusor::processOptions(Options const& o) {
@@ -264,7 +264,7 @@ Image fitfc_impl_detail::cubic_filter(Image i, double scale) {
 void FitFCFusor::predict(int date2, ConstImage const& validMask, ConstImage const& predMask) {
     checkInputImages(validMask, predMask, date2);
     if (opt.getNumberNeighbors() > opt.getWinSize() * opt.getWinSize()) {
-        std::cerr << "Warning: You acquired more neighbors (" << opt.getNumberNeighbors()
+        Rcpp::Rcerr << "Warning: You acquired more neighbors (" << opt.getNumberNeighbors()
                   << ") than pixels in the window (" << (opt.getWinSize() * opt.getWinSize()) << "). Using all pixels in the window." << std::endl;
         opt.setNumberNeighbors(opt.getWinSize() * opt.getWinSize());
     }
