@@ -15,7 +15,7 @@
 #include <cmath>
 #include <iostream>
 #include <memory>
-
+#include <Rcpp.h>
 
 namespace imagefusion {
 
@@ -249,7 +249,7 @@ inline void Parallelizer<Alg,AlgOpt>::predict(int date, ConstImage const& validM
 
     AlgOpt ao = options.getAlgOptions();
     if (ao.getPredictionArea().x != 0 || ao.getPredictionArea().y != 0 || ao.getPredictionArea().width != 0 || ao.getPredictionArea().height != 0)
-        std::cout << "Warning: Note that the algorithm option's prediction area is ignored and replaced by the split up ParallelizerOption's prediction area." << std::endl;
+        Rcpp::Rcout << "Warning: Note that the algorithm option's prediction area is ignored and replaced by the split up ParallelizerOption's prediction area." << std::endl;
 
     double stepsize = (double)(pa.height) / nt;
     double curY = pa.y;

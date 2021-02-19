@@ -1,5 +1,5 @@
 #include "estarfm.h"
-
+#include <Rcpp.h>
 #include <boost/math/distributions/fisher_f.hpp>
 
 namespace imagefusion {

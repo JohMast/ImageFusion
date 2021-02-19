@@ -1,4 +1,5 @@
 #include "spstfm.h"
+#include <Rcpp.h>
 
 namespace imagefusion {
 
@@ -163,7 +164,7 @@ void SpstfmFusor::train(ConstImage const& validMask, ConstImage const& predMask)
     // make sample area without going out of bounds
     Rectangle innerSampleArea = sampleArea & Rectangle(0, 0, s.width, s.height);
 
-//    std::cout << "crop: " << crop << std::endl
+//    Rcpp::Rcout << "crop: " << crop << std::endl
 //              << "predArea: " << predArea << std::endl;
 
     ConstImage const& h1 = imgs->get(opt.getHighResTag(), opt.getDate1());
@@ -186,13 +187,13 @@ void SpstfmFusor::train(ConstImage const& validMask, ConstImage const& predMask)
     t.writeMask = predMask.constSharedCopy();
 
 //    {
-//        std::cout << "x = xout + " << crop.x << std::endl;
-//        std::cout << "pxi = floor(x / (" << opt.patchSize << " - " << opt.patchOverlap << "))" << std::endl;
-//        std::cout << "xpatch = x - pxi * (" << opt.patchSize << " - " << opt.patchOverlap << ")" << std::endl;
+//        Rcpp::Rcout << "x = xout + " << crop.x << std::endl;
+//        Rcpp::Rcout << "pxi = floor(x / (" << opt.patchSize << " - " << opt.patchOverlap << "))" << std::endl;
+//        Rcpp::Rcout << "xpatch = x - pxi * (" << opt.patchSize << " - " << opt.patchOverlap << ")" << std::endl;
 
-//        std::cout << "y = yout + " << crop.y << std::endl;
-//        std::cout << "pyi = floor(y / (" << opt.patchSize << " - " << opt.patchOverlap << "))" << std::endl;
-//        std::cout << "ypatch = y - pyi * (" << opt.patchSize << " - " << opt.patchOverlap << ")" << std::endl;
+//        Rcpp::Rcout << "y = yout + " << crop.y << std::endl;
+//        Rcpp::Rcout << "pyi = floor(y / (" << opt.patchSize << " - " << opt.patchOverlap << "))" << std::endl;
+//        Rcpp::Rcout << "ypatch = y - pyi * (" << opt.patchSize << " - " << opt.patchOverlap << ")" << std::endl;
 //    }
 
     Type resultHighType = getResultType(highType);
@@ -253,7 +254,7 @@ void SpstfmFusor::train(ConstImage const& validMask, ConstImage const& predMask)
             auto samplePair = t.getSamples(highDiff, lowDiff, sampleArea, c); // uses sampleMask and mean and stddev from above
             arma::mat trainingSamplesConcat   = std::move(samplePair.first);
             arma::mat validationSamplesConcat = std::move(samplePair.second);
-//            std::cout << "Samples (c = " << c << "):" << std::endl << trainingSamplesConcat << std::endl;
+//            Rcpp::Rcout << "Samples (c = " << c << "):" << std::endl << trainingSamplesConcat << std::endl;
 
             t.initDictsFromSamples(trainingSamplesConcat, c);
 
@@ -321,7 +322,7 @@ std::pair<arma::mat, arma::mat> spstfm_impl_detail::DictTrainer::getSamples(Cons
     double normFactorForLow  = normFactorsLowDiff[channel];
     double fillHigh          = meansOfHighDiff[channel];
     double fillLow           = meansOfLowDiff[channel];
-//        std::cout << "Using norm factor: " << normFactorForHigh << " for high res and " << normFactorForLow << " for low res." << std::endl;
+//        Rcpp::Rcout << "Using norm factor: " << normFactorForHigh << " for high res and " << normFactorForLow << " for low res." << std::endl;
 
     // determine the order of patches and the number to sample and to use for dictionary (limited, if the image is too small)
     std::vector<size_t> patchIndices = getOrderedPatchIndices(opt.getSamplingStrategy(), highDiff, lowDiff, sampleMask, opt.getInvalidPixelTolerance(), opt.getPatchSize(), opt.getPatchOverlap(), sampleArea, channel);
@@ -331,11 +332,11 @@ std::pair<arma::mat, arma::mat> spstfm_impl_detail::DictTrainer::getSamples(Cons
 
         double reduction = static_cast<double>(nsamples) / opt.getNumberTrainingSamples();
         unsigned int natoms = static_cast<unsigned int>(opt.getDictSize() * reduction);
-        std::cout << "Changed nsamples to " << nsamples << " and natoms to " << natoms << ".";
+        Rcpp::Rcout << "Changed nsamples to " << nsamples << " and natoms to " << natoms << ".";
         if (natoms <= opt.getPatchSize() * opt.getPatchSize())
-            std::cout << " Note, the dictionary is not overcomplete, since it only has " << natoms
+            Rcpp::Rcout << " Note, the dictionary is not overcomplete, since it only has " << natoms
                       << " atoms with " << (opt.getPatchSize() * opt.getPatchSize()) << " elements each.";
-        std::cout << std::endl;
+        Rcpp::Rcout << std::endl;
     }
 
     arma::mat validationSamplesConcat;
@@ -422,9 +423,9 @@ void spstfm_impl_detail::DictTrainer::initWeights(ConstImage const& /*high1*/, C
         Image bu1 = low1.convertColor(ColorMapping::Red_NIR_SWIR_to_BU, Type::int8, channels);
         Image bu2 = low2.convertColor(ColorMapping::Red_NIR_SWIR_to_BU, Type::int8, channels);
         Image bu3 = low3.convertColor(ColorMapping::Red_NIR_SWIR_to_BU, Type::int8, channels);
-//        std::cout << "bu1:" << std::endl << bu1.cvMat() << std::endl;
-//        std::cout << "bu2:" << std::endl << bu2.cvMat() << std::endl;
-//        std::cout << "bu3:" << std::endl << bu3.cvMat() << std::endl;
+//        Rcpp::Rcout << "bu1:" << std::endl << bu1.cvMat() << std::endl;
+//        Rcpp::Rcout << "bu2:" << std::endl << bu2.cvMat() << std::endl;
+//        Rcpp::Rcout << "bu3:" << std::endl << bu3.cvMat() << std::endl;
 
         // threshold the images to binary build-up mask
         int8_t thresh = cv::saturate_cast<int8_t>(opt.getBUThreshold() * getImageRangeMax(Type::int8));
@@ -439,15 +440,15 @@ void spstfm_impl_detail::DictTrainer::initWeights(ConstImage const& /*high1*/, C
 
         temp = bu3.cvMat() > thresh;
         bu3.cvMat() = std::move(temp);
-//        std::cout << "bu1 binary:" << std::endl << bu1.cvMat() << std::endl;
-//        std::cout << "bu2 binary:" << std::endl << bu2.cvMat() << std::endl;
-//        std::cout << "bu3 binary:" << std::endl << bu3.cvMat() << std::endl;
+//        Rcpp::Rcout << "bu1 binary:" << std::endl << bu1.cvMat() << std::endl;
+//        Rcpp::Rcout << "bu2 binary:" << std::endl << bu2.cvMat() << std::endl;
+//        Rcpp::Rcout << "bu3 binary:" << std::endl << bu3.cvMat() << std::endl;
 
         // get pixel changes (0 or 255)
         cv::absdiff(bu1.cvMat(), bu2.cvMat(), d12);
         cv::absdiff(bu3.cvMat(), bu2.cvMat(), d32);
-//        std::cout << "diff12 binary:" << std::endl << d12 << std::endl;
-//        std::cout << "diff32 binary:" << std::endl << d32 << std::endl;
+//        Rcpp::Rcout << "diff12 binary:" << std::endl << d12 << std::endl;
+//        Rcpp::Rcout << "diff32 binary:" << std::endl << d32 << std::endl;
         scale = 1. / 255.;
     }
 
@@ -494,7 +495,7 @@ void spstfm_impl_detail::DictTrainer::initWeights(ConstImage const& /*high1*/, C
         }
     }
 //    drawWeights(weights1, "weights.png");
-//    std::cout << "Number of non-zero weights: "
+//    Rcpp::Rcout << "Number of non-zero weights: "
 //              << (arma::accu(weights1 != 0) + arma::accu(weights3 != 0)) << std::endl;
 }
 
@@ -664,7 +665,7 @@ void spstfm_impl_detail::DictTrainer::train(arma::mat& trainingSamplesConcat, ar
             arma::vec nzs = arma::nonzeros(rep);
             nnzs(c) = nzs.n_elem;
             if (nzs.n_elem > dim * (opt.getSparseCoeffTrainingResolution() == SpstfmOptions::TrainingResolution::concat ? 2 : 1))
-                std::cout << "Note: In training iteration " << it << " sparse sample patch " << c << " has a large number of non-zero entries: " << nzs.n_elem << " > "
+                Rcpp::Rcout << "Note: In training iteration " << it << " sparse sample patch " << c << " has a large number of non-zero entries: " << nzs.n_elem << " > "
                           << (opt.getSparseCoeffTrainingResolution() == SpstfmOptions::TrainingResolution::concat ? std::to_string(2*dim) + " = 2 * dim" : std::to_string(dim) + " = dim") << "." << std::endl;
         }
 
@@ -734,7 +735,7 @@ void spstfm_impl_detail::DictTrainer::train(arma::mat& trainingSamplesConcat, ar
 
         // save usage pattern
         arma::uvec use = arma::any(coeff, 1);
-//        std::cout << "Used atoms: " << arma::sum(use) << std::endl;
+//        Rcpp::Rcout << "Used atoms: " << arma::sum(use) << std::endl;
         arma::uvec use_count = arma::sum(coeff != 0., 1);
         usage.insert_cols(usage.n_cols, use);
         usage_count.insert_cols(usage_count.n_cols, use_count);
@@ -752,7 +753,7 @@ void spstfm_impl_detail::DictTrainer::train(arma::mat& trainingSamplesConcat, ar
 //        if (untrainedDict.n_cols > 0)
 //            drawDictionary(untrainedDict, "untrained_patches" + std::to_string(it) + ".png");     /// DEBUG
 //        if (!removedAtomsText.empty())
-//            std::cout << "Removed untrained atoms:" << removedAtomsText << std::endl;
+//            Rcpp::Rcout << "Removed untrained atoms:" << removedAtomsText << std::endl;
 
         // stats
         numbernonzeros_mean.push_back(arma::mean(nnzs));
@@ -854,7 +855,7 @@ void spstfm_impl_detail::DictTrainer::train(arma::mat& trainingSamplesConcat, ar
 
     // use the best dictionary state, if requested
     if (opt.getBestShotErrorSet() != SpstfmOptions::BestShotErrorSet::none) {
-//        std::cout << "After " << it << " training iterations using best shot dictionary from it " << bestShotIt << "." << std::endl;
+//        Rcpp::Rcout << "After " << it << " training iterations using best shot dictionary from it " << bestShotIt << "." << std::endl;
 //                  << " with test set error: " << bestShotVal << std::endl;
         dictConcat = bestShotDictConcat;
     }
@@ -878,20 +879,20 @@ void spstfm_impl_detail::DictTrainer::train(arma::mat& trainingSamplesConcat, ar
 //            drawDictionary(untrainedDict, "untrained_patches.png");     /// DEBUG
 
 //        if (!removedAtomsText.empty())
-//            std::cout << "Removed untrained atoms:" << removedAtomsText << std::endl;
+//            Rcpp::Rcout << "Removed untrained atoms:" << removedAtomsText << std::endl;
 //        trainedAtoms[channel] = natoms;
 //    }
 
-//    std::cout << "Usage pattern:" << std::endl << usage << std::endl;
-//    std::cout << "Usage pattern (count):" << std::endl << usage_count << std::endl;
-//    std::cout << "Mean NNZ: [";
+//    Rcpp::Rcout << "Usage pattern:" << std::endl << usage << std::endl;
+//    Rcpp::Rcout << "Usage pattern (count):" << std::endl << usage_count << std::endl;
+//    Rcpp::Rcout << "Mean NNZ: [";
 //    for (double nnz : numbernonzeros_mean)
-//        std::cout << nnz << ", ";
-//    std::cout << "];" << std::endl;
-//    std::cout << "Stddev NNZ: [";
+//        Rcpp::Rcout << nnz << ", ";
+//    Rcpp::Rcout << "];" << std::endl;
+//    Rcpp::Rcout << "Stddev NNZ: [";
 //    for (double nnz : numbernonzeros_stddev)
-//        std::cout << nnz << ", ";
-//    std::cout << "];" << std::endl;
+//        Rcpp::Rcout << nnz << ", ";
+//    Rcpp::Rcout << "];" << std::endl;
 }
 
 std::vector<arma::mat> spstfm_impl_detail::DictTrainer::reconstructPatchRow(ConstImage const& high1, ConstImage const& high3, ConstImage const& low1, ConstImage const& low2, ConstImage const& low3, double fillL21, double fillL23, unsigned int pyi, imagefusion::Rectangle sampleArea, unsigned int channel) const {
@@ -899,7 +900,7 @@ std::vector<arma::mat> spstfm_impl_detail::DictTrainer::reconstructPatchRow(Cons
     double meanForLow        = meanForLowDiff_cv[channel];
     double normFactorForHigh = normFactorsHighDiff[channel];
     double normFactorForLow  = normFactorsLowDiff[channel];
-//        std::cout << "Using norm factor: " << normFactorForHigh << " for high res and " << normFactorForLow << " for low res." << std::endl;
+//        Rcpp::Rcout << "Using norm factor: " << normFactorForHigh << " for high res and " << normFactorForLow << " for low res." << std::endl;
 
     unsigned int psize = opt.getPatchSize();
     unsigned int pover = opt.getPatchOverlap();
@@ -1128,12 +1129,12 @@ void spstfm_impl_detail::DictTrainer::reconstructImage(
     std::vector<arma::mat> bottomPatches(npx);
     for (int pyi = 0; pyi < npy; ++pyi) {
         // reconstruct next line of patches
-//        std::cout << "reconstructing line " << pyi << std::endl;
+//        Rcpp::Rcout << "reconstructing line " << pyi << std::endl;
         std::swap(topPatches, bottomPatches);
         bottomPatches = reconstructPatchRow(high1, high3, low1, low2, low3, fillL21, fillL23, pyi, sampleArea, channel);
 
         // average to output
-//        std::cout << "averaging..." << std::endl;
+//        Rcpp::Rcout << "averaging..." << std::endl;
         outputAveragedPatchRow(topPatches, bottomPatches, pyi, crop, npx, npy, channel);
     }
 

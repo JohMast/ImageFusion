@@ -8,7 +8,7 @@
 #include <memory>
 #include <vector>
 #include <string>
-
+#include <Rcpp.h>
 namespace helpers {
 
 extern const char* usageValidRanges;
@@ -290,21 +290,21 @@ parseAndCombineRanges(std::vector<imagefusion::option::Option> const& rangeOpts)
     validSets.hasLow  = !firstRangeLow;
 
     if (validSets.hasHigh || validSets.hasLow)
-        std::cout << "Using valid ranges ";
+        Rcpp::Rcout << "Using valid ranges ";
     if (validSets.hasHigh) {
-        std::cout << validSets.high << " for high resolution images and ";
+        Rcpp::Rcout << validSets.high << " for high resolution images and ";
         if (!validSets.hasLow)
-            std::cout << " full range for low resolution images." << std::endl;
+            Rcpp::Rcout << " full range for low resolution images." << std::endl;
     }
     if (validSets.hasLow) {
-        std::cout << validSets.low << " for low resolution images";
+        Rcpp::Rcout << validSets.low << " for low resolution images";
         if (!validSets.hasHigh)
-            std::cout << " and full range for high resolution images." << std::endl;
+            Rcpp::Rcout << " and full range for high resolution images." << std::endl;
         else
-            std::cout << "." << std::endl;
+            Rcpp::Rcout << "." << std::endl;
     }
     if ((validSets.hasHigh || validSets.hasLow) && (validSets.high.empty() || validSets.low.empty()))
-        std::cerr << "Warning: An empty valid set means that no value is valid. Check your mask range specification!" << std::endl;
+        Rcpp::Rcerr << "Warning: An empty valid set means that no value is valid. Check your mask range specification!" << std::endl;
 
     return validSets;
 }
@@ -324,7 +324,7 @@ getPrefixAndPostfix(std::vector<imagefusion::option::Option> const& prefixOpts,
         postfix = postfixOpts.back().arg;
 
     if (prefix.empty() && postfix.empty()) {
-        std::cout << "Setting " << name << " to '" << replacement << "', since both prefix and "
+        Rcpp::Rcout << "Setting " << name << " to '" << replacement << "', since both prefix and "
                      "postfix are empty. This is to prevent filename clashes." << std::endl;
         prefix = replacement;
     }

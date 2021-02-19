@@ -12,7 +12,7 @@
 
 #include "geoinfo.h"
 #include "exceptions.h"
-
+#include <Rcpp.h>
 namespace {
 
 std::vector<imagefusion::Coordinate> convertProj(imagefusion::GeoInfo const& giSrc, imagefusion::GeoInfo const& giDst, std::vector<imagefusion::Coordinate> const& coords, bool srcImg, bool dstImg) {
@@ -353,13 +353,13 @@ bool GeoInfo::compareColorTables(GeoInfo const& other, bool quiet) const {
 
     if (!colorTable.empty() && other.colorTable.empty()) {
         if (!quiet)
-            std::cerr << "Warning: The color table has been removed by the driver!" << std::endl;
+            Rcpp::Rcerr << "Warning: The color table has been removed by the driver!" << std::endl;
         return false;
     }
 
     if (colorTable.size() > other.colorTable.size()) {
         if (!quiet)
-            std::cerr << "Warning: Not all entries of the color tables were written by the driver!" << std::endl;
+            Rcpp::Rcerr << "Warning: Not all entries of the color tables were written by the driver!" << std::endl;
         return false;
     }
 
@@ -417,7 +417,7 @@ bool GeoInfo::compareColorTables(GeoInfo const& other, bool quiet) const {
     if (!allNonNodataAlpha255Before && allNonNodataAlpha255After)
         warning += "All non-nodata entries' alpha values have been changed to 255.";
 
-    std::cerr << warning << std::endl;
+    Rcpp::Rcerr << warning << std::endl;
 
     return areCompatible;
 }

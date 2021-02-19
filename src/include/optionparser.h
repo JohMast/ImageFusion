@@ -11,7 +11,6 @@
 #include <vector>
 #include <type_traits>
 #include <functional>
-
 namespace imagefusion {
 
 /**
@@ -4784,8 +4783,8 @@ void printUsage(Function* prn, Stream* stream, std::vector<Descriptor> const& us
 inline void printUsage(std::vector<Descriptor> const& usage, int width,
                 int last_column_min_percent, int last_column_own_line_max_percent)
 {
-    OStreamWriter<std::ostream> write(std::cout);
-    printUsageBackend(write, usage, width, last_column_min_percent, last_column_own_line_max_percent);
+    //**Commented couts and cerr until a fix is found* OStreamWriter<std::ostream> write(std::cout);
+    //printUsageBackend(write, usage, width, last_column_min_percent, last_column_own_line_max_percent);
 }
 
 

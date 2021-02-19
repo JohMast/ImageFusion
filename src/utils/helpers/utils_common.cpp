@@ -1,7 +1,6 @@
 #include "utils_common.h"
-
 #include <filesystem>
-
+#include <Rcpp.h>
 namespace helpers {
 
 const char* usageValidRanges =
@@ -128,19 +127,19 @@ std::map<std::vector<int>, std::vector<int>> getJobs(std::vector<int> const& pai
         }
 
         if (!outDatesStr.empty())
-            std::cerr << "Warning: Removed low resolution images with dates " << outDatesStr << "because they are not surrounded by pair dates. Only interpolation-style prediction is supported." << std::endl;
+            Rcpp::Rcerr << "Warning: Removed low resolution images with dates " << outDatesStr << "because they are not surrounded by pair dates. Only interpolation-style prediction is supported." << std::endl;
     }
 
     if (predDates.empty())
         IF_THROW_EXCEPTION(imagefusion::invalid_argument_error("Please specify at least 1 low resolution image for the prediction date(s)."));
 
     {   // info
-        std::cout << "Your input images are interpreted as job to predict at dates: ";
+        Rcpp::Rcout << "Your input images are interpreted as job to predict at dates: ";
         std::string predDatesStr;
         for (int d : predDates)
             predDatesStr += std::to_string(d) + ", ";
         predDatesStr.pop_back(); predDatesStr.pop_back();
-        std::cout << predDatesStr << "." << std::endl;
+        Rcpp::Rcout << predDatesStr << "." << std::endl;
     }
 
     // collect the dates in a job hierarchy, like [(1) 2 3 4 (7)], [(7), 10, (14)]
@@ -229,13 +228,13 @@ std::string outputImageFile(imagefusion::ConstImage const& img, imagefusion::Geo
         }
     }
     catch (imagefusion::runtime_error& e) {
-        std::cout << e.what() << std::endl;
+        Rcpp::Rcout << e.what() << std::endl;
         if (f != imagefusion::FileFormat("GTiff") && extension != ".tif" && extension != ".tiff") {
-            std::cout << "Retrying with GTiff driver." << std::endl;
+            Rcpp::Rcout << "Retrying with GTiff driver." << std::endl;
             return outputImageFile(img, gi, origFileName, prefix, postfix, imagefusion::FileFormat("GTiff"), date1, date2, date3);
         }
         else if (prefix != "save_") {
-            std::cout << "Retrying at working directory with prefix 'save_'." << std::endl;
+            Rcpp::Rcout << "Retrying at working directory with prefix 'save_'." << std::endl;
             return outputImageFile(img, gi, origFileName, "save_", postfix, imagefusion::FileFormat("GTiff"), date1, date2, date3);
         }
         else
