@@ -12,7 +12,7 @@ Johannes Mast (Package Maintainer)
 * local windows 10, R under development (unstable) (2021-02-17 r80023)
 * local ubuntu 20.04, R 4.0.2
 * win-builder  R version 4.0.4
-* win-builder  R Under development (unstable) (2021-02-16 r80015)
+* win-builder  R Under development (unstable) (2021-02-20 r80030)
 
 ## R CMD check results
 
@@ -33,12 +33,17 @@ checking installed package size ... NOTE
       libs   59.2Mb
       modis   1.4Mb
       
-The great size mostly due to our inclusion of the gdal library, which is required by the c++ library we are building on. Therefore, the library is not easily substituted.
+The great size mostly due to our inclusion of the gdal library,
+which is required by the c++ library we are building on. 
+Therefore, the library is not easily substituted.
 
-Other packages handling raster files, such as [sf](https://cran.r-project.org/web/packages/sf/index.html) or [gdalcubes](https://cran.r-project.org/web/packages/gdalcubes/index.html), also suffer from 
-this.
-We appreciate any ideas on how to solve this note, as we have no influence over the size of the GDAL library.
+Other packages handling raster files,
+such as [sf](https://cran.r-project.org/web/packages/sf/index.html) or [gdalcubes](https://cran.r-project.org/web/packages/gdalcubes/index.html),
+are also affected by this issue.
+We appreciate any ideas on how to solve this note,
+as we have no influence over the size of the GDAL library.
 
 ## Downstream dependencies
 
-There are no downstreams dependencies yet, although our intent is to produce some in the future.
+There are no downstreams dependencies yet,
+although our intent is to produce some in the future.
