@@ -62,7 +62,7 @@ imagefusion_task(filenames_high = list_of_high_resolution_filenames,
                  dates_low = 68:93,
                  dates_pred = c(65,70,75,80,85,90,95))
 ```
-For the creation of a task, we pass the high and low filenames and dates seperately. Note that here we have multiple high-resolution images (68, 77, 93, 100) and multiple pair dates (68, 77, 93). The task will therefore be split up into different jobs, one for each interval.
+For the creation of a task, we pass the high and low filenames and dates separately. Note that here we have multiple high-resolution images (68, 77, 93, 100) and multiple pair dates (68, 77, 93). The task will therefore be split up into different jobs, one for each interval.
 
 ### Utilities
 
