@@ -14,7 +14,6 @@ imagefusion_task(
   filenames_pred = NULL,
   singlepair_mode = "ignore",
   method = "starfm",
-  spstfm_mode = "none",
   high_date_prediction_mode = "ignore",
   verbose = FALSE,
   output_overview = FALSE,
@@ -45,13 +44,6 @@ imagefusion_task(
 \item{starfm: STARFM stands for spatial and temporal adaptive reflectance fusion model. It requires a relatively low amount of computation time for prediction. Supports singlepair and doublepair modes. See \link[ImageFusion]{starfm_job}.}
 \item{estarfm: ESTARFM stands for enhanced spatial and temporal adaptive reflectance fusion model so it claims to be an enhanced STARFM. It can yield better results in some situations. Only supports doublepair mode. See \link[ImageFusion]{estarfm_job}.}
 \item{fitfc: Fit-FC is a three-step method consisting of regression model fitting (RM fitting), spatial filtering (SF) and residual compensation (RC). It requires a relatively low amount of computation time for prediction. Supports singlepair or a pseudo-doublepair mode(For predictions between two pair dates, predictions will be done twice, once for each of the pair dates). See \link[ImageFusion]{fitfc_job}. This is the default algorithm.}
-\item{spstfm: SPSTFM is a dictionary learning based algorithm, which is computationally expensive in training and application, but can give good quality predictions. Only supports doublepair mode. See \link[ImageFusion]{spstfm_job}.}
-}}
-
-\item{spstfm_mode}{(Optional) If the spstfm \code{method} was chosen: Write and reuse dictionaries? \itemize{
-\item{none: No dictionary will be saved. This is the default.}
-\item{separate: Separate dictionaries will be saved for each job. }
-\item{iterative: Dictionaries will be iteratively improved by each job, reusing the previously saved dictionary. }
 }}
 
 \item{high_date_prediction_mode}{(Optional) How to proceed for predictions on those dates which have high resolution images available? \itemize{

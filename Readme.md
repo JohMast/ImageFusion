@@ -3,7 +3,7 @@
 <img src=".img/logo.png" align="right" src="doc/images/logo.png">
 
 ## Introduction
-Temporal fusion of raster image time-Series. R interface for the imagefusion framework, which provides implementation of the FITFC, ESTARFM, SPSTFM and STARFM algorithms in C++. 
+Temporal fusion of raster image time-Series. R interface for the imagefusion framework, which provides implementation of the FITFC, ESTARFM and STARFM algorithms in C++. 
 
 
 ### Background
@@ -23,7 +23,6 @@ So far, the following algorithms are implemented:
 
 * FITFC
 * ESTARFM
-* SPSTFM
 * STARFM
 
 ## Installation
@@ -39,9 +38,9 @@ devtools::install_github("JohMast/ImageFusion")
 
 ### Jobs
 
-The core of the package are functions for the algorithms ESTARFM, FITFC, SPSTFM and STARFM. 
+The core of the package are functions for the algorithms ESTARFM, FITFC and STARFM. 
 
-Individual *jobs* can be executed using the `estarfm_job`, `fitfc_job`, `spstfm_job` and `starfm_job` functions. These jobs require one or two *pair dates* on which both high and low resolution images are available. The *pair dates* support an interval and the job offer the fusion of images for all dates within this interval for which only low resolution images are available.
+Individual *jobs* can be executed using the `estarfm_job`, `fitfc_job`and `starfm_job` functions. These jobs require one or two *pair dates* on which both high and low resolution images are available. The *pair dates* support an interval and the job offer the fusion of images for all dates within this interval for which only low resolution images are available.
 
 Some algorithms also offer a *singlepair mode* which allows fusion based on only a single pair. The FITFC algorithm operates exclusively in singlepair mode.
 ```r

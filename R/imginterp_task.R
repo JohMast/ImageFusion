@@ -60,10 +60,15 @@
 #' \strong{Specific Formats}
 #' 
 #' Some arguments require inputs in a specific format.
+#' \itemize{
+#' \item{starfm: STARFM stands for spatial and temporal adaptive reflectance fusion model. It requires a relatively low amount of computation time for prediction. Supports singlepair and doublepair modes. See \link[ImageFusion]{starfm_job}.}
+#' \item{estarfm: ESTARFM stands for enhanced spatial and temporal adaptive reflectance fusion model so it claims to be an enhanced STARFM. It can yield better results in some situations. Only supports doublepair mode. See \link[ImageFusion]{estarfm_job}.}
+#' \item{fitfc: Fit-FC is a three-step method consisting of regression model fitting (RM fitting), spatial filtering (SF) and residual compensation (RC). It requires a relatively low amount of computation time for prediction. Supports singlepair or a pseudo-doublepair mode(For predictions between two pair dates, predictions will be done twice, once for each of the pair dates). See \link[ImageFusion]{fitfc_job}. This is the default algorithm.}
+#' } 
 #'  \itemize{
-#'  \item <num-list> must be lists of integer vectors. Example: \code{list(c(1,3,3,7),c(4,2))} 
-#'  \item <range> must be strings. Either be a single number or have the format \code{'[<float>,<float>]'}, \code{'(<float>,<float>)'}, \code{'[<float>,<float>'} or \code{'<float>,<float>]'} where the comma and round brackets are optional, but square brackets are here actual characters. Especially for half-open intervals do not use unbalanced parentheses or escape them (maybe with two '\\'). Additional whitespace can be added anywhere. Example: \code{"(125,175)"}
-#'  \item <range-list> must be strings that combine ranges in the form \code{ '<range> [<range> ...]'}, where the brackets mean that further intervals are optional. The different ranges are related as union. Example: \code{"(125,175) [225,275]"}
+#'  \item \code{<num-list>} must be lists of integer vectors. Example: \code{list(c(1,3,3,7),c(4,2))} 
+#'  \item \code{<range> must} be strings. Either be a single number or have the format \code{'[<float>,<float>]'}, \code{'(<float>,<float>)'}, \code{'[<float>,<float>'} or \code{'<float>,<float>]'} where the comma and round brackets are optional, but square brackets are here actual characters. Especially for half-open intervals do not use unbalanced parentheses or escape them (maybe with two '\\'). Additional whitespace can be added anywhere. Example: \code{"(125,175)"}
+#'  \item \code{<range-list>} must be strings that combine ranges in the form \code{ '<range> [<range> ...]'}, where the brackets mean that further intervals are optional. The different ranges are related as union. Example: \code{"(125,175) [225,275]"}
 #'  }
 #' @author  Christof Kaufmann (C++), Johannes Mast (R)
 #' @examples 
@@ -92,6 +97,12 @@
 #' unlink("Outputs",recursive = TRUE)
 #' 
 #' 
+
+ # \itemize{
+ # \item{<num-list> must be lists of integer vectors. Example: \code{list(c(1,3,3,7),c(4,2))} }
+ # \item <range> must be strings. Either be a single number or have the format \code{'[<float>,<float>]'}, \code{'(<float>,<float>)'}, \code{'[<float>,<float>'} or \code{'<float>,<float>]'} where the comma and round brackets are optional, but square brackets are here actual characters. Especially for half-open intervals do not use unbalanced parentheses or escape them (maybe with two '\\'). Additional whitespace can be added anywhere. Example: \code{"(125,175)"}
+ # \item <range-list> must be strings that combine ranges in the form \code{ '<range> [<range> ...]'}, where the brackets mean that further intervals are optional. The different ranges are related as union. Example: \code{"(125,175) [225,275]"}
+ # }
 imginterp_task <- function(filenames,
                            dates,
                            tags=NULL,
