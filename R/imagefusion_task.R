@@ -350,39 +350,39 @@ for(i in 1:nrow(valid_job_table)){ #For every job
       )
     }#end starfm
     #SPSTFM
-    if(method=="spstfm"){
-      if(spstfm_mode=="separate"){
-        SAVEDICT_options  <-  file.path(out_dir,paste0("Spstfm_dict_job",i))
-        print("Not saving dictionary")
-      }
-      if(spstfm_mode=="iterative"){
-        if(i>1){
-          LOADDICT_options  <-  file.path(out_dir,paste0("Spstfm_dict_job",i-1))
-          print(paste("Building on previously save dictionary: ",LOADDICT_options ))}
-        REUSE_options <- "improve"
-        SAVEDICT_options  <-  file.path(out_dir,paste0("Spstfm_dict_job",i))
-      }
-      if(spstfm_mode=="none"){
-        SAVEDICT_options <-  ""
-        REUSE_options="use"
-        print("Not saving dictionary")
-      }
-      
-      ImageFusion::spstfm_job(input_filenames = c(startpair_date$files_high,
-                                                  startpair_date$files_low,
-                                                  endpair_date$files_high,
-                                                  endpair_date$files_low,
-                                                  current_case_1$files_low),
-                              input_resolutions = c("high","low","high","low",rep("low",nrow(current_case_1))),
-                              input_dates = c(startpair,startpair,endpair,endpair,current_case_1$date),
-                              pred_dates = current_case_1$date,
-                              pred_filenames =  current_case_1$files_pred,
-                              SAVEDICT_options = SAVEDICT_options,
-                              REUSE_options = REUSE_options,
-                              verbose=verbose,
-                              ...
-      )
-    }#end spstfm
+    # if(method=="spstfm"){
+    #   if(spstfm_mode=="separate"){
+    #     SAVEDICT_options  <-  file.path(out_dir,paste0("Spstfm_dict_job",i))
+    #     print("Not saving dictionary")
+    #   }
+    #   if(spstfm_mode=="iterative"){
+    #     if(i>1){
+    #       LOADDICT_options  <-  file.path(out_dir,paste0("Spstfm_dict_job",i-1))
+    #       print(paste("Building on previously save dictionary: ",LOADDICT_options ))}
+    #     REUSE_options <- "improve"
+    #     SAVEDICT_options  <-  file.path(out_dir,paste0("Spstfm_dict_job",i))
+    #   }
+    #   if(spstfm_mode=="none"){
+    #     SAVEDICT_options <-  ""
+    #     REUSE_options="use"
+    #     print("Not saving dictionary")
+    #   }
+    #   
+    #   ImageFusion::spstfm_job(input_filenames = c(startpair_date$files_high,
+    #                                               startpair_date$files_low,
+    #                                               endpair_date$files_high,
+    #                                               endpair_date$files_low,
+    #                                               current_case_1$files_low),
+    #                           input_resolutions = c("high","low","high","low",rep("low",nrow(current_case_1))),
+    #                           input_dates = c(startpair,startpair,endpair,endpair,current_case_1$date),
+    #                           pred_dates = current_case_1$date,
+    #                           pred_filenames =  current_case_1$files_pred,
+    #                           SAVEDICT_options = SAVEDICT_options,
+    #                           REUSE_options = REUSE_options,
+    #                           verbose=verbose,
+    #                           ...
+    #   )
+    # }#end spstfm
   }#end case1
   #Process Cases 2
   if(nrow(current_case_2)){
