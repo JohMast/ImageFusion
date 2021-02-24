@@ -8,3 +8,4 @@
 ^\.img$
 ^CRAN-RELEASE$
 ^windows$
+^\R\spstfm_job.R$
