@@ -51,7 +51,7 @@ starfm_job(
 
 \item{date3}{(Optional) Set the date of the second input image pair. By default, will use the pair with the highest date value. Disregarded if using double pair mode.}
 
-\item{n_cores}{(Optional) Set the number of cores to use when using parallelisation. Default is 1.}
+\item{n_cores}{(Optional) Set the number of cores to use when using parallelization. Default is 1.}
 
 \item{logscale_factor}{(Optional) When using a positive scale, the logistic weighting formula is used, which reduces the influence of spectral and temporal differences. Default is 0, i. e. logistic formula not used}
 
@@ -86,7 +86,7 @@ starfm_job(
 
 \item{use_temp_diff_for_weights}{(Optional) Use temporal difference in the candidates weight (like in the paper)? Default is to use temporal weighting in double pair mode, and to not use it in single pair mode.}
 
-\item{do_copy_on_zero_diff}{(Optional) Predict for all pixels, even for pixels with zero temporal or spectral difference (behaviour of the reference implementation). Default is "false".}
+\item{do_copy_on_zero_diff}{(Optional) Predict for all pixels, even for pixels with zero temporal or spectral difference (behavior of the reference implementation). Default is "false".}
 
 \item{verbose}{(Optional) Print progress updates to console? Default is "true".}
 }
@@ -100,9 +100,9 @@ A wrapper function for \code{execute_starfm_job_cpp}. Intended to execute a sing
 Executes the STARFM algorithm to create a number of synthetic high-resolution images from either two pairs (double pair mode) or one pair (single pair mode) of matching high- and low-resolution images. Assumes that the input images already have matching size. See the original paper for details (TO DO: INSERT CHANGES WITH REGARDS TO THE ORIGINAL PAPER). \itemize{
 \item{  For the weighting (10) states: \eqn{C = S T D}  but we use  \eqn{C = (S+1)(T+1)D}, according to the reference implementation. With \code{logscale_factor}, the weighting formula can be changed to \eqn{C = ln{(Sb+2)}ln{(Tb+1)D}}}
 \item{ In addition to the temporal uncertainty \eqn{\sigma_t} (see \code{temporal_uncertainty}) and the spectral uncertainty\eqn{ \sigma_s} (see \code{spectral_uncertainty}) there will be used a \emph{combined uncertainty} \eqn{\sigma_c := \sqrt{\sigma_t^2 + \sigma_s^2} }. This will be used in the candidate weighting: If \eqn{(S + 1) \, (T + 1) < \sigma_c }, then \eqn{C = 1 } instead of the formula above.}
-\item{Considering candidate weighting again, there is an option \code{use_tempdiff_for_weights} to not use the temporal difference for the weighting (also not for the combined uncertainty check above), i. e. T = 0 then. This is also the default behaviour.}{ }
-\item{The basic assumption of the original paper that with zero spectral or temporal difference the central pixel will be chosen is wrong since there might be multiple pixels with zero difference within one window. Also due to the addition of 1 to the spectral and temporal differences, the weight will not increase so dramatical from a zero difference. However, these assumptions can be enforced with \code{do_copy_on_zero_diff}, which is the default behaviour.}{ }
-\item{The paper states that a good candidate should satisfy (15) and (16). This can be set with use_strict_filtering, which is by default used. However the other behaviour, that a candidate should fulfill (15) or (16), as in the reference implementation, can be also be selected with that option.}
+\item{Considering candidate weighting again, there is an option \code{use_tempdiff_for_weights} to not use the temporal difference for the weighting (also not for the combined uncertainty check above), i. e. T = 0 then. This is also the default behavior.}{ }
+\item{The basic assumption of the original paper that with zero spectral or temporal difference the central pixel will be chosen is wrong since there might be multiple pixels with zero difference within one window. Also due to the addition of 1 to the spectral and temporal differences, the weight will not increase so dramatically from a zero difference. However, these assumptions can be enforced with \code{do_copy_on_zero_diff}, which is the default behavior.}{ }
+\item{The paper states that a good candidate should satisfy (15) and (16). This can be set with use_strict_filtering, which is by default used. However the other behavior, that a candidate should fulfill (15) or (16), as in the reference implementation, can be also be selected with that option.}
 \item{The paper uses max in (15) and (16), which would choose the largest spectral and temporal difference from all input pairs (only one or two are possible). Since this should filter out bad candidates, we believe this is a mistake and should be min instead of max, like it is done in the reference implementation. So this implementation uses min here.}
 }
 }
