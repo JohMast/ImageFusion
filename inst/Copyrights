@@ -1,0 +1,18 @@
+===========================
+File: src/include/optionparser.h  src/include/optionparserimpl.h
+Copyright (c) 2012 Matthias S. Benkmann
+License: MIT
+Origin: https://sourceforge.net/projects/optionparser/
+
+Modifications (c) 2020 Christof Kaufmann:
+- Major additions to the original optionparser code
+
+
+==========================
+File: src/include/* src/src/* src/utils/*
+Copyright (c) 2016-2020 Hochschule Bochum
+License: BSD-3
+Origin: No public repository
+Modifications (c) 2020 Johannes Mast:
+- Removed or commented code that is not necessary for the implementation in R
+- Removed calls to std::cerr or std::cout with calls to Rcpp::Rcerr or Rcpp::Rcout to comply with cran policy.
