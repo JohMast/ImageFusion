@@ -1,11 +1,21 @@
 Dear CRAN-Team,
 
-This is my first submission of our ImageFusion package. 
+This is my resubmission of our ImageFusion package. 
 
 We have done our best to thoroughly test our code and follow all best practices.
 Thank you for your support.
 
 Johannes Mast (Package Maintainer)
+
+## Changes
+
+In this version of the package, we have made the following changes:
+* LICENSE: Omitted superfluous newlines
+* LICENSE.note: Omitted superfluous newlines
+* Readme.md: Fixed a typo 
+* DESCRIPTION: Added en-US as the language of the package. Ensured that American spelling is used consistently.
+* DESCRIPTION: Added Hochschule Bochum as the copyright holder of the imagefusion source code.
+* R/imagefusion_task.R: Added references to the underlying algorithms to the documentation.
 
 ## Test environments
 * local windows 10, R 4.0.3

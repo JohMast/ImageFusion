@@ -37,7 +37,10 @@ has_high <- has_low <- interval_pairs <- interval_ids <- pred_case  <-  interval
 #' @importFrom stats predict
 #' @export
 #' @details The function firstly seeks among the inputs for pair dates, which are dates for which have both a high resolution image and a low resolution image are available. It then splits the task into a number of self-contained \emph{jobs} which handle the fusion between these pair dates using the paired images as anchors. These jobs can also be called directly via their respective functions, see \code{method}.
-#' @author  Christof Kaufmann (C++), Johannes Mast (R)
+#' @author Christof Kaufmann (C++), Johannes Mast (R)
+#' @references Gao, Feng, et al. "On the blending of the Landsat and MODIS surface reflectance: Predicting daily Landsat surface reflectance." IEEE Transactions on Geoscience and Remote sensing 44.8 (2006): 2207-2218.
+#' @references Wang, Qunming, and Peter M. Atkinson. "Spatio-temporal fusion for daily Sentinel-2 images." Remote Sensing of Environment 204 (2018): 31-42.
+#' @references Zhu, X., Chen, J., Gao, F., Chen, X., & Masek, J. G. (2010). An enhanced spatial and temporal adaptive reflectance fusion model for complex heterogeneous regions. Remote Sensing of Environment, 114(11), 2610-2623.
 #' @examples 
 #' # Load required libraries
 #' library(ImageFusion)

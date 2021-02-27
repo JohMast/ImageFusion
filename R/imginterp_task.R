@@ -48,7 +48,7 @@
 #'  
 #' Using \code{output_pixelstate} the pixelstates can be produces as an additional output. The pixelstates are 8 bit wide.
 #' bit 6 indicates that it was a location to interpolate before,bit 7 indicates that it is a clear pixel afterwards.
-#' This results in the follwing states (other bits are 0):
+#' This results in the following states (other bits are 0):
 #' 
 #' \tabular{rrrr}{
 #'   \strong{value} \tab \strong{b7} \tab \strong{b6} \tab \strong{meaning} \cr

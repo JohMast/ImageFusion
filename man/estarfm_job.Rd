@@ -49,7 +49,7 @@ estarfm_job(
 
 \item{date3}{(Optional) Set the date of the second input image pair. By default, will use the pair with the highest date value.}
 
-\item{n_cores}{(Optional) Set the number of cores to use when using parallelisation. Default is 1.}
+\item{n_cores}{(Optional) Set the number of cores to use when using parallelization. Default is 1.}
 
 \item{data_range_min}{(Optional) When predicting pixel values ESTARFM can exceed the values that appear in the image. To prevent from writing invalid values (out of a known data range) you can set bounds. By default, the value range will be limited by the natural data range (e. g. -32767 for INT2S).}
 

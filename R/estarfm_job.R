@@ -10,7 +10,7 @@
 #' @param winsize (Optional) Window size of the rectangle around the current pixel. Default is 51.
 #' @param date1 (Optional) Set the date of the first input image pair. By default, will use the pair with the lowest date value.
 #' @param date3 (Optional) Set the date of the second input image pair. By default, will use the pair with the highest date value.
-#' @param n_cores (Optional) Set the number of cores to use when using parallelisation. Default is 1.
+#' @param n_cores (Optional) Set the number of cores to use when using parallelization. Default is 1.
 #' @param data_range_min (Optional) When predicting pixel values ESTARFM can exceed the values that appear in the image. To prevent from writing invalid values (out of a known data range) you can set bounds. By default, the value range will be limited by the natural data range (e. g. -32767 for INT2S).
 #' @param data_range_max (Optional) When predicting pixel values ESTARFM can exceed the values that appear in the image. To prevent from writing invalid values (out of a known data range) you can set bounds. By default, the value range will be limited by the natural data range (e. g.  32767 for INT2S).
 #' @param MASKIMG_options (Optional) A string containing information for a mask image (8-bit, boolean, i. e. consists of 0 and 255). "For all input images the pixel values at the locations where the mask is 0 is replaced by the mean value." Example: \code{--mask-img=some_image.png}
@@ -345,7 +345,7 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
       print(MASKRANGE_options_c)
     }
     if(n_cores_c>1){
-      print(paste("USING PARALLELISATION WITH ", n_cores_c," CORES"))
+      print(paste("USING PARALLELIZATION WITH ", n_cores_c," CORES"))
     }
   }
   
