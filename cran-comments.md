@@ -15,7 +15,9 @@ In this version of the package, we have made the following changes:
 * Readme.md: Fixed a typo 
 * DESCRIPTION: Added en-US as the language of the package. Ensured that American spelling is used consistently.
 * DESCRIPTION: Added Hochschule Bochum as the copyright holder of the imagefusion source code.
+* DESCRIPTION Added reference to file inst/Copyrights
 * R/imagefusion_task.R: Added references to the underlying algorithms to the documentation.
+* inst/Copyrights: Created text file listing copyrights
 
 ## Test environments
 * local windows 10, R 4.0.3
