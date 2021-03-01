@@ -9,15 +9,18 @@ Johannes Mast (Package Maintainer)
 
 ## Changes
 
-In this version of the package, we have made the following changes:
+In response to the e mail conversation with Uwe Ligges, we have made the following changes:
 * LICENSE: Omitted superfluous newlines
 * LICENSE.note: Omitted superfluous newlines
-* Readme.md: Fixed a typo 
-* DESCRIPTION: Added en-US as the language of the package. Ensured that American spelling is used consistently.
 * DESCRIPTION: Added Hochschule Bochum as the copyright holder of the imagefusion source code.
-* DESCRIPTION Added reference to file inst/Copyrights
+* DESCRIPTION: Added reference to file inst/Copyrights
 * R/imagefusion_task.R: Added references to the underlying algorithms to the documentation.
 * inst/Copyrights: Created text file listing copyrights
+
+We have made further changes:
+* Readme.md: Fixed a typo 
+* DESCRIPTION: Added en-US as the language of the package. Ensured that American spelling is used consistently.
+
 
 ## Test environments
 * local windows 10, R 4.0.3
@@ -57,5 +60,5 @@ as we have no influence over the size of the GDAL library.
 
 ## Downstream dependencies
 
-There are no downstreams dependencies yet,
+There are no downstream dependencies yet,
 although our intent is to produce some in the future.
