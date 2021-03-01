@@ -10,15 +10,15 @@ Johannes Mast (Package Maintainer)
 ## Changes
 
 In response to the e mail conversation with Uwe Ligges, we have made the following changes:
-* LICENSE: Omitted superfluous newlines
-* LICENSE.note: Omitted superfluous newlines
+* LICENSE: Omitted superfluous newlines.
+* LICENSE.note: Omitted superfluous newlines.
 * DESCRIPTION: Added Hochschule Bochum as the copyright holder of the imagefusion source code.
-* DESCRIPTION: Added reference to file inst/Copyrights
+* DESCRIPTION: Added reference to file inst/Copyrights.
 * R/imagefusion_task.R: Added references to the underlying algorithms to the documentation.
-* inst/Copyrights: Created text file listing copyrights
+* inst/Copyrights: Created text file listing copyrights.
 
 We have made further changes:
-* Readme.md: Fixed a typo 
+* Readme.md: Fixed a typo.
 * DESCRIPTION: Added en-US as the language of the package. Ensured that American spelling is used consistently.
 
 
@@ -27,7 +27,7 @@ We have made further changes:
 * local windows 10, R under development (unstable) (2021-02-17 r80023)
 * local ubuntu 20.04, R 4.0.2
 * win-builder  R version 4.0.4
-* win-builder  R Under development (unstable) (2021-02-20 r80030)
+* win-builder  R Under development (unstable) (2021-02-27 r80043)
 
 ## R CMD check results
 
