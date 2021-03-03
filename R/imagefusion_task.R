@@ -27,7 +27,7 @@ has_high <- has_low <- interval_pairs <- interval_ids <- pred_case  <-  interval
 #' \item{force: Use the chosen algorithm to predicts the high resolution input images on themselves. This takes additional computation time, but ensures that the outputs are consistent with the genuinely predicted outputs.}
 #' }
 #' @param output_overview (Optional) Should a summary of the task be printed to console, and a \link[ggplot2]{ggplot} overview be returned? Default is "false".
-#' @param out_dir (Optional) A directory in which the predicted images will be saved. Will be created if it does not exist. Default: "/Pred_Outputs"
+#' @param out_dir (Optional) A directory in which the predicted images will be saved. Will be created if it does not exist. By default, creates a directory "Outputs" in the R temp directory (see \link{tempdir}).
 #' @param ... Further arguments specific to the chosen \code{method}. See the documentation of the methods for a detailed description.
 #' @return A ggplot overview of the tasks (If \code{output_overview} is "true")
 #' @import assertthat ggplot2 magrittr dplyr
@@ -62,30 +62,36 @@ has_high <- has_low <- interval_pairs <- interval_ids <- pred_case  <-  interval
 #'   recursive = TRUE,
 #'   full.names = TRUE
 #' )
-#' # Create output directory
-#' if(!dir.exists("Outputs")) dir.create("Outputs", recursive = TRUE)
+#' # Create output directory in temporary folder
+#' out_dir <- file.path(tempdir(),"Outputs")
+#' if(!dir.exists(out_dir)) dir.create(out_dir, recursive = TRUE)
 #' # Run the fusion on the entire time series
 #' imagefusion_task(filenames_high = landsat,
 #'                  dates_high = c(68,77,93,100),
 #'                  filenames_low = modis,
 #'                  dates_low = 68:93,
 #'                  dates_pred = c(65,85,95),
-#'                  out_dir = "Outputs/")
+#'                  out_dir = out_dir)
 #' # remove the output directory
-#' unlink("Outputs",recursive = TRUE)
+#' unlink(out_dir,recursive = TRUE)
 #' 
 #' 
 
 
 
-imagefusion_task <- function(...,filenames_high,filenames_low,dates_high,dates_low,dates_pred,filenames_pred=NULL,singlepair_mode="ignore",method="starfm",high_date_prediction_mode="ignore",verbose=FALSE,output_overview=FALSE,out_dir="Pred_Outputs"){
+imagefusion_task <- function(...,filenames_high,filenames_low,dates_high,dates_low,dates_pred,filenames_pred=NULL,singlepair_mode="ignore",method="starfm",high_date_prediction_mode="ignore",verbose=FALSE,output_overview=FALSE,out_dir=NULL){
   
   ####1: Prepare Inputs####
+  
+  #If no output folder was specified, create one in temp directory
+  if(is.null(out_dir)){
+    out_dir <- file.path(tempdir(),"Outputs")
+  }
   
   #Check output folder
   if(ifelse(!dir.exists(out_dir), dir.create(out_dir,recursive = TRUE), FALSE)){
     if(verbose){
-      print(paste("Creating output directory:",out_dir)) ##attemo
+      print(paste("Creating output directory:",out_dir)) ##attempt
     }#end if verbose
   }else{#end if dir was created
     if(verbose){

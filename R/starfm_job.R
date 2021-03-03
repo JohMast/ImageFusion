@@ -40,7 +40,7 @@
 #' @importFrom assertthat assert_that 
 #' @author Christof Kaufmann (C++)
 #' @author Johannes Mast (R)
-#' @details Executes the STARFM algorithm to create a number of synthetic high-resolution images from either two pairs (double pair mode) or one pair (single pair mode) of matching high- and low-resolution images. Assumes that the input images already have matching size. See the original paper for details (TO DO: INSERT CHANGES WITH REGARDS TO THE ORIGINAL PAPER). \itemize{
+#' @details Executes the STARFM algorithm to create a number of synthetic high-resolution images from either two pairs (double pair mode) or one pair (single pair mode) of matching high- and low-resolution images. Assumes that the input images already have matching size. See the original paper for details. \itemize{
 ##'  \item{  For the weighting (10) states: \eqn{C = S T D}  but we use  \eqn{C = (S+1)(T+1)D}, according to the reference implementation. With \code{logscale_factor}, the weighting formula can be changed to \eqn{C = ln{(Sb+2)}ln{(Tb+1)D}}}
 ##'  \item{ In addition to the temporal uncertainty \eqn{\sigma_t} (see \code{temporal_uncertainty}) and the spectral uncertainty\eqn{ \sigma_s} (see \code{spectral_uncertainty}) there will be used a *combined uncertainty* \eqn{\sigma_c := \sqrt{\sigma_t^2 + \sigma_s^2} }. This will be used in the candidate weighting: If \eqn{(S + 1) \, (T + 1) < \sigma_c }, then \eqn{C = 1 } instead of the formula above.}
 ##'  \item{Considering candidate weighting again, there is an option \code{use_tempdiff_for_weights} to not use the temporal difference for the weighting (also not for the combined uncertainty check above), i. e. T = 0 then. This is also the default behavior.}{ }
@@ -74,8 +74,9 @@
 #' landsat_sel <- landsat[1:2]
 #' #Select the corresponding modis images
 #' modis_sel <- modis[1:10]
-#' # Create output directory
-#' if(!dir.exists("Outputs")) dir.create("Outputs", recursive = TRUE)
+#' # Create output directory in temporary folder
+#' out_dir <- file.path(tempdir(),"Outputs")
+#' if(!dir.exists(out_dir)) dir.create(out_dir, recursive = TRUE)
 #' #Run the job, fusing two images
 #' starfm_job(input_filenames = c(landsat_sel,modis_sel),
 #'            input_resolutions = c("high","high",
@@ -84,11 +85,11 @@
 #'                                  "low","low","low","low"),
 #'            input_dates = c(68,77,68,69,70,71,72,73,74,75,76,77),
 #'            pred_dates = c(73,77),
-#'            pred_filenames = c("Outputs/starfm_73.tif",
-#'                               "Outputs/starfm_77.tif"))
-#' 
+#'            pred_filenames = c(file.path(out_dir,"starfm_73.tif"),
+#'                               file.path(out_dir,"starfm_77.tif"))
+#' )
 #' # remove the output directory
-#' unlink("Outputs",recursive = TRUE)
+#' unlink(out_dir,recursive = TRUE)
 starfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,pred_filenames,pred_area,winsize,date1,date3,n_cores, logscale_factor,spectral_uncertainty, temporal_uncertainty, number_classes,hightag,lowtag,MASKIMG_options,MASKRANGE_options,output_masks,use_nodata_value,use_strict_filtering,double_pair_mode,use_temp_diff_for_weights,do_copy_on_zero_diff,verbose=TRUE) {
   
   ##### A: Check all the Optional Inputs #####
@@ -98,9 +99,6 @@ starfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,
   #### pred_area ####
   # check pred area.
   # if not provided by user, set pred area to max image size of first image
-  # TO DO: MAKE SURE THAT THE SPECIFIED IMAGE COORDINATES FIT INTO THE BOUNDING BOX
-  # TO DO: ADD AN OPTION TO USE GEOCOORDINATES
-  #Use the first image as a template #TO DO: MAY MAKE MORE SENSE TO USE THE FIRST LOW-ONLY IMAGE AS TEMPLATE
   template <- raster::stack(input_filenames[1])
   #If a bbox was provided, check it for plausibility and pass it on 
   if(!missing(pred_area)){

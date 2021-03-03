@@ -8,8 +8,22 @@ Thank you for your support.
 Johannes Mast (Package Maintainer)
 
 ## Changes
+In response to the e mail conversation with Julia Haider, we have made the following changes:
 
-In response to the e mail conversation with Uwe Ligges, we have made the following changes:
+* DESCRIPTION: Changed the spellings of "time-Series" to "time series" and "c++" to "C++".
+* LICENSE.note: Added Hochschule Bochum explicitly as the copyright holder of the imagefusion C++ code.
+* R/fitfc_job.R:  Changed example to write to tempdir instead of the current directory.
+* R/starfm_job.R:  Changed example to write to tempdir instead of the current directory.
+* R/estarfm_job.R: Changed example to write to tempdir instead of the current directory.
+* R/imagefusion_task.R: Changed example to write to tempdir instead of the current directory. Accordingly, changed how the default output directory is chosen by the functions.
+* R/imginterp_task.R: Changed example to write to tempdir instead of the current directory. Accordingly, changed how the default output directory is chosen by the functions.
+
+We have made further changes:
+* Removed superfluous comments across various functions.
+
+
+## Previous Changes
+In response to the e mail conversation with Uwe Ligges, we have previously made the following changes:
 * LICENSE: Omitted superfluous newlines.
 * LICENSE.note: Omitted superfluous newlines.
 * DESCRIPTION: Added Hochschule Bochum as the copyright holder of the imagefusion source code.

@@ -97,7 +97,7 @@ Nothing. Output files are written to disk. The Geoinformation for the output ima
 A wrapper function for \code{execute_starfm_job_cpp}. Intended to execute a single job, that is a number of predictions based on the same input pair(s). It ensures that all of the arguments passed are of the correct type and creates sensible defaults.
 }
 \details{
-Executes the STARFM algorithm to create a number of synthetic high-resolution images from either two pairs (double pair mode) or one pair (single pair mode) of matching high- and low-resolution images. Assumes that the input images already have matching size. See the original paper for details (TO DO: INSERT CHANGES WITH REGARDS TO THE ORIGINAL PAPER). \itemize{
+Executes the STARFM algorithm to create a number of synthetic high-resolution images from either two pairs (double pair mode) or one pair (single pair mode) of matching high- and low-resolution images. Assumes that the input images already have matching size. See the original paper for details. \itemize{
 \item{  For the weighting (10) states: \eqn{C = S T D}  but we use  \eqn{C = (S+1)(T+1)D}, according to the reference implementation. With \code{logscale_factor}, the weighting formula can be changed to \eqn{C = ln{(Sb+2)}ln{(Tb+1)D}}}
 \item{ In addition to the temporal uncertainty \eqn{\sigma_t} (see \code{temporal_uncertainty}) and the spectral uncertainty\eqn{ \sigma_s} (see \code{spectral_uncertainty}) there will be used a \emph{combined uncertainty} \eqn{\sigma_c := \sqrt{\sigma_t^2 + \sigma_s^2} }. This will be used in the candidate weighting: If \eqn{(S + 1) \, (T + 1) < \sigma_c }, then \eqn{C = 1 } instead of the formula above.}
 \item{Considering candidate weighting again, there is an option \code{use_tempdiff_for_weights} to not use the temporal difference for the weighting (also not for the combined uncertainty check above), i. e. T = 0 then. This is also the default behavior.}{ }
@@ -132,8 +132,9 @@ modis <- list.files(
 landsat_sel <- landsat[1:2]
 #Select the corresponding modis images
 modis_sel <- modis[1:10]
-# Create output directory
-if(!dir.exists("Outputs")) dir.create("Outputs", recursive = TRUE)
+# Create output directory in temporary folder
+out_dir <- file.path(tempdir(),"Outputs")
+if(!dir.exists(out_dir)) dir.create(out_dir, recursive = TRUE)
 #Run the job, fusing two images
 starfm_job(input_filenames = c(landsat_sel,modis_sel),
            input_resolutions = c("high","high",
@@ -142,11 +143,11 @@ starfm_job(input_filenames = c(landsat_sel,modis_sel),
                                  "low","low","low","low"),
            input_dates = c(68,77,68,69,70,71,72,73,74,75,76,77),
            pred_dates = c(73,77),
-           pred_filenames = c("Outputs/starfm_73.tif",
-                              "Outputs/starfm_77.tif"))
-
+           pred_filenames = c(file.path(out_dir,"starfm_73.tif"),
+                              file.path(out_dir,"starfm_77.tif"))
+)
 # remove the output directory
-unlink("Outputs",recursive = TRUE)
+unlink(out_dir,recursive = TRUE)
 }
 \references{
 Gao, Feng, et al. "On the blending of the Landsat and MODIS surface reflectance: Predicting daily Landsat surface reflectance." IEEE Transactions on Geoscience and Remote sensing 44.8 (2006): 2207-2218.

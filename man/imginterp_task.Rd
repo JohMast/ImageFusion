@@ -66,7 +66,7 @@ imginterp_task(
 
 \item{invalid_ranges}{(Optional) Character (specifically a range-list, see below at \code{<range-list>}). Specify one or more intervals for invalid values. These will be masked out.}
 
-\item{out_prefix}{(Optional) Character. This string will be prepended to the output filenames and can also be used to specify an output filepath.  By default is empty.}
+\item{out_prefix}{(Optional) Character. This string will be prepended to the output filenames and can also be used to specify an output filepath.  By default, is set to an \code{"Outputs"} folder in the R temp directory (See \link{tempdir}).}
 
 \item{out_postfix}{(Optional) Character. This string will be appended to the output filenames. Default is "interpolated_".}
 
@@ -156,20 +156,21 @@ landsat_with_gaps <- list.files(system.file("landsat/unfilled",
                                 ".tif",
                                 recursive = TRUE,
                                 full.names = TRUE)
-# Create output Directory
-if(!dir.exists("Outputs")) dir.create("Outputs", recursive = TRUE)
+# Create output directory in temporary folder
+out_dir <- paste0(tempdir(),"/Outputs/")
+if(!dir.exists(out_dir)) dir.create(out_dir, recursive = TRUE)
 # Interpolate into output directory
 imginterp_task(filenames = landsat_with_gaps,
               dates = c(68,77,93,100),limit_days = 15,
                invalid_ranges = "[-inf,-1]",
-               out_prefix = "Outputs/")
+               out_prefix = out_dir)
 # Get filenames of interpolated images
-landsat_without_gaps <- list.files("Outputs",pattern = ".tif$",full.names = TRUE)
+landsat_without_gaps <- list.files(out_dir,pattern = ".tif$",full.names = TRUE)
 # Count the number of NAs before and after the interpolation
 sum(is.na(getValues(stack(landsat_with_gaps[2]))))
 sum(is.na(getValues(stack(landsat_without_gaps[2]))))
 # remove the output directory
-unlink("Outputs",recursive = TRUE)
+unlink(out_dir,recursive = TRUE)
 
 
 }

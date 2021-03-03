@@ -61,8 +61,9 @@
 #' landsat_sel <- landsat[1:2]
 #' #Select some corresponding modis images
 #' modis_sel <- modis[1:12]
-#' # Create output directory
-#' if(!dir.exists("Outputs")) dir.create("Outputs", recursive = TRUE)
+#' # Create output directory in temporary folder
+#' out_dir <- file.path(tempdir(),"Outputs")
+#' if(!dir.exists(out_dir)) dir.create(out_dir, recursive = TRUE)
 #' #Run the job, fusing two images
 #' fitfc_job(input_filenames = c(landsat_sel,modis_sel),
 #'           input_resolutions = c("high","high",
@@ -72,11 +73,11 @@
 #'                                 "low","low","low"),
 #'           input_dates = c(68,77,68,69,70,71,72,73,74,75,76,77,78,79),
 #'           pred_dates = c(71,79),
-#'           pred_filenames = c("Outputs/fitfc_71.tif",
-#'                              "Outputs/fitfc_79.tif"))
-#' 
+#'           pred_filenames = c(file.path(out_dir,"fitfc_71.tif"),
+#'                              file.path(out_dir,"fitfc_79.tif"))
+#' )
 #' # remove the output directory
-#' unlink("Outputs",recursive = TRUE)
+#' unlink(out_dir,recursive = TRUE)
 fitfc_job <- function(input_filenames,input_resolutions,input_dates,pred_dates,pred_filenames,pred_area,winsize,date1,date3,n_neighbors,hightag,lowtag,MASKIMG_options,MASKRANGE_options,output_masks,use_nodata_value,resolution_factor,verbose=TRUE
 ){
   
