@@ -18,7 +18,7 @@ LinkingTo: Rcpp, RcppArmadillo, BH
 Depends: R (>= 4.0)
 Encoding: UTF-8
 RoxygenNote: 7.1.1
-SystemRequirements: GDAL OPENCV PROJ
+SystemRequirements: C++17 GDAL OPENCV PROJ
 NeedsCompilation: yes
 Roxygen: list(markdown=TRUE)
 Language: en-US
