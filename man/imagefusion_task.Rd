@@ -56,7 +56,7 @@ imagefusion_task(
 
 \item{output_overview}{(Optional) Should a summary of the task be printed to console, and a \link[ggplot2]{ggplot} overview be returned? Default is "false".}
 
-\item{out_dir}{(Optional) A directory in which the predicted images will be saved. Will be created if it does not exist. Default: "/Pred_Outputs"}
+\item{out_dir}{(Optional) A directory in which the predicted images will be saved. Will be created if it does not exist. By default, creates a directory "Outputs" in the R temp directory (see \link{tempdir}).}
 }
 \value{
 A ggplot overview of the tasks (If \code{output_overview} is "true")
