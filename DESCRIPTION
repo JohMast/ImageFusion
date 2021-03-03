@@ -4,13 +4,13 @@ Title: Temporal Fusion of Raster Images
 Version: 0.0.1
 Date: 2021-03-01
 Authors@R: c(
-    person("Christof", "Kaufmann", email = "christof.kaufmann@hs-bochum.de", role = c("aut","cph"),comment=c("Author of included imagefusion c++ code", ORCID = "0000-0002-0191-3341")),
+    person("Christof", "Kaufmann", email = "christof.kaufmann@hs-bochum.de", role = c("aut","cph"),comment=c("Author of included imagefusion C++ code", ORCID = "0000-0002-0191-3341")),
     person("Johannes", "Mast", email = "johannes.mast@stud-mail.uni-wuerzburg.de", role = c("aut", "cre","cph"),comment = c("Author of R code and wrappers", ORCID = "0000-0001-6595-5834")),
     person("Thorsten", "Dahms", email = "thorsten.dahms@uni-wuerzburg.de", role = "sad",comment = c(ORCID = "0000-0002-7073-5075")),
     person("Jakob", "Schwalb-Willmann", email = "movevis@schwalb-willmann.de", role = "sad",comment = c(ORCID = "0000-0003-2665-1509")),
     person("Dinesh", "Kumar Babu", email = "dinesh.kumar-babu@adwaiseo.eu", role = "ctb"),
     person("Hochschule Bochum", role="cph"))
-Description: Temporal fusion of raster image time-Series. Provides implementation of various fusion algorithms in c++.
+Description: Temporal fusion of raster image time series. Provides implementation of various fusion algorithms in C++.
 License: BSD_3_clause + file LICENSE
 Copyright: file inst/Copyrights
 Imports: Rcpp (>= 1.0.2), raster, rgdal, parallel, ggplot2, assertthat, foreach, dplyr, magrittr

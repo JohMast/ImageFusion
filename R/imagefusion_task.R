@@ -62,30 +62,36 @@ has_high <- has_low <- interval_pairs <- interval_ids <- pred_case  <-  interval
 #'   recursive = TRUE,
 #'   full.names = TRUE
 #' )
-#' # Create output directory
-#' if(!dir.exists("Outputs")) dir.create("Outputs", recursive = TRUE)
+#' # Create output directory in temporary folder
+#' out_dir <- file.path(tempdir(),"Outputs")
+#' if(!dir.exists(out_dir)) dir.create(out_dir, recursive = TRUE)
 #' # Run the fusion on the entire time series
 #' imagefusion_task(filenames_high = landsat,
 #'                  dates_high = c(68,77,93,100),
 #'                  filenames_low = modis,
 #'                  dates_low = 68:93,
 #'                  dates_pred = c(65,85,95),
-#'                  out_dir = "Outputs/")
+#'                  out_dir = out_dir)
 #' # remove the output directory
-#' unlink("Outputs",recursive = TRUE)
+#' unlink(out_dir,recursive = TRUE)
 #' 
 #' 
 
 
 
-imagefusion_task <- function(...,filenames_high,filenames_low,dates_high,dates_low,dates_pred,filenames_pred=NULL,singlepair_mode="ignore",method="starfm",high_date_prediction_mode="ignore",verbose=FALSE,output_overview=FALSE,out_dir="Pred_Outputs"){
+imagefusion_task <- function(...,filenames_high,filenames_low,dates_high,dates_low,dates_pred,filenames_pred=NULL,singlepair_mode="ignore",method="starfm",high_date_prediction_mode="ignore",verbose=FALSE,output_overview=FALSE,out_dir=NULL){
   
   ####1: Prepare Inputs####
+  
+  #If no output folder was specified, create one in temp directory
+  if(is.null(out_dir)){
+    out_dir <- file.path(tempdir(),"Outputs")
+  }
   
   #Check output folder
   if(ifelse(!dir.exists(out_dir), dir.create(out_dir,recursive = TRUE), FALSE)){
     if(verbose){
-      print(paste("Creating output directory:",out_dir)) ##attemo
+      print(paste("Creating output directory:",out_dir)) ##attempt
     }#end if verbose
   }else{#end if dir was created
     if(verbose){

@@ -17,7 +17,7 @@ imagefusion_task(
   high_date_prediction_mode = "ignore",
   verbose = FALSE,
   output_overview = FALSE,
-  out_dir = "Pred_Outputs"
+  out_dir = NULL
 )
 }
 \arguments{
@@ -88,17 +88,18 @@ modis <- list.files(
   recursive = TRUE,
   full.names = TRUE
 )
-# Create output directory
-if(!dir.exists("Outputs")) dir.create("Outputs", recursive = TRUE)
+# Create output directory in temporary folder
+out_dir <- file.path(tempdir(),"Outputs")
+if(!dir.exists(out_dir)) dir.create(out_dir, recursive = TRUE)
 # Run the fusion on the entire time series
 imagefusion_task(filenames_high = landsat,
                  dates_high = c(68,77,93,100),
                  filenames_low = modis,
                  dates_low = 68:93,
                  dates_pred = c(65,85,95),
-                 out_dir = "Outputs/")
+                 out_dir = out_dir)
 # remove the output directory
-unlink("Outputs",recursive = TRUE)
+unlink(out_dir,recursive = TRUE)
 
 
 }

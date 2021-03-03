@@ -12,7 +12,7 @@
 #' @param no_interp_ranges (Optional) Character (specifically a range-list, see below at \code{<range-list>}). Specify one or more intervals for values that should not be interpolated. No-interp-ranges can be excluded from interp-ranges. By default is empty.
 #' @param stats_filename (Optional) Character, a filename. Enable stats (cloud pixels before and after, etc.) and output into the given file. By default, no stats will be output.
 #' @param print_stats (Optional) Logical. If no \code{stats_filename} was provided: Print stats to console instead? Default is "false".
-#' @param out_prefix (Optional) Character. This string will be prepended to the output filenames and can also be used to specify an output filepath.  By default is empty.
+#' @param out_prefix (Optional) Character. This string will be prepended to the output filenames and can also be used to specify an output filepath.  By default, is set to an \code{"Outputs"} folder in the R temp directory (See \link{tempdir}).
 #' @param out_postfix (Optional) Character. This string will be appended to the output filenames. Default is "interpolated_".
 #' @param output_pixelstate (Optional) Logical. If "true" output the pixelstate. The pixelstates are 8 bit wide. Default is "false".
 #' @param use_nodata (Optional) Logical. If "true" nodata will be used as invalid range for masking. Default is "true".
@@ -81,28 +81,23 @@
 #'                                 ".tif",
 #'                                 recursive = TRUE,
 #'                                 full.names = TRUE)
-#' # Create output Directory
-#' if(!dir.exists("Outputs")) dir.create("Outputs", recursive = TRUE)
+#' # Create output directory in temporary folder
+#' out_dir <- paste0(tempdir(),"/Outputs/")
+#' if(!dir.exists(out_dir)) dir.create(out_dir, recursive = TRUE)
 #' # Interpolate into output directory
 #' imginterp_task(filenames = landsat_with_gaps,
 #'               dates = c(68,77,93,100),limit_days = 15,
 #'                invalid_ranges = "[-inf,-1]",
-#'                out_prefix = "Outputs/")
+#'                out_prefix = out_dir)
 #' # Get filenames of interpolated images
-#' landsat_without_gaps <- list.files("Outputs",pattern = ".tif$",full.names = TRUE)
+#' landsat_without_gaps <- list.files(out_dir,pattern = ".tif$",full.names = TRUE)
 #' # Count the number of NAs before and after the interpolation
 #' sum(is.na(getValues(stack(landsat_with_gaps[2]))))
 #' sum(is.na(getValues(stack(landsat_without_gaps[2]))))
 #' # remove the output directory
-#' unlink("Outputs",recursive = TRUE)
+#' unlink(out_dir,recursive = TRUE)
 #' 
 #' 
-
- # \itemize{
- # \item{<num-list> must be lists of integer vectors. Example: \code{list(c(1,3,3,7),c(4,2))} }
- # \item <range> must be strings. Either be a single number or have the format \code{'[<float>,<float>]'}, \code{'(<float>,<float>)'}, \code{'[<float>,<float>'} or \code{'<float>,<float>]'} where the comma and round brackets are optional, but square brackets are here actual characters. Especially for half-open intervals do not use unbalanced parentheses or escape them (maybe with two '\\'). Additional whitespace can be added anywhere. Example: \code{"(125,175)"}
- # \item <range-list> must be strings that combine ranges in the form \code{ '<range> [<range> ...]'}, where the brackets mean that further intervals are optional. The different ranges are related as union. Example: \code{"(125,175) [225,275]"}
- # }
 imginterp_task <- function(filenames,
                            dates,
                            tags=NULL,
@@ -358,8 +353,14 @@ imginterp_task <- function(filenames,
     string_args <- paste0(string_args, " --disable-output-pixelstate")
   }
   #If outprefix is given, add it
+  # Enforce the replacement of backslashes with single forward slashes
   if(!is.null(out_prefix)){
-    string_args <- paste0(string_args, " --out-prefix=",out_prefix)
+    out_prefix_forwardslashes <- gsub("\\\\", "/", out_prefix)
+    string_args <- paste0(string_args, " --out-prefix=",out_prefix_forwardslashes)
+  }else{
+    #Otherwise set the outprefix to an output folder in the temp directory
+    tempdir_forwardslashes <- gsub("\\\\", "/", tempdir())
+    string_args <- paste0(string_args, " --out-prefix=",file.path(tempdir_forwardslashes,"Outputs"),"/")
   }
   #If outpostfix is given, add it
   if(!is.null(out_postfix)){

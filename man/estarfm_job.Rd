@@ -119,8 +119,10 @@ modis <- list.files(
 landsat_sel <- landsat[1:2]
 #Select the corresponding modis images
 modis_sel <- modis[1:10]
-# Create output directory
-if(!dir.exists("Outputs")) dir.create("Outputs", recursive = TRUE)
+# Create output directory in temporary folder
+out_dir <- file.path(tempdir(),"Outputs")
+if(!dir.exists(out_dir)) dir.create(out_dir, recursive = TRUE)
+
 #Run the job, fusing two images
 estarfm_job(input_filenames = c(landsat_sel,modis_sel),
             input_resolutions = c("high","high",
@@ -129,11 +131,11 @@ estarfm_job(input_filenames = c(landsat_sel,modis_sel),
                                   "low","low","low","low"),
             input_dates = c(68,77,68,69,70,71,72,73,74,75,76,77),
             pred_dates = c(72,74),
-            pred_filenames = c("Outputs/estarfm_72.tif",
-                               "Outputs/estarfm_74.tif"))
-
+            pred_filenames = c(file.path(out_dir,"estarfm_72.tif"),
+                               file.path(out_dir,"estarfm_74.tif"))
+)
 # remove the output directory
-unlink("Outputs",recursive = TRUE)
+unlink(out_dir,recursive = TRUE)
 
 }
 \references{
