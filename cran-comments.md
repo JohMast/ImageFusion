@@ -22,6 +22,7 @@ We have made further changes:
 * Removed superfluous comments across various functions.
 
 
+
 ## Previous Changes
 In response to the e mail conversation with Uwe Ligges, we have previously made the following changes:
 * LICENSE: Omitted superfluous newlines.
