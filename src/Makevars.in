@@ -1,7 +1,7 @@
 VERSION = 0.0.1
 #Add the gdal opencv headers and the imagefusion headers from the /include directory
-PKG_CPPFLAGS= @PKG_CPPFLAGS@ -I../src/utils/helpers  -I../src/utils/imginterp  -I/usr/include/opencv4/opencv -I/usr/include/opencv4 -D_DATA_PREFIX=/usr  -DWITH_OMP  @OPENMP_FLAG@
-PKG_LIBS= @PKG_LIBS@ -lopencv_imgproc -lopencv_core -L/usr/include @OPENMP_FLAG@
+PKG_CPPFLAGS= @PKG_CPPFLAGS@ -I../src/utils/helpers  -I../src/utils/imginterp  @OPENCV_FLAG@ -D_DATA_PREFIX=/usr  -DWITH_OMP  @OPENMP_FLAG@
+PKG_LIBS= @PKG_LIBS@ @PKG_LIBS_OPENCV@ -L/usr/include @OPENMP_FLAG@
 PKG_CXXFLAGS = -Iinclude -I@OPENMP_FLAG@
 CXX_STD=CXX17
 

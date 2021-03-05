@@ -14,6 +14,10 @@ In Response to the comments by David Ripley, we have made the following changes:
 * DESCRIPTION: Added C++17 as a System Requirement
 * Changed the System Requirements from Debian format to the project names (e.g. libgdal -> GDAL) .
 
+* configure: We are not able to perform tests on macos. Thus, we follow the example of the R package opencv whicha ccording to its [cran checks](https://cran.r-project.org/web/checks/check_results_opencv.html) runs fine across many different platforms. We adopt the code used in its configure file to dynamically create the variables PKG_LIBS_OPENCV and OPENCV_FLAG for use in Makevars. There, they replace the previously hardcoded paths and libraries.
+* 2 DO: Include jeroen ooms as copyright holder for that code
+* Rbuildignore: Added the configure.log file to the list of ignored files (logs opencv libraries)
+
 ## Test environments
 * local windows 10, R 4.0.3
 * local windows 10, R under development (unstable) (2021-02-17 r80023)

@@ -2,7 +2,7 @@
 ^\.Rproj\.user$
 ^LICENSE\.md$
 ^cran-comments\.md$
-
+^configure.log$
 ^.cran_comments\.md$
 ^Readme\.md$
 ^\.img$

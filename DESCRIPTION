@@ -13,7 +13,7 @@ Authors@R: c(
 Description: Temporal fusion of raster image time series. Provides implementation of various fusion algorithms in C++.
 License: BSD_3_clause + file LICENSE
 Copyright: file inst/Copyrights
-Imports: Rcpp (>= 1.0.2), raster, parallel, ggplot2, assertthat, dplyr, magrittr
+Imports: Rcpp (>= 1.0.2), raster, rgdal, parallel, ggplot2, assertthat, dplyr, magrittr
 LinkingTo: Rcpp, RcppArmadillo, BH
 Depends: R (>= 4.0)
 Encoding: UTF-8
