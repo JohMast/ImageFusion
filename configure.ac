@@ -114,7 +114,7 @@ GDAL_PATCH=`echo $GDAL_VERSION | cut -f3 -d"."`
 AC_MSG_CHECKING([GDAL version >= 2.0.1])
 if test ${GDAL_MAJOR} -lt 2 ; then
   AC_MSG_RESULT(no)
-  AC_MSG_ERROR([gdalcubes is not compatible with GDAL versions below 2.0.1])
+  AC_MSG_ERROR([imagefusion is not compatible with GDAL versions below 2.0.1])
 else
   AC_MSG_RESULT(yes)
 fi
