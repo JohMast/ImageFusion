@@ -634,11 +634,7 @@ AC_MSG_NOTICE([Copy data for:])
 fi
 
 
-# Finalizing #################################################################################
-
-
-
-
+# Finalizing GDAL AND PROJ##########################################################################
 
 ## PKG_CPPFLAGS
 AC_SUBST([PKG_CPPFLAGS], ["${INPKG_CPPFLAGS} ${GDAL_CPPFLAGS}"])
@@ -651,39 +647,63 @@ AC_SUBST([PKG_CPPFLAGS], ["${PKG_CPPFLAGS} -DACCEPT_USE_OF_DEPRECATED_PROJ_API_H
 fi
 AC_SUBST([PKG_CPPFLAGS], ["${PKG_CPPFLAGS} -DR_PACKAGE"])
 
-###OPENMP
-###Mostly copied from: https://github.com/RcppCore/RcppArmadillo/blob/master/configure.ac
 
-## Default the OpenMP flag to the empty string.
-## If and only if OpenMP is found, expand to $(SHLIB_OPENMP_CXXFLAGS)
+# OPENMP #######################################################################################
+## Copyright Dirk Eddelbuettel for RcppArmadillo (GPL-2)
+AC_PREREQ(2.61)
+
+
+: ${R_HOME=$(R RHOME)}
+if test -z "${R_HOME}"; then
+    AC_MSG_ERROR([Could not determine R_HOME.])
+fi
+
+CXX=$(${R_HOME}/bin/R CMD config CXX)
+CXXFLAGS=$("${R_HOME}/bin/R" CMD config CXXFLAGS)
+
+AC_LANG(C++)
+AC_REQUIRE_CPP
+
 openmp_flag=""
+openmp_cflag=""
+openmp_imagefusionflag=""
 
+AC_MSG_CHECKING([for macOS])
+RSysinfoName=$("${R_HOME}/bin/Rscript" --vanilla -e 'cat(Sys.info()[["sysname"]])')
+if test x"${RSysinfoName}" == x"Darwin"; then
+   AC_MSG_RESULT([found])
+   AC_MSG_WARN([OpenMP unavailable and turned off.])
+      openmp_imagefusionflag="-DWITHOUT_OMP"
+else
+   AC_MSG_RESULT([not found as on ${RSysinfoName}])
+   AC_MSG_CHECKING([for OpenMP])
+   allldflags=$(${R_HOME}/bin/R CMD config --ldflags)
+   hasOpenMP=$(echo ${allldflags} | grep -- -fopenmp)
+   if test x"${hasOpenMP}" == x""; then
+      AC_MSG_RESULT([missing])
+      openmp_imagefusionflag="-DWITHOUT_OMP"
 
-## Set the fallback, by default it is nope
-arma_have_openmp="#define ARMA_DONT_USE_OPENMP 1"
-
-if test x"${openmp_already_works}" = x"yes"; then
-    arma_have_openmp="#define ARMA_USE_OPENMP 1"
+   else
+      AC_MSG_RESULT([found])
+      openmp_flag='$(SHLIB_OPENMP_CXXFLAGS)'
+      openmp_cflag='$(SHLIB_OPENMP_CFLAGS)'
+      openmp_imagefusionflag="-DWITH_OMP"
+   fi
 fi
+## END OPENMP
 
-if test x"${can_use_openmp}" = x"yes"; then
-    AC_MSG_CHECKING([for OpenMP])
-    ## if R has -fopenmp we should be good
-    allldflags=$(${R_HOME}/bin/R CMD config --ldflags)
-    hasOpenMP=$(echo ${allldflags} | grep -- -fopenmp)
-    if test x"${hasOpenMP}" = x""; then
-        AC_MSG_RESULT([missing])
-        arma_have_openmp="#define ARMA_DONT_USE_OPENMP 1"
-    else
-        AC_MSG_RESULT([found and suitable])
-        arma_have_openmp="#define ARMA_USE_OPENMP 1"
-        openmp_flag='$(SHLIB_OPENMP_CXXFLAGS)'
-    fi
-fi
-## Manually overwrite output from previous block, which is not executed for unknown reasons. Needs to be revisited.
-openmp_flag='-fopenmp'
+## OPENCV ######################################
+opencv_flag=""
+opencv_libs=""
+## END OPENCV
 
+##### Finishing up
+AC_SUBST([OPENCV_FLAG], ["${opencv_flag}"])
+AC_SUBST([PKG_LIBS_OPENCV], ["${opencv_libs}"])
+AC_SUBST([OPENMP_CFLAG], ["${openmp_cflag}"])
 AC_SUBST([OPENMP_FLAG], ["${openmp_flag}"])
+AC_SUBST([OPENMP_IMAGEFUSIONFLAG], ["${openmp_imagefusionflag}"])
+
 
 
 ### Determine subdirectory source files
@@ -706,9 +726,13 @@ AC_SUBST([PKG_LIBS], ["${PKG_LIBS} -lproj"])
 
 
 
+AC_MSG_NOTICE([OPENCV flags: ${OPENCV_FLAG}])
+AC_MSG_NOTICE([OPENCV LIBS: ${OPENCV_LIBS}])
+AC_MSG_NOTICE([OpenMP flags: ${OPENMP_FLAG}])
+AC_MSG_NOTICE([OpenMP cflags: ${OPENMP_CFLAG}])
 AC_MSG_NOTICE([Package CPP flags: ${PKG_CPPFLAGS}])
 AC_MSG_NOTICE([Package LIBS: ${PKG_LIBS}])
-AC_MSG_NOTICE([OpenMP flags: ${OPENMP_FLAG}])
+
 
 AC_CONFIG_FILES([src/Makevars])
 AC_OUTPUT
