@@ -14,8 +14,10 @@ In Response to the comments by David Ripley, we have made the following changes:
 * DESCRIPTION: Added C++17 as a System Requirement
 * Changed the System Requirements from Debian format to the project names (e.g. libgdal -> GDAL) .
 
-* configure: We are not able to perform tests on macos. Thus, we follow the example of the R package opencv whicha ccording to its [cran checks](https://cran.r-project.org/web/checks/check_results_opencv.html) runs fine across many different platforms. We adopt the code used in its configure file to dynamically create the variables PKG_LIBS_OPENCV and OPENCV_FLAG for use in Makevars. There, they replace the previously hardcoded paths and libraries.
-* 2 DO: Include jeroen ooms as copyright holder for that code
+* configure: We are not able to perform tests on macos. Thus, we follow the example of the R package opencv which according to its [cran checks](https://cran.r-project.org/web/checks/check_results_opencv.html) runs fine across many different platforms. We adopt the code used in its configure file to dynamically create the variables PKG_LIBS_OPENCV and OPENCV_FLAG for use in Makevars. There, they replace the previously hardcoded paths and libraries.
+* configure: Maintaining openmp capability on MacOS is not trivial. As we have no capability to test on MacOS, we follow the example of [RcppArmadillo](https://github.com/RcppCore/RcppArmadillo) and the recommendation of this [stackoverflow post](https://stackoverflow.com/q/46723854). Instead of hardcoding -fopenmp as before (which was problematic if openmp was not installed or found), the configure process creates the flags OPENMP_FLAG and OPENMP_CFLAG (SHLIB_OPENMP_CXXFLAGS and SHLIB_OPENMP_CFLAGS) for use in Makevars, as suggested by the R Extensions Manual. We also define a variable OPENMP_IMAGEFUSIONFLAG which takes either WITH_OMP or WITHOUT_OMP which are used in our ImageFusion code. Thereby we only include openmp-based parallelization if OPENMP was detected.
+* 2 DO: Include jeroen ooms as copyright holder for the opencv configure code.
+* 2 DO: Include Dirk Eddelbüttel as copyright holder for the openmp configure.ac code.
 * Rbuildignore: Added the configure.log file to the list of ignored files (logs opencv libraries)
 
 ## Test environments
