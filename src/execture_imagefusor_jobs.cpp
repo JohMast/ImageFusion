@@ -7,10 +7,10 @@
 #include "multiresimages.h"
 #include "geoinfo.h"
 #include <filesystem>
-#ifdef WITH_OMP
+#ifdef _OPENMP
 #include "parallelizer.h"
 #include "parallelizer_options.h"
-#endif /* WITH_OMP */
+#endif /* _OPENMP */
 
 using namespace Rcpp;
 
@@ -51,7 +51,7 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames,
   // Alternative fix to rcout issue, kept here as a reminder
   //std::streambuf* stdoutbuf = std::cout.rdbuf(Rcpp::Rcout.rdbuf());
   //std::streambuf* stderrbuf = std::cerr.rdbuf(Rcpp::Rcerr.rdbuf());
-#ifndef WITH_OMP
+#ifndef _OPENMP
   if(n_cores>1){
     Rcout <<"Sorry, if you want to use Parallelizer, you need to install OpenMP first."<<std::endl;
   }
@@ -116,18 +116,18 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames,
   
   //Step 3: Create the Fusor and pass the options
   //Create the Fusor
-#ifdef WITH_OMP
+#ifdef _OPENMP
     ParallelizerOptions<EstarfmOptions> po;
     po.setNumberOfThreads(n_cores);
     po.setAlgOptions(o);
     Parallelizer<EstarfmFusor> esf;
     esf.srcImages(mri);
     esf.processOptions(po);
-#else /* WITH_OMP not defined */
+#else /* _OPENMP not defined */
     EstarfmFusor esf;
     esf.srcImages(mri); 
     esf.processOptions(o);
-#endif /* WITH_OMP */
+#endif /* _OPENMP */
   
 
   
@@ -293,7 +293,7 @@ void execute_starfm_job_cpp(CharacterVector input_filenames,
    
    
 
-#ifndef WITH_OMP
+#ifndef _OPENMP
   if(n_cores>1){
     Rcout <<"Sorry, if you want to use Parallelizer, you need to install OpenMP first."<<std::endl;
   }
@@ -370,18 +370,18 @@ void execute_starfm_job_cpp(CharacterVector input_filenames,
   //Create the Fusor
 
   //create a parallelizer options object if desired
-#ifdef WITH_OMP
+#ifdef _OPENMP
     ParallelizerOptions<StarfmOptions> po;
     po.setNumberOfThreads(n_cores);
     po.setAlgOptions(o);
     Parallelizer<StarfmFusor> sf;
     sf.srcImages(mri);
     sf.processOptions(po);
-#else /* WITH_OMP not defined */
+#else /* _OPENMP not defined */
     StarfmFusor sf;
     sf.srcImages(mri); 
     sf.processOptions(o);
-#endif /* WITH_OMP */
+#endif /* _OPENMP */
   
 
   
@@ -611,19 +611,19 @@ void execute_fitfc_job_cpp(CharacterVector input_filenames,
   
   //Step 3: Create the Fusor
   //create a parallelizer options object if desired ( at this point, not supported by FITFC,therefore ignore for now)
-// #ifdef WITH_OMP
+// #ifdef _OPENMP
 //   ParallelizerOptions<FitFCOptions> po;
 //   po.setNumberOfThreads(n_cores);
 //   po.setAlgOptions(o);
 //   Parallelizer<StarfmFusor> ffc;
 //   ffc.srcImages(mri);
 //   ffc.processOptions(po);
-// #else /* WITH_OMP not defined */    
+// #else /* _OPENMP not defined */    
   //Create the Fusor
   FitFCFusor ffc;
   ffc.srcImages(mri); 
   ffc.processOptions(o);
-// #endif /* WITH_OMP */
+// #endif /* _OPENMP */
 
 
   
@@ -791,7 +791,7 @@ void execute_fitfc_job_cpp(CharacterVector input_filenames,
 //   
 //   
 //   
-// #ifndef WITH_OMP
+// #ifndef _OPENMP
 //   if(n_cores>1){
 //     Rcout <<"Sorry, if you want to use Parallelizer, you need to install OpenMP first."<<std::endl;
 //   }
@@ -1133,7 +1133,7 @@ void execute_fitfc_job_cpp(CharacterVector input_filenames,
 //    
 //    
 //   
-// #ifndef WITH_OMP
+// #ifndef _OPENMP
 //   if(n_cores>1){
 //     Rcout <<"Sorry, if you want to use Parallelizer, you need to install OpenMP first."<<std::endl;
 //   }
