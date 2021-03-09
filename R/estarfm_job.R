@@ -262,7 +262,7 @@ estarfm_job <- function(input_filenames,input_resolutions,input_dates,pred_dates
   
   #### n_cores ####
   if(!missing(n_cores)){
-    assert_that(class(n_cores)=="numeric"|class(date3)=="integer",
+    assert_that(class(n_cores)=="numeric"|class(n_cores)=="integer",
                 n_cores<=parallel::detectCores())
     n_cores_c <- n_cores
   }else{
