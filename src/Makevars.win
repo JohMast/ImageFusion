@@ -5,7 +5,7 @@ RWINLIB_GDAL = ../windows/gdal2-2.2.3
 RWINLIB_BOOST= ../windows/boost_1_55_0/boost
 CXX_STD = CXX17
 
-PKG_CPPFLAGS = -I$(RWINLIB_GDAL)/include/gdal \
+PKG_CXXFLAGS = -I$(RWINLIB_GDAL)/include/gdal \
                -I$(RWINLIB)/include/opencv4 \
                -Iinclude \
                -I../src/utils/helpers \
