@@ -48,10 +48,7 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames,
                              const std::string& MASKRANGE_options
 )
 {
-  // Alternative fix to rcout issue, kept here as a reminder
-  //std::streambuf* stdoutbuf = std::cout.rdbuf(Rcpp::Rcout.rdbuf());
-  //std::streambuf* stderrbuf = std::cerr.rdbuf(Rcpp::Rcerr.rdbuf());
-  
+
 #ifdef WITH_OMP
   Rcout <<"OPENMP found. Capable of parallelization."<<std::endl;
 #endif 
@@ -59,11 +56,7 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames,
   Rcout <<"NO OPENMP found. NOT capable of parallelization."<<std::endl;
 #endif 
   
-#ifndef _OPENMP
-  if(n_cores>1){
-    Rcout <<"Sorry, if you want to use Parallelizer, you need to install OpenMP first."<<std::endl;
-  }
-#endif 
+
   
   using namespace imagefusion;
   //Step 1: Prepare the Input
