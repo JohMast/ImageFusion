@@ -12,21 +12,21 @@ Johannes Mast (Package Maintainer)
 In Response to the comments by David Ripley, we have made the following changes:
 
 * DESCRIPTION: Added C++17 as a System Requirement
-* Changed the System Requirements from Debian format to the project names (e.g. libgdal -> GDAL) .
+* Changed the System Requirements from Debian format to the project names (e.g. libgdal -> GDAL).
+* configure.ac & configure: At present, we are not able to perform tests on macOS. Thus, we follow the example of the R package opencv which according to its [cran checks](https://cran.r-project.org/web/checks/check_results_opencv.html) runs fine across many different platforms. We adopt the code used in its configure file to dynamically create the variables PKG_LIBS_OPENCV and OPENCV_FLAG for use in Makevars. There, they replace the previously hardcoded paths and libraries.
+* configure.ac & configure: Maintaining openmp capability on macOS is not [trivial](https://thecoatlessprofessor.com/programming/cpp/openmp-in-r-on-os-x/). As our capability to test on macOS is very limited, we follow the example of [RcppArmadillo](https://github.com/RcppCore/RcppArmadillo) and the recommendation of this [stackoverflow post](https://stackoverflow.com/q/46723854). Instead of hardcoding -fopenmp as before, the updated configure process creates the flags OPENMP_FLAG (SHLIB_OPENMP_CXXFLAGS) for use in Makevars, as suggested by the [R Extensions Manual](https://cran.r-project.org/doc/manuals/r-release/R-exts.html#OpenMP-support). 
+* Makevars.in: See changes above.
+* Makevars.win: See changes above.
+* inst/Copyrights: To acknowledge the original sources which we base the above modifications on, we have credited the contribution of the original authors.
+* src/: Also, we now consistently use _OPENMP to only activate openmp-based parallelization if openmp was detected. We previously used a custom variable WITH_OMP that was required by in our wrapped imagefusion code. For simplicity and portability, we now make this change.
 
-* configure: We are not able to perform tests on macOS. Thus, we follow the example of the R package opencv which according to its [cran checks](https://cran.r-project.org/web/checks/check_results_opencv.html) runs fine across many different platforms. We adopt the code used in its configure file to dynamically create the variables PKG_LIBS_OPENCV and OPENCV_FLAG for use in Makevars. There, they replace the previously hardcoded paths and libraries.
-* configure: Maintaining openmp capability on macOS is not [trivial](https://thecoatlessprofessor.com/programming/cpp/openmp-in-r-on-os-x/). As we have no capability to test on macOS, we follow the example of [RcppArmadillo](https://github.com/RcppCore/RcppArmadillo) and the recommendation of this [stackoverflow post](https://stackoverflow.com/q/46723854). Instead of hardcoding -fopenmp as before (which was problematic if openmp was not installed or found), the configure process creates the flags OPENMP_FLAG and OPENMP_CFLAG (SHLIB_OPENMP_CXXFLAGS and SHLIB_OPENMP_CFLAGS) for use in Makevars, as suggested by the [R Extensions Manual](https://cran.r-project.org/doc/manuals/r-release/R-exts.html#OpenMP-support). 
-* src/:Also, we now consistently use _OPENMP to only activate openmp-based parallelization if openmp was detected. We previously used a custom variable WITH_OMP that was required by in our wrapped imagefusion code. For simplicity and portability, we now make this change.
-
-* 2 DO: Include jeroen ooms as copyright holder for the opencv configure code.
-* 2 DO: Include Dirk Eddelbüttel as copyright holder for the openmp configure.ac code.
 
 We have made further changes:
 
-
 * DESCRIPTION: Increased Version number to 0.0.2
-* NEWS.md: Updated news according to the changes
-* Rbuildignore: Added the configure.log file to the list of ignored files (This file logs opencv libraries)
+* NEWS.md: Updated news according to the changes.
+* Rbuildignore: Added the configure.log file to the list of ignored files (This file logs opencv libraries).
+* R/estarfm_job.R: Fixed a bug resulting from a typo.
 
 ## Test environments
 * local windows 10, R 4.0.3

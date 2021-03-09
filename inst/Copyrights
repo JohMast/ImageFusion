@@ -16,3 +16,23 @@ Origin: No public repository
 Modifications (c) 2020 Johannes Mast:
 - Removed or commented code that is not necessary for the implementation in R
 - Removed calls to std::cerr or std::cout with calls to Rcpp::Rcerr or Rcpp::Rcout to comply with cran policy.
+
+==========================
+
+File: configure.ac section OPENCV
+Copyright (c) 2019 Jeroen Ooms
+License: MIT
+Origin: https://github.com/ropensci/opencv/blob/master/configure
+Modifications (c) 2020 Johannes Mast:
+- Removed checks for PKG_TEST_HEADER_XFEATURES2D which is not used in this package.
+
+==========================
+
+File: configure.ac section OPENMP
+Copyright (C) 2016 - 2021  Dirk Eddelbuettel
+License: GPL-2
+Origin: https://github.com/RcppCore/RcppArmadillo/blob/master/configure.ac
+Modifications (c) 2017 Stackoverflow user hejseb:
+- see https://stackoverflow.com/q/46723854
+Modifications (c) 2020 Johannes Mast:
+- Added openmp_imagefusionflag (commented out, possible use for compatibility with imagefusion code)
