@@ -1,6 +1,6 @@
 #pragma once
 
-#ifndef WITH_OMP
+#ifndef _OPENMP
     #error "Sorry, if you want to use Parallelizer, you need to install OpenMP first."
 #endif
 

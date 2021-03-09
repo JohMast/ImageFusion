@@ -6,9 +6,9 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
 
-#ifdef WITH_OMP
+#ifdef _OPENMP
     #include "parallelizer.h"
-#endif /* WITH_OMP */
+#endif /* _OPENMP */
 
 
 namespace imagefusion {
@@ -425,7 +425,7 @@ protected:
 
 
 /// \cond
-#ifdef WITH_OMP
+#ifdef _OPENMP
 namespace fitfc_impl_detail {
 template <typename... T>
 struct specialization_not_allowed : std::false_type
@@ -445,7 +445,7 @@ template <class AlgOpt>
 class Parallelizer<FitFCFusor, AlgOpt> {
     static_assert(fitfc_impl_detail::specialization_not_allowed<AlgOpt>::value, "Parallelizer not supported for FitFCFusor, but it is internally parallelized with OpenMP.");
 };
-#endif /* WITH_OMP */
+#endif /* _OPENMP */
 /// \endcond
 
 } /* namespace imagefusion */

@@ -3,9 +3,9 @@
 #include "options.h"
 #include "exceptions.h"
 
-#ifdef WITH_OMP
+#ifdef _OPENMP
     #include <omp.h>
-#endif /* WITH_OMP*/
+#endif /* _OPENMP*/
 
 namespace imagefusion {
 
@@ -157,7 +157,7 @@ public:
     }
 
 
-#ifdef WITH_OMP
+#ifdef _OPENMP
     /**
      * @brief Set the number of threads to use
      *
@@ -179,7 +179,7 @@ public:
     unsigned int getNumberThreads() const {
         return threads;
     }
-#endif /* WITH_OMP*/
+#endif /* _OPENMP*/
 
 protected:
     int date1;
@@ -193,9 +193,9 @@ protected:
 
     double blocksize = 30;
 
-#ifdef WITH_OMP
+#ifdef _OPENMP
     unsigned int threads = omp_get_num_procs();
-#endif /* WITH_OMP*/
+#endif /* _OPENMP*/
 
     friend class FitFCFusor;
 };

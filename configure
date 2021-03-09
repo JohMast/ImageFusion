@@ -3263,7 +3263,7 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 openmp_flag=""
 openmp_cflag=""
-openmp_imagefusionflag=""
+#openmp_imagefusionflag=""
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for macOS" >&5
 $as_echo_n "checking for macOS... " >&6; }
@@ -3273,7 +3273,7 @@ if test x"${RSysinfoName}" == x"Darwin"; then
 $as_echo "found" >&6; }
    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: OpenMP unavailable and turned off." >&5
 $as_echo "$as_me: WARNING: OpenMP unavailable and turned off." >&2;}
-      openmp_imagefusionflag="-DWITHOUT_OMP"
+      #openmp_imagefusionflag="-DWITHOUT_OMP"
 else
    { $as_echo "$as_me:${as_lineno-$LINENO}: result: not found as on ${RSysinfoName}" >&5
 $as_echo "not found as on ${RSysinfoName}" >&6; }
@@ -3284,14 +3284,14 @@ $as_echo_n "checking for OpenMP... " >&6; }
    if test x"${hasOpenMP}" == x""; then
       { $as_echo "$as_me:${as_lineno-$LINENO}: result: missing" >&5
 $as_echo "missing" >&6; }
-      openmp_imagefusionflag="-DWITHOUT_OMP"
+      #openmp_imagefusionflag="-DWITHOUT_OMP"
 
    else
       { $as_echo "$as_me:${as_lineno-$LINENO}: result: found" >&5
 $as_echo "found" >&6; }
       openmp_flag='$(SHLIB_OPENMP_CXXFLAGS)'
       openmp_cflag='$(SHLIB_OPENMP_CFLAGS)'
-      openmp_imagefusionflag="-DWITH_OMP"
+      # openmp_imagefusionflag="-DWITH_OMP"
    fi
 fi
 ## END OPENMP

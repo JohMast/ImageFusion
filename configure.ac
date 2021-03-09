@@ -664,14 +664,14 @@ AC_REQUIRE_CPP
 
 openmp_flag=""
 openmp_cflag=""
-openmp_imagefusionflag=""
+#openmp_imagefusionflag=""
 
 AC_MSG_CHECKING([for macOS])
 RSysinfoName=$("${R_HOME}/bin/Rscript" --vanilla -e 'cat(Sys.info()[["sysname"]])')
 if test x"${RSysinfoName}" == x"Darwin"; then
    AC_MSG_RESULT([found])
    AC_MSG_WARN([OpenMP unavailable and turned off.])
-      openmp_imagefusionflag="-DWITHOUT_OMP"
+      #openmp_imagefusionflag="-DWITHOUT_OMP"
 else
    AC_MSG_RESULT([not found as on ${RSysinfoName}])
    AC_MSG_CHECKING([for OpenMP])
@@ -679,13 +679,13 @@ else
    hasOpenMP=$(echo ${allldflags} | grep -- -fopenmp)
    if test x"${hasOpenMP}" == x""; then
       AC_MSG_RESULT([missing])
-      openmp_imagefusionflag="-DWITHOUT_OMP"
+      #openmp_imagefusionflag="-DWITHOUT_OMP"
 
    else
       AC_MSG_RESULT([found])
       openmp_flag='$(SHLIB_OPENMP_CXXFLAGS)'
       openmp_cflag='$(SHLIB_OPENMP_CFLAGS)'
-      openmp_imagefusionflag="-DWITH_OMP"
+      # openmp_imagefusionflag="-DWITH_OMP"
    fi
 fi
 ## END OPENMP

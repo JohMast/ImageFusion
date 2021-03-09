@@ -49,10 +49,10 @@ void execute_estarfm_job_cpp(CharacterVector input_filenames,
 )
 {
 
-#ifdef WITH_OMP
+#ifdef _OPENMP
   Rcout <<"OPENMP found. Capable of parallelization."<<std::endl;
 #endif 
-#ifndef WITH_OMP
+#ifndef _OPENMP
   Rcout <<"NO OPENMP found. NOT capable of parallelization."<<std::endl;
 #endif 
   
@@ -292,7 +292,12 @@ void execute_starfm_job_cpp(CharacterVector input_filenames,
                             const std::string& MASKRANGE_options
 ){
    
-   
+#ifdef _OPENMP
+   Rcout <<"OPENMP found. Capable of parallelization."<<std::endl;
+#endif 
+#ifndef _OPENMP
+   Rcout <<"NO OPENMP found. NOT capable of parallelization."<<std::endl;
+#endif 
 
 #ifndef _OPENMP
   if(n_cores>1){

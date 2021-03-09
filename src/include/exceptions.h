@@ -187,7 +187,7 @@ struct invalid_argument_error : public virtual runtime_error {
 /** @} */ /* group error */
 
 
-#ifdef WITH_OMP
+#ifdef _OPENMP
 /**
  * @brief The ThreadExceptionHelper escorts one exception thrown by a thread
  *
@@ -233,7 +233,7 @@ public:
         }
     }
 };
-#endif /* WITH_OMP */
+#endif /* _OPENMP */
 
 
 } /* namespace imagefusion */

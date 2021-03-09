@@ -1,10 +1,10 @@
 #include "staarch.h"
 #include "starfm.h"
 
-#ifdef WITH_OMP
+#ifdef _OPENMP
     #include "parallelizer.h"
     #include "parallelizer_options.h"
-#endif /* WITH_OMP */
+#endif /* _OPENMP */
 
 namespace imagefusion {
 
@@ -773,14 +773,14 @@ void StaarchFusor::predict(int date, ConstImage const& baseMask, ConstImage cons
     starfmOpts.setHighResTag(opt.getHighResTag());
     starfmOpts.setLowResTag(opt.getLowResTag());
 
-#ifdef WITH_OMP
+#ifdef _OPENMP
     imagefusion::ParallelizerOptions<imagefusion::StarfmOptions> parStarfmOpts;
     parStarfmOpts.setPredictionArea(opt.getPredictionArea());
     imagefusion::Parallelizer<imagefusion::StarfmFusor> starfm;
-#else /* WITH_OMP not defined */
+#else /* _OPENMP not defined */
     starfmOpts.setPredictionArea(opt.getPredictionArea());
     imagefusion::StarfmFusor starfm;
-#endif /* WITH_OMP */
+#endif /* _OPENMP */
 
     starfm.srcImages(predictSrc);
 
@@ -795,12 +795,12 @@ void StaarchFusor::predict(int date, ConstImage const& baseMask, ConstImage cons
     starfmPredMaskCropped.copyValuesFrom(disturbed.bitwise_not());
 
     starfmOpts.setDoublePairDates(opt.dateLeft, opt.dateRight);
-#ifdef WITH_OMP
+#ifdef _OPENMP
     parStarfmOpts.setAlgOptions(starfmOpts);
     starfm.processOptions(parStarfmOpts);
-#else /* WITH_OMP not defined */
+#else /* _OPENMP not defined */
     starfm.processOptions(starfmOpts);
-#endif /* WITH_OMP */
+#endif /* _OPENMP */
     starfm.predict(date, makeStarfmMask(baseMask, *imgs, opt, opt.dateLeft, date, opt.dateRight), starfmPredMask);
     output = starfm.outputImage().clone();
 
@@ -810,12 +810,12 @@ void StaarchFusor::predict(int date, ConstImage const& baseMask, ConstImage cons
     starfmPredMaskCropped.copyValuesFrom(fromLeft);
 
     starfmOpts.setSinglePairDate(opt.dateLeft);
-#ifdef WITH_OMP
+#ifdef _OPENMP
     parStarfmOpts.setAlgOptions(starfmOpts);
     starfm.processOptions(parStarfmOpts);
-#else /* WITH_OMP not defined */
+#else /* _OPENMP not defined */
     starfm.processOptions(starfmOpts);
-#endif /* WITH_OMP */
+#endif /* _OPENMP */
     starfm.predict(date, makeStarfmMask(baseMask, *imgs, opt, starfmOpts.getSinglePairDate(), date), starfmPredMask);
     output.copyValuesFrom(starfm.outputImage(), fromLeft);
 
@@ -825,12 +825,12 @@ void StaarchFusor::predict(int date, ConstImage const& baseMask, ConstImage cons
     starfmPredMaskCropped.copyValuesFrom(fromRight);
 
     starfmOpts.setSinglePairDate(opt.dateRight);
-#ifdef WITH_OMP
+#ifdef _OPENMP
     parStarfmOpts.setAlgOptions(starfmOpts);
     starfm.processOptions(parStarfmOpts);
-#else /* WITH_OMP not defined */
+#else /* _OPENMP not defined */
     starfm.processOptions(starfmOpts);
-#endif /* WITH_OMP */
+#endif /* _OPENMP */
     starfm.predict(date, makeStarfmMask(baseMask, *imgs, opt, starfmOpts.getSinglePairDate(), date), starfmPredMask);
     output.copyValuesFrom(starfm.outputImage(), fromRight);
 }

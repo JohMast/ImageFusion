@@ -3,9 +3,9 @@
 #include "starfm_options.h"
 #include "exceptions.h"
 
-#ifdef WITH_OMP
+#ifdef _OPENMP
     #include <omp.h>
-#endif /* WITH_OMP*/
+#endif /* _OPENMP*/
 
 namespace imagefusion {
 
@@ -1070,7 +1070,7 @@ public:
         return outputBands;
     }
 
-//#ifdef WITH_OMP
+//#ifdef _OPENMP
 //    /**
 //     * @brief Set the number of threads to use
 //     *
@@ -1092,7 +1092,7 @@ public:
 //    unsigned int getNumberThreads() const {
 //        return threads;
 //    }
-//#endif /* WITH_OMP*/
+//#endif /* _OPENMP*/
 
 protected:
     /**
@@ -1176,9 +1176,9 @@ protected:
     /// Output bands used for fusion
     std::vector<std::string> outputBands = {"red", "green", "blue"};
 
-//#ifdef WITH_OMP
+//#ifdef _OPENMP
 //    unsigned int threads = omp_get_num_procs();
-//#endif /* WITH_OMP*/
+//#endif /* _OPENMP*/
 
     friend class StaarchFusor;
 

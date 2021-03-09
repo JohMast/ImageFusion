@@ -7,9 +7,9 @@
 #include "image.h"
 #include "exceptions.h"
 
-#ifdef WITH_OMP
+#ifdef _OPENMP
     #include "parallelizer.h"
-#endif /* WITH_OMP */
+#endif /* _OPENMP */
 
 #include <armadillo>
 
@@ -1952,7 +1952,7 @@ private:
 };
 
 /// \cond
-#ifdef WITH_OMP
+#ifdef _OPENMP
 namespace spstfm_impl_detail {
 template <typename... T>
 struct specialization_not_allowed : std::false_type
@@ -1973,7 +1973,7 @@ template <class AlgOpt>
 class Parallelizer<SpstfmFusor, AlgOpt> {
     static_assert(spstfm_impl_detail::specialization_not_allowed<AlgOpt>::value, "Parallelizer not supported for SpstfmFusor. Armadillo and underlying BLAS library should make the code run in parallel (when using OpenBLAS) automatically.");
 };
-#endif /* WITH_OMP */
+#endif /* _OPENMP */
 /// \endcond
 
 
