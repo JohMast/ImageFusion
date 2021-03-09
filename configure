@@ -2603,8 +2603,6 @@ PKG_CPPFLAGS="${PKG_CPPFLAGS} -DR_PACKAGE"
 # OPENMP #######################################################################################
 ## Copyright Dirk Eddelbuettel for RcppArmadillo (GPL-2)
 
-
-
 : ${R_HOME=$(R RHOME)}
 if test -z "${R_HOME}"; then
     as_fn_error $? "Could not determine R_HOME." "$LINENO" 5
@@ -3298,10 +3296,10 @@ $as_echo "found" >&6; }
 fi
 ## END OPENMP
 
-## OPENCV ######################################
-
-
-##### OPENCV ####
+# OPENCV ######################################
+#Written by Jeroen Ooms for the r package opencv
+#Not to be processed by autoconf, thus commented out
+#Before building, manually uncomment in the configure file
 #!/bin/sh
 # Anticonf (tm) script by Jeroen Ooms (2020)
 PKG_CONFIG_NAME="opencv4"
@@ -3332,7 +3330,7 @@ fi
 if [ "$PKGCONFIG_CFLAGS" ] || [ "$PKGCONFIG_LIBS" ]; then
 echo "Found pkg-config cflags and libs!"
 PKG_CFLAGS=${PKGCONFIG_CFLAGS}
-PKG_LIBS_OPENCV=${PKGCONFIG_LIBS}
+opencv_libs=${PKGCONFIG_LIBS}
 if [ "$PKGCONFIG_PREFIX" ]; then
 PKG_CFLAGS="$PKG_CFLAGS -D_DATA_PREFIX=${PKGCONFIG_PREFIX}"
 fi
@@ -3341,7 +3339,7 @@ brew --version 2>/dev/null
 if [ $? -eq 0 ]; then
 BREWDIR=`brew --prefix`
 PKG_CFLAGS="-I$BREWDIR/opt/opencv/include"
-PKG_LIBS_OPENCV="-L$BREWDIR/opt/opencv/lib $PKG_LIBS_OPENCV"
+opencv_libs="-L$BREWDIR/opt/opencv/lib $PKG_LIBS_OPENCV"
 else
   curl -sfL "https://autobrew.github.io/scripts/opencv" > autobrew
 . ./autobrew
@@ -3376,10 +3374,13 @@ exit 1
 fi
 
 ## Create a new variable OPENCV_FLAG for use in Makevars.in
-OPENCV_FLAG="${PKG_CFLAGS}"
+opencv_flag="${PKG_CFLAGS}"
+# END OPENCV #################################################
 
 ##### Finishing up
+OPENCV_FLAG="${opencv_flag}"
 
+PKG_LIBS_OPENCV="${opencv_libs}"
 
 OPENMP_CFLAG="${openmp_cflag}"
 

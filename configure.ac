@@ -650,8 +650,6 @@ AC_SUBST([PKG_CPPFLAGS], ["${PKG_CPPFLAGS} -DR_PACKAGE"])
 
 # OPENMP #######################################################################################
 ## Copyright Dirk Eddelbuettel for RcppArmadillo (GPL-2)
-AC_PREREQ(2.61)
-
 
 : ${R_HOME=$(R RHOME)}
 if test -z "${R_HOME}"; then
@@ -693,9 +691,85 @@ fi
 ## END OPENMP
 
 ## OPENCV ######################################
-opencv_flag=""
-opencv_libs=""
-## END OPENCV
+# #Written by Jeroen Ooms for the r package opencv
+# #Not to be processed by autoconf, thus commented out
+# #Before building, manually uncomment in the configure file
+# #!/bin/sh
+# # Anticonf (tm) script by Jeroen Ooms (2020)
+# PKG_CONFIG_NAME="opencv4"
+# PKG_CONFIG_NAME_ALT="opencv"
+# PKG_DEB_NAME="libopencv-dev"
+# PKG_RPM_NAME="opencv-devel"
+# PKG_BREW_NAME="opencv"
+# PKG_TEST_HEADER="<opencv2/opencv.hpp>"
+# PKG_TEST_HEADER_XFEATURES2D="<opencv2/xfeatures2d.hpp>"
+# PKG_LIBS_OPENCV="-lopencv_{imgproc,core}"
+# 
+# # Use pkg-config if available
+# PCVERSION=`pkg-config --version 2>/dev/null`
+# if [ $? -eq 0 ]; then
+# echo "This is pkg-config $PCVERSION"
+# if pkg-config --exists ${PKG_CONFIG_NAME} ; then
+# PKGCONFIG_CFLAGS=`pkg-config --cflags ${PKG_CONFIG_NAME}`
+# PKGCONFIG_LIBS=`pkg-config --libs ${PKG_CONFIG_NAME}`
+# PKGCONFIG_PREFIX=`pkg-config --variable=prefix ${PKG_CONFIG_NAME}`
+# elif pkg-config --exists ${PKG_CONFIG_NAME_ALT}; then
+# PKGCONFIG_CFLAGS=`pkg-config --cflags ${PKG_CONFIG_NAME_ALT}`
+# PKGCONFIG_LIBS=`pkg-config --libs ${PKG_CONFIG_NAME_ALT}`
+# PKGCONFIG_PREFIX=`pkg-config --variable=prefix ${PKG_CONFIG_NAME_ALT}`
+# fi
+# fi
+# 
+# # Note that cflags may be empty in case of success
+# if [ "$PKGCONFIG_CFLAGS" ] || [ "$PKGCONFIG_LIBS" ]; then
+# echo "Found pkg-config cflags and libs!"
+# PKG_CFLAGS=${PKGCONFIG_CFLAGS}
+# opencv_libs=${PKGCONFIG_LIBS}
+# if [ "$PKGCONFIG_PREFIX" ]; then
+# PKG_CFLAGS="$PKG_CFLAGS -D_DATA_PREFIX=${PKGCONFIG_PREFIX}"
+# fi
+# elif [ `uname` = "Darwin" ]; then
+# brew --version 2>/dev/null
+# if [ $? -eq 0 ]; then
+# BREWDIR=`brew --prefix`
+# PKG_CFLAGS="-I$BREWDIR/opt/opencv/include"
+# opencv_libs="-L$BREWDIR/opt/opencv/lib $PKG_LIBS_OPENCV"
+# else
+#   curl -sfL "https://autobrew.github.io/scripts/opencv" > autobrew
+# . ./autobrew
+# fi
+# fi
+# 
+# # OpenCV 4 enforces C++11 in the headers
+# CPPFLAGS=`${R_HOME}/bin/R CMD config CPPFLAGS`
+# CXX11STD=`${R_HOME}/bin/R CMD config CXX11STD`
+# if [ $? -eq 0 ]; then
+# CXX11=`${R_HOME}/bin/R CMD config CXX11`
+# CXX11CPP="$CXX11 -E $CXX11STD"
+# else
+#   CXX11CPP=`${R_HOME}/bin/R CMD config CXXCPP`
+# fi
+# 
+# # Test configuration
+# echo "#include $PKG_TEST_HEADER" | ${CXX11CPP} ${CPPFLAGS} ${PKG_CFLAGS} -xc++ - >/dev/null 2>configure.log
+# if [ $? -ne 0 ]; then
+# echo "-----------------------------[ ANTICONF ]-------------------------------"
+# echo "Configuration failed to find $PKG_CONFIG_NAME library. Try installing:"
+# echo " * deb: $PKG_DEB_NAME (Debian, Ubuntu, etc)"
+# echo "   -> for Ubuntu Xenial use: ppa:cran/opencv"
+# echo " * rpm: $PKG_RPM_NAME (Fedora, CentOS, RHEL)"
+# echo " * brew: $PKG_BREW_NAME (Mac OSX)"
+# echo "If $PKG_CONFIG_NAME is already installed, check that 'pkg-config' is in your"
+# echo "PATH and PKG_CONFIG_PATH contains a $PKG_CONFIG_NAME.pc file."
+# echo "---------------------------[ ERROR MESSAGE ]----------------------------"
+# #cat configure.log
+# echo "------------------------------------------------------------------------"
+# exit 1
+# fi
+# 
+# ## Create a new variable OPENCV_FLAG for use in Makevars.in
+# opencv_flag="${PKG_CFLAGS}"
+## END OPENCV #################################################
 
 ##### Finishing up
 AC_SUBST([OPENCV_FLAG], ["${opencv_flag}"])
@@ -727,7 +801,7 @@ AC_SUBST([PKG_LIBS], ["${PKG_LIBS} -lproj"])
 
 
 AC_MSG_NOTICE([OPENCV flags: ${OPENCV_FLAG}])
-AC_MSG_NOTICE([OPENCV LIBS: ${OPENCV_LIBS}])
+AC_MSG_NOTICE([PKG_LIBS_OPENCV: ${PKG_LIBS_OPENCV}])
 AC_MSG_NOTICE([OpenMP flags: ${OPENMP_FLAG}])
 AC_MSG_NOTICE([OpenMP cflags: ${OPENMP_CFLAG}])
 AC_MSG_NOTICE([Package CPP flags: ${PKG_CPPFLAGS}])
