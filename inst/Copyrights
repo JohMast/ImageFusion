@@ -19,12 +19,23 @@ Modifications (c) 2020 Johannes Mast:
 
 ==========================
 
+File: configure.ac sections PROJ and GDAL
+Copyright (C) 2019 Marius Appel
+License: MIT
+Origin: https://github.com/appelmar/gdalcubes_R/blob/master/configure.ac
+Modifications (c) 2021 Johannes Mast:
+- Removed sections which are not relevant for ImageFusion
+
+==========================
+
 File: configure.ac section OPENCV
 Copyright (c) 2019 Jeroen Ooms
 License: MIT
 Origin: https://github.com/ropensci/opencv/blob/master/configure
 Modifications (c) 2020 Johannes Mast:
 - Removed checks for PKG_TEST_HEADER_XFEATURES2D which is not used in this package.
+
+
 
 ==========================
 

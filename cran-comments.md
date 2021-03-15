@@ -27,13 +27,14 @@ We have made further changes:
 * NEWS.md: Updated news according to the changes.
 * Rbuildignore: Added the configure.log file to the list of ignored files (This file logs opencv libraries).
 * R/estarfm_job.R: Fixed a bug resulting from a typo.
+* configure.ac: Updated the PROJ and GDAL sections to follow the example of the gdalcubes package which locates GDAL on all [checked](https://cran.r-project.org/web/checks/check_results_gdalcubes.html) platforms.
 
 ## Test environments
 * local windows 10, R 4.0.3
 * local windows 10, R under development (unstable) (2021-02-17 r80023)
 * local ubuntu 20.04, R 4.0.2
 * win-builder  R version 4.0.4 (2021-02-15)
-* win-builder  R Under development (unstable) (2021-02-27 r80059)
+* win-builder  R Under development (unstable) (2021-03-11´ r80086)
 
 ## R CMD check results
 
