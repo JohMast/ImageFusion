@@ -2091,27 +2091,6 @@ INPKG_LIBS="${PKG_LIBS}"
 
 
 
-
-
-# C++11 ########################################################################################################
-# #Written by Marius Appel Ooms for the r package gdalcubes
-# copyright 2020 by Marius Appel
-
-
-CXX11=`"${RBIN}" CMD config CXX11`
-CXX11STD=`"${RBIN}" CMD config CXX11STD`
-CXX="${CXX11} ${CXX11STD}"
-
-
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: CC: ${CC}" >&5
-$as_echo "$as_me: CC: ${CC}" >&6;}
-{ $as_echo "$as_me:${as_lineno-$LINENO}: CXX: ${CXX}" >&5
-$as_echo "$as_me: CXX: ${CXX}" >&6;}
-
-
-
-
 # GDAL #########################################################################################################
 # #Written by Marius Appel Ooms for the r package gdalcubes
 # #Who adapted it from the https://github.com/cran/rgdal/blob/master/configure.ac
@@ -3951,7 +3930,6 @@ opencv_flag="${PKG_CFLAGS}"
 
 ##### Finishing up
 
-rm -f errors.txt  proj_conf_test proj_conf_test.c proj_conf_test.cpp
 
 
 OPENCV_FLAG="${opencv_flag}"
@@ -5161,6 +5139,10 @@ if test -n "$ac_unrecognized_opts" && test "$enable_option_checking" != no; then
   { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: unrecognized options: $ac_unrecognized_opts" >&5
 $as_echo "$as_me: WARNING: unrecognized options: $ac_unrecognized_opts" >&2;}
 fi
+
+
+echo "Cleaning"
+rm -f errors.txt  proj_conf_test proj_conf_test.c proj_conf_test.cpp config.log config.status configure.log
 
 
 

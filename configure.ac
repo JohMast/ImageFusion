@@ -24,25 +24,6 @@ INPKG_LIBS="${PKG_LIBS}"
 
 
 
-
-
-# C++11 ########################################################################################################
-# #Written by Marius Appel Ooms for the r package gdalcubes
-# copyright 2020 by Marius Appel
-
-
-CXX11=`"${RBIN}" CMD config CXX11`
-CXX11STD=`"${RBIN}" CMD config CXX11STD`
-CXX="${CXX11} ${CXX11STD}"
-
-
-
-AC_MSG_NOTICE([CC: ${CC}])
-AC_MSG_NOTICE([CXX: ${CXX}])
-
-
-
-
 # GDAL #########################################################################################################
 # #Written by Marius Appel Ooms for the r package gdalcubes
 # #Who adapted it from the https://github.com/cran/rgdal/blob/master/configure.ac
@@ -765,7 +746,6 @@ fi
 
 ##### Finishing up
 
-rm -f errors.txt  proj_conf_test proj_conf_test.c proj_conf_test.cpp
 
 
 AC_SUBST([OPENCV_FLAG], ["${opencv_flag}"])
@@ -806,6 +786,10 @@ AC_MSG_NOTICE([Package LIBS: ${PKG_LIBS}])
 
 AC_CONFIG_FILES([src/Makevars])
 AC_OUTPUT
+
+echo "Cleaning"
+rm -f errors.txt  proj_conf_test proj_conf_test.c proj_conf_test.cpp config.log config.status configure.log
+
 
 
 
