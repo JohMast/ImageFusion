@@ -2,7 +2,11 @@
 ^\.Rproj\.user$
 ^LICENSE\.md$
 ^cran-comments\.md$
-^configure.log$
+^errors.txt$
+^proj_conf_test$
+^proj_conf_test.c$
+^proj_conf_test.cpp$
+
 ^.cran_comments\.md$
 ^Readme\.md$
 ^\.img$
