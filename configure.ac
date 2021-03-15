@@ -295,10 +295,12 @@ AC_MSG_RESULT(no)
 else
 gdal_has_proj=yes
 AC_MSG_RESULT(yes)
+
 fi
 if test "${gdal_has_proj}" = no; then
    AC_MSG_ERROR([OGRCoordinateTransformation() does not return a coord.trans: PROJ not available?])
 fi
+
 rm -fr errors.txt gdal_proj.cpp gdal_proj
 AC_MSG_NOTICE([GDAL: ${GDAL_VERSION}])
 
@@ -522,7 +524,9 @@ fi
 
 else # proj >= 6
 
+
 if test "${PROJH}" = no; then
+
 
 [cat > proj_conf_test.c <<_EOCONF
 #include <stdio.h>
