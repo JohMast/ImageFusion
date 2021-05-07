@@ -33,8 +33,8 @@ We have made further changes:
 * local windows 10, R 4.0.3
 * local windows 10, R under development (unstable) (2021-02-17 r80023)
 * local ubuntu 20.04, R 4.0.2
-* win-builder  R version 4.0.4 (2021-02-15)
-* win-builder  R Under development (unstable) (2021-03-11´ r80086)
+* win-builder  R version 4.0.5 (2021-03-31)
+* win-builder  R version 4.1.0 alpha (2021-05-01´ r80245)
 
 ## R CMD check results
 
