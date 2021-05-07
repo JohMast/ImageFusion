@@ -1,8 +1,20 @@
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT(ImageFusion, 0.0.1, johannes.mast@gmx.de)
+
+
+AC_INIT(ImageFusion, 0.0.3, johannes.mast@gmx.de)
+
+CXX17=`"${R_HOME}/bin/R" CMD config CXX17`
+if test -z "$CXX17"; then
+  AC_MSG_ERROR([No C++17 compiler is available])
+fi
+CXX17STD=`"${R_HOME}/bin/R" CMD config CXX17STD`
+CXX="${CXX17} ${CXX17STD}"
+CXXFLAGS=`"${R_HOME}/bin/R" CMD config CXX17FLAGS`
 AC_LANG(C++)
 echo "Starting Configure."
+
+
 
 # find R home and set CC/CFLAGS
 : ${R_HOME=`R RHOME`}
@@ -99,7 +111,7 @@ AC_MSG_CHECKING([GDAL version >= 2.0.1])
 GDAL_MAJ_VER=`echo $GDAL_VERSION | cut -d "." -f1`
 if test ${GDAL_MAJ_VER} -lt 2 ; then
   AC_MSG_RESULT(no)
-  AC_MSG_ERROR([gdalcubes is not compatible with GDAL versions below 2.0.1])
+  AC_MSG_ERROR([sf is not compatible with GDAL versions below 2.0.1])
 else
    AC_MSG_RESULT(yes)
 fi
@@ -198,10 +210,15 @@ fi
 # Optional local copy of GDAL datadir and PROJ_LIB
 
 data_copy=no
-AC_ARG_WITH([data-copy],
-    AC_HELP_STRING([--with-data-copy=yes/no],
+if test "${PROJ_GDAL_DATA_COPY}" ; then
+    data_copy=yes
+    AC_MSG_NOTICE([PROJ_GDAL_DATA_COPY used.])
+else
+    AC_ARG_WITH([data-copy],
+        AC_HELP_STRING([--with-data-copy=yes/no],
                [local copy of data directories in package, default no]),
                [data_copy=$withval])
+fi
 if test "${data_copy}" = "yes" ; then
 AC_MSG_NOTICE([Copy data for:])
   proj_lib0="${PROJ_LIB}"
@@ -276,24 +293,17 @@ AC_MSG_RESULT(no)
 else
 gdal_has_proj=yes
 AC_MSG_RESULT(yes)
-
 fi
 if test "${gdal_has_proj}" = no; then
    AC_MSG_ERROR([OGRCoordinateTransformation() does not return a coord.trans: PROJ not available?])
 fi
-
 rm -fr errors.txt gdal_proj.cpp gdal_proj
 AC_MSG_NOTICE([GDAL: ${GDAL_VERSION}])
 
 
-
-
-# PROJ #########################################################################################################
-# #Written by Marius Appel Ooms for the r package gdalcubes
-# #Who adapted it from the https://github.com/cran/rgdal/blob/master/configure.ac
-# #Copyright 2020 by Marius Appel
-# #Original rgdal code by Roger Bivand
-
+#
+# PROJ
+#
 
 PROJ_CONFIG="pkg-config proj"
 
@@ -372,7 +382,7 @@ if test [ -n "$proj_lib_path" ] ; then
     AC_SUBST([PROJ_LIBS], ["-L${proj_lib_path} ${INPKG_LIBS} -lproj"])
 else
   if test "${proj_config_ok}" = yes; then
-    PROJ_LIB_PATH=`${PROJ_CONFIG} --libs`
+    PROJ_LIB_PATH=`${PROJ_CONFIG} --libs --static`
     AC_SUBST([PROJ_LIBS], ["${PROJ_LIB_PATH} ${INPKG_LIBS}"])
 	proj_version=`${PROJ_CONFIG} --modversion`
 	AC_MSG_NOTICE([PROJ: ${proj_version}])
@@ -505,9 +515,7 @@ fi
 
 else # proj >= 6
 
-
 if test "${PROJH}" = no; then
-
 
 [cat > proj_conf_test.c <<_EOCONF
 #include <stdio.h>
@@ -604,6 +612,7 @@ fi
 fi # PROJH = no
 
 fi # proj >= 6
+
 
 
 

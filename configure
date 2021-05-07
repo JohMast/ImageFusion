@@ -2063,6 +2063,14 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
+
+CXX17=`"${R_HOME}/bin/R" CMD config CXX17`
+if test -z "$CXX17"; then
+  as_fn_error $? "No C++17 compiler is available" "$LINENO" 5
+fi
+CXX17STD=`"${R_HOME}/bin/R" CMD config CXX17STD`
+CXX="${CXX17} ${CXX17STD}"
+CXXFLAGS=`"${R_HOME}/bin/R" CMD config CXX17FLAGS`
 ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -2070,6 +2078,8 @@ ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ex
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 echo "Starting Configure."
+
+
 
 # find R home and set CC/CFLAGS
 : ${R_HOME=`R RHOME`}
@@ -2223,7 +2233,7 @@ GDAL_MAJ_VER=`echo $GDAL_VERSION | cut -d "." -f1`
 if test ${GDAL_MAJ_VER} -lt 2 ; then
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
-  as_fn_error $? "gdalcubes is not compatible with GDAL versions below 2.0.1" "$LINENO" 5
+  as_fn_error $? "sf is not compatible with GDAL versions below 2.0.1" "$LINENO" 5
 else
    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
@@ -3249,12 +3259,18 @@ fi
 # Optional local copy of GDAL datadir and PROJ_LIB
 
 data_copy=no
+if test "${PROJ_GDAL_DATA_COPY}" ; then
+    data_copy=yes
+    { $as_echo "$as_me:${as_lineno-$LINENO}: PROJ_GDAL_DATA_COPY used." >&5
+$as_echo "$as_me: PROJ_GDAL_DATA_COPY used." >&6;}
+else
 
 # Check whether --with-data-copy was given.
 if test "${with_data_copy+set}" = set; then :
   withval=$with_data_copy; data_copy=$withval
 fi
 
+fi
 if test "${data_copy}" = "yes" ; then
 { $as_echo "$as_me:${as_lineno-$LINENO}: Copy data for:" >&5
 $as_echo "$as_me: Copy data for:" >&6;}
@@ -3341,25 +3357,18 @@ else
 gdal_has_proj=yes
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
-
 fi
 if test "${gdal_has_proj}" = no; then
    as_fn_error $? "OGRCoordinateTransformation() does not return a coord.trans: PROJ not available?" "$LINENO" 5
 fi
-
 rm -fr errors.txt gdal_proj.cpp gdal_proj
 { $as_echo "$as_me:${as_lineno-$LINENO}: GDAL: ${GDAL_VERSION}" >&5
 $as_echo "$as_me: GDAL: ${GDAL_VERSION}" >&6;}
 
 
-
-
-# PROJ #########################################################################################################
-# #Written by Marius Appel Ooms for the r package gdalcubes
-# #Who adapted it from the https://github.com/cran/rgdal/blob/master/configure.ac
-# #Copyright 2020 by Marius Appel
-# #Original rgdal code by Roger Bivand
-
+#
+# PROJ
+#
 
 PROJ_CONFIG="pkg-config proj"
 
@@ -3476,7 +3485,7 @@ if test  -n "$proj_lib_path"  ; then
 
 else
   if test "${proj_config_ok}" = yes; then
-    PROJ_LIB_PATH=`${PROJ_CONFIG} --libs`
+    PROJ_LIB_PATH=`${PROJ_CONFIG} --libs --static`
     PROJ_LIBS="${PROJ_LIB_PATH} ${INPKG_LIBS}"
 
 	proj_version=`${PROJ_CONFIG} --modversion`
@@ -3666,9 +3675,7 @@ fi
 
 else # proj >= 6
 
-
 if test "${PROJH}" = no; then
-
 
 cat > proj_conf_test.c <<_EOCONF
 #include <stdio.h>
@@ -3774,6 +3781,7 @@ fi # proj >= 6
 
 
 
+
 # Finalizing GDAL AND PROJ##########################################################################
 
 ## PKG_CPPFLAGS
@@ -3847,7 +3855,7 @@ $as_echo "found" >&6; }
 fi
 ## END OPENMP
 
-# OPENCV ######################################
+## OPENCV ######################################
 #Written by Jeroen Ooms for the r package opencv
 #Not to be processed by autoconf, thus commented out
 #Before building, manually uncomment in the configure file
@@ -3926,7 +3934,7 @@ fi
 
 ## Create a new variable OPENCV_FLAG for use in Makevars.in
 opencv_flag="${PKG_CFLAGS}"
-# END OPENCV #################################################
+## END OPENCV #################################################
 
 ##### Finishing up
 
