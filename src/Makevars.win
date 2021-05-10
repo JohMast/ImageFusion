@@ -1,3 +1,4 @@
+VERSION = 0.0.3
 OPENCVVERSION = 4.0.1
 TARGET = lib$(subst gcc,,$(COMPILED_BY))$(R_ARCH)
 RWINLIB = ../windows/opencv-$(OPENCVVERSION)
