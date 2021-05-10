@@ -20,9 +20,9 @@ Modifications (c) 2020 Johannes Mast:
 ==========================
 
 File: configure.ac sections PROJ and GDAL
-Copyright (C) 2019 Marius Appel
-License: MIT
-Origin: https://github.com/appelmar/gdalcubes_R/blob/master/configure.ac
+Copyright (C) 2021 Roger Bivand
+License: GPL (>= 2)
+Origin: https://github.com/cran/rgdal
 Modifications (c) 2021 Johannes Mast:
 - Removed sections which are not relevant for ImageFusion
 

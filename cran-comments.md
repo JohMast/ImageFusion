@@ -9,32 +9,43 @@ Johannes Mast (Package Maintainer)
 
 ## Changes
 
-In Response to the comments by David Ripley, we have made the following changes:
+In response to the comments by Uwe Ligges, We have made the following changes:
 
-* DESCRIPTION: Added C++17 as a System Requirement
-* Changed the System Requirements from Debian format to the project names (e.g. libgdal -> GDAL).
-* configure.ac & configure: At present, we are not able to perform tests on macOS. Thus, we follow the example of the R package opencv which according to its [cran checks](https://cran.r-project.org/web/checks/check_results_opencv.html) runs fine across many different platforms. We adopt the code used in its configure file to dynamically create the variables PKG_LIBS_OPENCV and OPENCV_FLAG for use in Makevars. There, they replace the previously hardcoded paths and libraries.
-* configure.ac & configure: Maintaining openmp capability on macOS is not [trivial](https://thecoatlessprofessor.com/programming/cpp/openmp-in-r-on-os-x/). As our capability to test on macOS is very limited, we follow the example of [RcppArmadillo](https://github.com/RcppCore/RcppArmadillo) and the recommendation of this [stackoverflow post](https://stackoverflow.com/q/46723854). Instead of hardcoding -fopenmp as before, the updated configure process creates the flags OPENMP_FLAG (SHLIB_OPENMP_CXXFLAGS) for use in Makevars, as suggested by the [R Extensions Manual](https://cran.r-project.org/doc/manuals/r-release/R-exts.html#OpenMP-support). 
+To address general issues on platforms using clang:
+* DESCRIPTION: Added C++17 as a System Requirement.
+* configure.ac: Set C++ before include AC_LANG().
+
+To address issues of macOS portability:
+configure.ac: Adapted the configuration process of PROJ from the recent version 
+of rgdal to comply with the most recent requirements of PROJ.
 * Makevars.in: See changes above.
 * Makevars.win: See changes above.
-* inst/Copyrights: To acknowledge the original sources which we base the above modifications on, we have credited the contribution of the original authors.
-* src/: Also, we now consistently use _OPENMP to only activate openmp-based parallelization if openmp was detected. We previously used a custom variable WITH_OMP that was required by in our wrapped imagefusion code. For simplicity and portability, we now make this change.
-
+* inst/Copyrights: Added rgdal author as original copyright holder for the GDAL and PROJ configure sections.
 
 We have made further changes:
-
-* DESCRIPTION: Increased Version number to 0.0.2
+* removed superfluous files of the imagefusion library to reduce the overall size of the package slightly.
+* Makevars.in: Increased Version number to 0.0.3
+* Makevars.win: Increased Version number to 0.0.3
+* DESCRIPTION: Increased Version number to 0.0.3
 * NEWS.md: Updated news according to the changes.
-* Rbuildignore: Added the configure.log file to the list of ignored files (This file logs opencv libraries).
-* R/estarfm_job.R: Fixed a bug resulting from a typo.
-* configure.ac: Updated the PROJ and GDAL sections to follow the example of the gdalcubes package which locates GDAL on all [checked](https://cran.r-project.org/web/checks/check_results_gdalcubes.html) platforms.
+
 
 ## Test environments
 * local windows 10, R 4.0.3
 * local windows 10, R under development (unstable) (2021-02-17 r80023)
 * local ubuntu 20.04, R 4.0.2
 * win-builder  R version 4.0.5 (2021-03-31)
-* win-builder  R version 4.1.0 alpha (2021-05-01´ r80245)
+* win-builder  R version 4.1.0 beta (2021-05-06´ r80268)
+
+
+## Note
+I am currently unable to test on macOS, as I lack access to a macOS machine and the rhub builder does not appear to supply the system requirements. Nevertheless, I can suspect certain issues which may arise:
+The imagefusion c++ library, which is wrapped by this R package, relies for its file handling on std::filesystem, which may not be available on older macOS systems, as described in this thread:
+https://stackoverflow.com/questions/49577343/filesystem-with-c17-doesnt-work-on-my-mac-os-x-high-sierra
+As an alternative, we consider a dedicated, header-only helper library:
+https://github.com/gulrak/filesystem
+However, this library contains pragmas that suppress diagnostics, and result in additional WARNINGS.
+Since, to our understanding, the filesystem library is supplied since macOS 10.15 onwards (that is, since October 2019), this may not be an issue. If it is, I will appreciate any guidance on this matter.
 
 ## R CMD check results
 
@@ -64,6 +75,12 @@ such as [sf](https://cran.r-project.org/web/packages/sf/index.html) or [gdalcube
 are also affected by this issue.
 We appreciate any ideas on how to solve this note,
 as we have no influence over the size of the GDAL library.
+
+#### Note 2:
+Non-standard file/directory found at top level:
+  'tmp'
+  
+We are unsure what causes this error, as we are not able to reproduce it on any of our local machines. 
 
 ## Downstream dependencies
 
