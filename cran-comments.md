@@ -42,8 +42,12 @@ We have made further changes:
 We are currently unable to test on macOS, as we lack access to a macOS machine and the rhub builder does not appear to supply the system requirements. Nevertheless, we can suspect certain issues which may arise:
 The imagefusion c++ library, which is wrapped by this R package, relies for its file handling on std::filesystem, which may not be available on older macOS systems, as described in this thread:
 [stackoverflow](https://stackoverflow.com/questions/49577343/filesystem-with-c17-doesnt-work-on-my-mac-os-x-high-sierra)
+
+
 As an alternative, we consider a dedicated, header-only helper library:
 [filesystem](https://github.com/gulrak/filesystem)
+
+
 However, this library contains pragmas that suppress diagnostics, and result in additional WARNINGS.
 Since, to our understanding, the filesystem library is supplied since macOS 10.15 onward (that is, since October 2019), this may not be an issue. If it is, we will appreciate any guidance on this matter.
 
