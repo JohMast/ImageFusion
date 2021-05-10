@@ -1,3 +1,9 @@
+
+[![CRAN version](https://www.r-pkg.org/badges/version/ImageFusion)](https://CRAN.R-project.org/package=ImageFusion)
+[![CRAN downloads](https://cranlogs.r-pkg.org/badges/last-month/ImageFusion?color=brightgreen)](https://CRAN.R-project.org/package=ImageFusion)
+[![R build status](https://github.com/JohMast/ImageFusion/workflows/R-CMD-check/badge.svg)](https://github.com/JohMast/ImageFusion/actions)
+
+
 # ImageFusion
 
 <img src=".img/logo.png" align="right" src="doc/images/logo.png">
