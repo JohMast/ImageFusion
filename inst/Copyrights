@@ -16,6 +16,7 @@ Origin: No public repository
 Modifications (c) 2020 Johannes Mast:
 - Removed or commented code that is not necessary for the implementation in R
 - Removed calls to std::cerr or std::cout with calls to Rcpp::Rcerr or Rcpp::Rcout to comply with cran policy.
+- Adapted to use gdal filesystem functionalities instead of std::filesystem (for portability)
 
 ==========================
 
@@ -47,3 +48,13 @@ Modifications (c) 2017 Stackoverflow user hejseb:
 - see https://stackoverflow.com/q/46723854
 Modifications (c) 2020 Johannes Mast:
 - Added openmp_imagefusionflag (commented out, possible use for compatibility with imagefusion code)
+
+
+==========================
+
+Files: include/filesystem.h and src/filesystem.cpp
+Copyright (C) 2019 Marius Appel
+Origin: https://github.com/appelmar/gdalcubes/blob/master/src/filesystem.cpp
+License: MIT
+Modifications (c) 2021 Johannes Mast:
+- Changed the namespace to imagefusion

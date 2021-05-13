@@ -2,7 +2,7 @@ Package: ImageFusion
 Type: Package
 Title: Temporal Fusion of Raster Images
 Version: 0.0.3
-Date: 2021-05-07
+Date: 2021-05-13
 Authors@R: c(
     person("Christof", "Kaufmann", email = "christof.kaufmann@hs-bochum.de", role = c("aut","cph"),comment=c("Author of included imagefusion C++ code", ORCID = "0000-0002-0191-3341")),
     person("Johannes", "Mast", email = "johannes.mast@stud-mail.uni-wuerzburg.de", role = c("aut", "cre","cph"),comment = c("Author of R code and wrappers", ORCID = "0000-0001-6595-5834")),

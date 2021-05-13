@@ -14,6 +14,7 @@
 #include "interpolation.h"
 #include "customopts.h"
 
+#include "include/filesystem.h"
 using namespace Rcpp;
 using  std::vector;
 
@@ -127,7 +128,21 @@ void execute_imginterp_job_cpp(
                                                              "We have identified the usage of following options: " + givenargs +
                                                                ". If you intend to use option file please provide your option as --option-file=<file>"));
   }
+ //Testing filesystem
+  if(!imagefusion::filesystem::exists("test.txt")){
+    Rcout << "File does not exist!" << std::endl;
+    
+    // std::filesystem::path p = filename;
+    // std::string ext = p.extension().string();
+    
+    std::string ext = imagefusion::filesystem::extension("test.tif");
+    Rcout << "Found extension:" << ext << std::endl;
+    FileFormat format = FileFormat::fromFileExtension(ext);
+    Rcout << "Found format:" << format << std::endl;
+  }
   
+  
+
   // collect arguments for images, quality layers and masks
 
   imagefusion::MultiResCollection<std::string> imgArgs;

@@ -1,5 +1,6 @@
 #include "utils_common.h"
 #include <filesystem>
+#include "../../include/filesystem.h"
 #include <Rcpp.h>
 namespace helpers {
 
@@ -193,9 +194,12 @@ imagefusion::Image processSetMask(imagefusion::ConstImage const& mask, imagefusi
 
 
 std::string outputImageFile(imagefusion::ConstImage const& img, imagefusion::GeoInfo gi, std::string origFileName, std::string prefix, std::string postfix, imagefusion::FileFormat f, int date1, int date2, int date3) {
-    std::filesystem::path p = origFileName;
-
-    std::string extension = p.extension().string();
+    // std::filesystem::path p = origFileName;
+    // 
+    // std::string extension = p.extension().string();
+    std::string extension = imagefusion::filesystem::extension(origFileName);
+    // FileFormat format = FileFormat::fromFileExtension(ext);
+    
     if (f != imagefusion::FileFormat::unsupported) {
         extension = f.fileExtension();
         if (extension.empty()) {
@@ -211,11 +215,11 @@ std::string outputImageFile(imagefusion::ConstImage const& img, imagefusion::Geo
 
     std::string basename  = std::to_string(date2) + "_from_" + std::to_string(date1) + (date1 != date3 ? "_and_" + std::to_string(date3) : "");
     if (date1 == date2 && date2 == date3)
-        basename = p.stem().string();
-    p = prefix + basename + postfix + extension;
-    auto outpath = p;
+        basename = imagefusion::filesystem::stem(origFileName);
+    std::string p = prefix + basename + postfix + extension;
+    // auto outpath = p;
 
-    std::string outfilename = outpath.string();
+    std::string outfilename = p;
     try {
         img.write(outfilename, gi, f);
 
