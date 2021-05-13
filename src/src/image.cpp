@@ -3,7 +3,8 @@
 #include <type_traits>
 #include <sstream>
 
-#include <filesystem>
+// #include <filesystem>
+#include "../../include/filesystem.h"
 
 #include <gdal.h>
 #include <gdal_priv.h>
@@ -72,8 +73,8 @@ GDALDataset* Image::asGDALDataset() {
 void ConstImage::write(std::string const& filename, GeoInfo const& gi, FileFormat format) const {
     GDALAllRegister();
     if (format == FileFormat::unsupported) {
-        std::filesystem::path p = filename;
-        std::string ext = p.extension().string();
+        // std::filesystem::path p = filename;
+        std::string ext = imagefusion::filesystem::extension(filename);
         format = FileFormat::fromFileExtension(ext);
         if (format == FileFormat::unsupported) {
             IF_THROW_EXCEPTION(file_format_error("Cannot auto detect image format for file extension " + ext +

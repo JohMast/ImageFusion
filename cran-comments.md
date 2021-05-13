@@ -20,13 +20,20 @@ configure.ac: Adapted the configuration process of PROJ from the recent version
 of rgdal to comply with the most recent requirements of PROJ.
 * Makevars.in: See changes above.
 * Makevars.win: See changes above.
-* inst/Copyrights: Added rgdal author as original copyright holder for the GDAL and PROJ configure sections.
+
+* src/include/filesystem.h: Now wraps around GDAL filesystem functions (path stem and extension) instead of relying on the std::filesystem which may not be provided on certain macOS. This is adapted from the r package gdalcubes by Marius Appel.
+* src/include/filesystem.cpp: See changes above.
+* src/image.cpp: See changes above.
+* src/utils/helpers/utils_common.cpp: See changes above.
+* src/utils/imginterp/interpolation.h: See changes above.
+* inst/Copyrights: Added rgdal author as original copyright holder for the GDAL and PROJ configure sections. Added Marius Appel as the source for the filesystem gdal wrapper.
+
 
 We have made further changes:
 * removed superfluous files of the imagefusion library to reduce the overall size of the package slightly.
-* Makevars.in: Increased Version number to 0.0.3
-* Makevars.win: Increased Version number to 0.0.3
-* DESCRIPTION: Increased Version number to 0.0.3
+* Makevars.in: Increased Version number to 0.0.3.
+* Makevars.win: Increased Version number to 0.0.3.
+* DESCRIPTION: Increased Version number to 0.0.3.
 * NEWS.md: Updated news according to the changes.
 
 
@@ -35,7 +42,7 @@ We have made further changes:
 * local windows 10, R under development (unstable) (2021-02-17 r80023)
 * local ubuntu 20.04, R 4.0.2
 * win-builder  R version 4.0.5 (2021-03-31)
-* win-builder  R version 4.1.0 beta (2021-05-06´ r80268)
+* win-builder  R version 4.1.0 RC (2021-05-06´ r80288)
 
 
 ## Note
@@ -79,12 +86,6 @@ such as [sf](https://cran.r-project.org/web/packages/sf/index.html) or [gdalcube
 are also affected by this issue.
 We appreciate any ideas on how to solve this note,
 as we have no influence over the size of the GDAL library.
-
-#### Note 2:
-Non-standard file/directory found at top level:
-  'tmp'
-  
-We are unsure what causes this error, as we are not able to reproduce it on any of our local machines. 
 
 ## Downstream dependencies
 
