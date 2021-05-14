@@ -3,7 +3,6 @@
 #include <type_traits>
 #include <sstream>
 
-// #include <filesystem>
 #include "../../include/filesystem.h"
 
 #include <gdal.h>

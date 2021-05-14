@@ -3,7 +3,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
-
+#include "filesystem.h"
 #include "exceptions.h"
 
 namespace imagefusion {

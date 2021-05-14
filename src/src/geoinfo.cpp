@@ -2,7 +2,7 @@
 #include <cmath>
 #include <cassert>
 
-#include <filesystem>
+#include "../../include/filesystem.h"
 
 #include <gdal.h>
 #include <gdal_priv.h>
@@ -255,7 +255,7 @@ void GeoInfo::readFrom(GDALDataset const* img_arg) {
 }
 
 void GeoInfo::addTo(std::string const& filename) const {
-    if (!std::filesystem::exists(filename))
+    if (!imagefusion::filesystem::exists(filename))
         IF_THROW_EXCEPTION(not_found_error("Could not find any file at path " + filename + " to add GeoInfo to it."))
                 << boost::errinfo_file_name(filename);
 

@@ -5,7 +5,7 @@
 #include "geoinfo.h"
 
 #include <boost/tokenizer.hpp>
-#include <filesystem>
+#include "../../include/filesystem.h"
 #include <boost/predef.h>
 
 #include <string>
@@ -1492,8 +1492,8 @@ ArgStatus ArgChecker::NonEmpty(const Option& option) {
 ArgStatus ArgChecker::File(const Option& option) {
     if (option.arg.empty())
         IF_THROW_EXCEPTION(invalid_argument_error("There was no filename given for option '" + option.name + "'"));
-
-    if (!std::filesystem::exists(option.arg))
+    
+    if (!imagefusion::filesystem::exists(option.arg))
         IF_THROW_EXCEPTION(invalid_argument_error("File '" + option.arg + "' does not exist"))
                 << boost::errinfo_file_name(option.arg);
 
