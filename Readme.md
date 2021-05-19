@@ -6,7 +6,7 @@
 
 # ImageFusion
 
-<img src=".img/logo.png" align="right" src="doc/images/logo.png">
+<img src=".img/logo.png" align="right" src="doc/images/logo2.png">
 
 ## Introduction
 Temporal fusion of raster image time-Series. R interface for the imagefusion framework, which provides implementation of the FITFC, ESTARFM and STARFM algorithms in C++. 
@@ -33,11 +33,14 @@ So far, the following algorithms are implemented:
 
 ## Installation
 
-The development version can be installed from GitHub:
+The package can be installed from GitHub :
 
 ```r
 devtools::install_github("JohMast/ImageFusion")
 ```
+
+ImageFusion is supported for and tested on Windows and Linux operating systems. Running ImageFusion on macOS is also possible, but may suffer from decreased performance and require additional work to install required dependencies.
+
 
 ## Usage
 
