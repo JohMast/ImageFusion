@@ -6,7 +6,7 @@
 
 # ImageFusion
 
-<img src=".img/logo2.png" align="right" src="doc/images/logo2.png">
+<img src=".img/logo.png" align="right" src="doc/images/logo2.png">
 
 ## Introduction
 Temporal fusion of raster image time-Series. R interface for the imagefusion framework, which provides implementation of the FITFC, ESTARFM and STARFM algorithms in C++. 
