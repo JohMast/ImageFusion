@@ -72,15 +72,9 @@ jobs:
           sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable
           sudo apt update
           sudo apt install \
-            libudunits2-dev \
             libgdal-dev \
             libgeos-dev \
-            libproj-dev \
-            libsqlite3-dev \
-            libnetcdf-dev \
-            libcurl4-openssl-dev \
-            netcdf-bin \
-            libmagick++-dev # only needed for animate function
+            libproj-dev 
             
             
       - name: Install dependencies
