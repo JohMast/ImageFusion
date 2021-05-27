@@ -59,7 +59,30 @@ jobs:
       - name: Install system dependencies
         if: runner.os != 'Windows'
         run: if [ "$RUNNER_OS" == "Linux" ]; then sudo apt-get install -y libopencv-dev; else brew install opencv; fi
-
+        
+      - name: Install system dependencies
+        if: runner.os == 'Linux'
+        env:
+          RHUB_PLATFORM: linux-x86_64-ubuntu-gcc
+        run: |
+          Rscript -e "remotes::install_github('r-hub/sysreqs')"
+          sysreqs=$(Rscript -e "cat(sysreqs::sysreq_commands('DESCRIPTION'))")
+          sudo -s eval "$sysreqs"
+          # install spatial dependencies
+          sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable
+          sudo apt update
+          sudo apt install \
+            libudunits2-dev \
+            libgdal-dev \
+            libgeos-dev \
+            libproj-dev \
+            libsqlite3-dev \
+            libnetcdf-dev \
+            libcurl4-openssl-dev \
+            netcdf-bin \
+            libmagick++-dev # only needed for animate function
+            
+            
       - name: Install dependencies
         run: |
           remotes::install_deps(dependencies = TRUE)
