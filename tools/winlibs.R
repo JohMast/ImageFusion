@@ -7,8 +7,8 @@ VERSION <- commandArgs(TRUE)
 # For details see: https://github.com/rwinlib/gdal2
 # For details see: https://github.com/rwinlib/netcdf
 
-if(!file.exists("../windows/gdal2-2.2.3/include/gdal/gdal.h")){
-  download.file("https://github.com/rwinlib/gdal2/archive/v2.2.3.zip", "lib.zip", quiet = TRUE)
+if(!file.exists("../windows/gdal3-3.4.1/include/gdal.h")){
+  download.file("https://github.com/rwinlib/gdal3/archive/v3.4.1.zip", "lib.zip", quiet = TRUE)
   dir.create("../windows", showWarnings = FALSE)
   unzip("lib.zip", exdir = "../windows")
   unlink("lib.zip")
