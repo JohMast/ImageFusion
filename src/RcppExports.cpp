@@ -6,6 +6,11 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // execute_estarfm_job_cpp
 void execute_estarfm_job_cpp(CharacterVector input_filenames, CharacterVector input_resolutions, IntegerVector input_dates, IntegerVector pred_dates, CharacterVector pred_filenames, IntegerVector pred_area, int winsize, int date1, int date3, int n_cores, bool use_local_tol, bool use_quality_weighted_regression, bool output_masks, bool use_nodata_value, bool verbose, double uncertainty_factor, double number_classes, double data_range_min, double data_range_max, const std::string& hightag, const std::string& lowtag, const std::string& MASKIMG_options, const std::string& MASKRANGE_options);
 RcppExport SEXP _ImageFusion_execute_estarfm_job_cpp(SEXP input_filenamesSEXP, SEXP input_resolutionsSEXP, SEXP input_datesSEXP, SEXP pred_datesSEXP, SEXP pred_filenamesSEXP, SEXP pred_areaSEXP, SEXP winsizeSEXP, SEXP date1SEXP, SEXP date3SEXP, SEXP n_coresSEXP, SEXP use_local_tolSEXP, SEXP use_quality_weighted_regressionSEXP, SEXP output_masksSEXP, SEXP use_nodata_valueSEXP, SEXP verboseSEXP, SEXP uncertainty_factorSEXP, SEXP number_classesSEXP, SEXP data_range_minSEXP, SEXP data_range_maxSEXP, SEXP hightagSEXP, SEXP lowtagSEXP, SEXP MASKIMG_optionsSEXP, SEXP MASKRANGE_optionsSEXP) {

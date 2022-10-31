@@ -1,7 +1,7 @@
 if(getRversion() < "4.0.0") {
   stop("Your version of R is too old. This package requires R-4.0.0 or newer on Windows.")
 }
-VERSION <- commandArgs(TRUE)
+VERSION <- "4.4.0"
 
 
 # For details see: https://github.com/rwinlib/gdal2
@@ -22,8 +22,15 @@ if(!file.exists("../windows/netcdf-4.4.1.1-dap/include/netcdf.h")){
 }
 
 
-if(!file.exists("../windows/opencv-%s/include/opencv4/opencv2/opencv.hpp")){
-  download.file("https://github.com/rwinlib/opencv/archive/v4.0.1.zip", "lib.zip", quiet = TRUE)
+# if(!file.exists("../windows/opencv-%s/include/opencv4/opencv2/opencv.hpp")){
+#   download.file("https://github.com/rwinlib/opencv/archive/v4.0.1.zip", "lib.zip", quiet = TRUE)
+#   dir.create("../windows", showWarnings = FALSE)
+#   unzip("lib.zip", exdir = "../windows")
+#   unlink("lib.zip")
+# }
+
+if(!file.exists(sprintf("../windows/opencv-%s/include/opencv4/opencv2/opencv.hpp", VERSION))){
+  download.file(sprintf("https://github.com/rwinlib/opencv/archive/v%s.zip", VERSION), "lib.zip", quiet = TRUE)
   dir.create("../windows", showWarnings = FALSE)
   unzip("lib.zip", exdir = "../windows")
   unlink("lib.zip")

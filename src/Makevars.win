@@ -1,5 +1,5 @@
 VERSION = 0.0.3
-OPENCVVERSION = 4.0.1
+OPENCVVERSION = 4.4.0
 TARGET = lib$(subst gcc,,$(COMPILED_BY))$(R_ARCH)
 RWINLIB = ../windows/opencv-$(OPENCVVERSION)
 RWINLIB_GDAL = ../windows/gdal3-3.4.1
@@ -25,7 +25,7 @@ PKG_LIBS = -lstdc++fs -L$(RWINLIB_GDAL)/lib$(R_ARCH) \
 	-lodbc32 -lodbccp32 -liconv -lpsapi -lwldap32 -lsecur32 -lgdi32 -lnormaliz \
 	-lcrypto -lcrypt32 -lws2_32 -lshlwapi -lbcrypt \
 	-L$(RWINLIB)/$(TARGET) \
-	-L$(RWINLIB)/lib$(R_ARCH) \
+	-L$(RWINLIB)/lib$(R_ARCH)-ucrt \
 	-lopencv_imgproc -lopencv_core -ltbb \
 	-ljpeg -lwebp -lpng -lz -ltiff \
 	-lcomctl32 -lgdi32 -lole32 -lws2_32 -lavifil32 -lavicap32 -lwinmm -lmsvfw32 \
@@ -34,18 +34,13 @@ PKG_LIBS = -lstdc++fs -L$(RWINLIB_GDAL)/lib$(R_ARCH) \
 
 all: clean winlibs
 
-
-
 winlibs:
 	mkdir -p ../inst
 	"${R_HOME}/bin${R_ARCH_BIN}/Rscript.exe" --vanilla "../tools/winlibs.R"
 	cp -r $(RWINLIB_GDAL)/share/gdal ../inst/
 	cp -r $(RWINLIB_GDAL)/share/proj ../inst/
-	"${R_HOME}/bin${R_ARCH_BIN}/Rscript.exe" "../tools/winlibs.R" ${VERSION}
+	"${R_HOME}/bin${R_ARCH_BIN}/Rscript.exe" "../tools/winlibs.R"
 	cp -r $(RWINLIB)/share ../inst/
-
-
-
 
 clean:
 	rm -f $(SHLIB) $(OBJECTS)
