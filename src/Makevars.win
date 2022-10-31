@@ -16,12 +16,14 @@ PKG_CPPFLAGS = -I$(RWINLIB_GDAL)/include \
 PKG_CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS)
 
 PKG_LIBS = -lstdc++fs -L$(RWINLIB_GDAL)/lib$(R_ARCH) \
-  -lgdal -lsqlite3 -lspatialite -lproj -lgeos_c -lgeos  \
-	-ljson-c -lnetcdf -lmariadbclient -lpq -lintl -lwebp -lcurl -lssh2 -lssl -lcrypto -lbcrypt \
-	-lkea -lhdf5_cpp -lhdf5_hl -lhdf5 -lexpat -lfreexl -lcfitsio \
-	-lmfhdf -ldf -lxdr \
-	-lopenjp2 -ljasper -lpng16 -ljpeg -ltiff -lgeotiff -lgif -lxml2 -llzma -lszip -lz -lzstd \
-	-lodbc32 -lodbccp32 -liconv -lpsapi -lws2_32 -lcrypt32 -lwldap32 -lsecur32 -lgdi32 \
+	-lgdal -lsqlite3 -lspatialite -lproj -lgeos_c -lgeos  \
+	-ljson-c -lnetcdf -lmariadbclient -lpq -lpgport -lpgcommon \
+	-lwebp -lcurl -lssh2 -lssl \
+	-lhdf5_hl -lhdf5 -lexpat -lfreexl -lcfitsio \
+	-lmfhdf -lhdf -lxdr -lpcre \
+	-lopenjp2 -ljasper -lpng -ljpeg -ltiff -lgeotiff -lgif -lxml2 -llzma -lz -lzstd \
+	-lodbc32 -lodbccp32 -liconv -lpsapi -lwldap32 -lsecur32 -lgdi32 -lnormaliz \
+	-lcrypto -lcrypt32 -lws2_32 -lshlwapi -lbcrypt \
 	-L$(RWINLIB)/$(TARGET) \
 	-L$(RWINLIB)/lib$(R_ARCH) \
 	-lopencv_imgproc -lopencv_core -ltbb \
