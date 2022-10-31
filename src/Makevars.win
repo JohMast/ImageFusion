@@ -2,7 +2,7 @@ VERSION = 0.0.3
 OPENCVVERSION = 4.0.1
 TARGET = lib$(subst gcc,,$(COMPILED_BY))$(R_ARCH)
 RWINLIB = ../windows/opencv-$(OPENCVVERSION)
-RWINLIB_GDAL = ../windows/gdal2-2.2.3
+RWINLIB_GDAL = ../windows/gdal3-3.4.1
 RWINLIB_BOOST= ../windows/boost_1_55_0/boost
 CXX_STD = CXX17
 
