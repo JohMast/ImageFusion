@@ -4,11 +4,11 @@
   #   Sys.setenv(PROJ_LIB=path_to_proj)
   # }
   
-  if (dir.exists(system.file("proj", package="gdalcubes"))) {
-    Sys.setenv("PROJ_LIB" = system.file("proj", package="gdalcubes"))
+  if (dir.exists(system.file("proj", package="Imagefusion"))) {
+    Sys.setenv("PROJ_LIB" = system.file("proj", package="Imagefusion"))
   }
-  if (dir.exists(system.file("gdal", package="gdalcubes"))) {
-    Sys.setenv("GDAL_DATA" = system.file("gdal", package="gdalcubes"))
+  if (dir.exists(system.file("gdal", package="Imagefusion"))) {
+    Sys.setenv("GDAL_DATA" = system.file("gdal", package="Imagefusion"))
   }
   
 }
